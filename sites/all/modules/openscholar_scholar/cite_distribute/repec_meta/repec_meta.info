@@ -1,0 +1,8 @@
+; $Id: repec_meta.info,v 1.1.1.1 2008/11/21 20:42:34 jweiner Exp $ v.1 - Joe Weiner
+name = RePEc
+description = "Creates formatted template files for RePEc respository to collect meta data from posted content, 
+such as research papers and articles."
+dependencies[] = cite_distribute
+package = Cite Distribute
+core = 6.x
+version = "6.x-beta14"

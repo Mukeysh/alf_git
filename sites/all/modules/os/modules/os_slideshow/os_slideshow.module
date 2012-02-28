@@ -1,0 +1,40 @@
+<?php
+
+include_once('os_slideshow.features.inc');
+
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function os_slideshow_ctools_plugin_api($module, $api) {
+  if ($module == 'boxes' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implementation of hook_boxes_plugins().
+ */
+function os_slideshow_boxes_plugins(){
+  $info = array();
+  $path = drupal_get_path('module', 'os_slideshow') . '/plugins';
+
+  $css = drupal_get_path('module', 'os_slideshow') . '/theme/os-slideshow.css';
+  $info['os_boxes_slideshow'] = array(
+    'title' => 'Slideshow Gallery',
+    'description' => 'Display gallery as a slideshow',
+//    'css' => $css,
+    'tags' => array(
+      'Media'
+    ),
+    'handler' => array(
+      'class' => 'os_boxes_slideshow',
+      'file' => 'os_slideshow_box.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_default'
+    )
+  );
+
+  return $info;
+
+}

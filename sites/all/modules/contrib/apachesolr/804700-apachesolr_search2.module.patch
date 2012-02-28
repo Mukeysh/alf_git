@@ -1,0 +1,33 @@
+Index: apachesolr_search.module
+===================================================================
+--- apachesolr_search.module	(revision 3357)
++++ apachesolr_search.module	(working copy)
+@@ -248,15 +248,21 @@
+     'facet.sort' => 'true'
+   );
+   apachesolr_search_add_facet_params($params, $query);
+-  $solr = apachesolr_get_solr();
+-  apachesolr_current_query($query);
+-  apachesolr_modify_query($query, $params, 'apachesolr');
+-  $response = $solr->search('', $params['start'], $params['rows'], $params);
+-  if (empty($response)) {
++  try {
++    $solr = apachesolr_get_solr();
++    apachesolr_current_query($query);
++    apachesolr_modify_query($query, $params, 'apachesolr');
++    $response = $solr->search('', $params['start'], $params['rows'], $params);
++    if (empty($response)) {
++      return;
++    }
++    apachesolr_static_response_cache($response);
++    apachesolr_has_searched(TRUE);
++  }
++  catch(Exception $e) {
++    watchdog('Apache Solr', nl2br(check_plain($e->getMessage())), NULL, WATCHDOG_ERROR);
+     return;
+   }
+-  apachesolr_static_response_cache($response);
+-  apachesolr_has_searched(TRUE);
+ 
+   // Get blocks for all enabled filters
+   $blocks = array();

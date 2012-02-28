@@ -1,0 +1,408 @@
+<?php
+module_load_include('inc', 'vsite_layout', 'vsite_layout.overrides');
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function vsite_layout_ctools_plugin_api() {
+  list($module, $api) = func_get_args();
+  if ($module == "context" && $api == "context") {
+    return array("version" => 3);
+  }
+}
+
+function vsite_layout_menu() {
+  $items = array();
+
+  $items['cp/vsite_layout/%ctools_js/move/%/%/%'] = array(
+    'title' => 'Move this Widget',
+    'page callback' => 'vsite_layout_move_widget',
+    'page arguments' => array(2, 4, 5, 6),
+    'access callback' => 'cp_access_cp',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Addes a boxes 'Remove' link as a contextual link
+ */
+function vsite_layout_vsite_admin_link($type, $object) {
+  $links = array();
+  if ($type != 'block') return $links;
+
+
+  if ($object->module == 'boxes' && ($box = boxes_load($object->delta)) && spaces_access_admin()) {
+
+    vsite_include('vsiteapi');
+  	$active_feature = vsite_active_feature();
+    if (!$active_feature) {
+      // if we call this through ajax from move_widget, we can't rely on vsite_active_feature
+      if (arg(5)) {
+        $active_feature = str_replace('openscholar-feature-', '', arg(5));
+      }
+      else {
+        return $links;
+      }
+    }
+
+    $links[] = array(
+      'title' => 'Remove',
+      'href' => 'cp/vsite_layout/nojs/move/'.$object->delta.'/'.'openscholar-feature-'.$active_feature.'/false',
+      'attributes' => array(
+        'class' => 'ctools-use-ajax',
+      ),
+      'admin_type' => 'remove',
+    );
+  }
+  return $links;
+}
+
+/**
+ * Gets ALL the widgets!
+ * Then runs an alter on them.
+ */
+function vsite_layout_get_widgets() {
+  static $widgets = null;
+  if (is_null($widgets)) {
+    $widgets = module_invoke_all('vsite_widgets');
+    drupal_alter('vsite_widgets', $widgets);
+  }
+
+  return $widgets;
+}
+
+/**
+ *
+ * Removes a widget from a single context
+ * @param boolean $js			Called by AJAX or not
+ * @param string $delta		The delta of the widget to remove
+ * @param string $ctx			The context its being removed from
+ */
+function vsite_layout_move_widget($js, $delta, $ctx, $moveTo) {
+  if ($moveTo == 'false') $moveTo = false;
+  // get the context
+  // remove box from context
+  // save context
+  $vsite = vsite_get_vsite();
+  $old_region = '';
+  $block = array();
+  if($vsite){
+	  $ctx_key = $ctx.':reaction:block';
+	  $context = $vsite->controllers->context->get($ctx_key);
+
+	  if($context && isset($context['blocks']['boxes-'.$delta])){
+	    $old_region = $context['blocks']['boxes-'.$delta]['region'];
+		  $context['blocks']['boxes-'.$delta]['region'] = $moveTo;
+		  $block = $context['blocks']['boxes-'.$delta];
+		  $vsite->controllers->context->set($ctx_key.':'.$vsite->group->og_theme, $context);
+	  }
+  }
+
+  if (!$js) {
+    drupal_goto('<front>');
+  }
+
+  ctools_include('ajax');
+
+  $replace = '';
+  if ($moveTo) {
+    $block += module_invoke($block['module'], 'block', 'view', $block['delta']);
+    $replace = theme('block', (object)$block);
+  }
+  else {
+    $url = 'cp/vsite_layout/nojs/move/'.$delta.'/'.$ctx.'/'.$old_region;
+    $replace = '<div id="block-boxes-'.$delta.'" class="block warning">'.t('You have removed that widget from your layout! !ctools-button', array('!ctools-button' => ctools_ajax_text_button('Undo it!', $url, "Remove this Widget"))).'</div>';
+  }
+
+  $output[] = ctools_ajax_command_replace('#block-boxes-'.$delta, $replace);
+  ctools_ajax_render($output);
+}
+
+/**
+ * Alter the default location for the theme widgets
+ *
+ * @param $a_widgets
+ */
+function vsite_layout_vsite_default_blocks_alter(&$a_widgets) {
+
+  static $a_settings = null;
+
+  if (!is_array($a_settings)) {
+  	$a_settings = array();
+    $space = vsite_get_vsite();
+    if ($space){
+
+	    $s_path = drupal_get_path('theme', $space->group->og_theme);
+	    if ($s_path){
+		    $a_info = drupal_parse_info_file($s_path . "/" . $space->group->og_theme . ".info");
+		    $a_settings = (is_array($a_info) && array_key_exists('os', $a_info) && array_key_exists('widgets', $a_info['os']))?$a_info['os']['widgets']:array();
+	    }
+    }//In a space
+  }//Get theme settings?
+
+  foreach ($a_settings as $s_widget => $s_region) {
+    $s_region = (strlen($s_region) && $s_region != 'false')?$s_region:false;
+    if (array_key_exists($s_widget, $a_widgets)) $a_widgets[$s_widget]['region'] = $s_region;
+  }//alter based on theme settings
+
+  //Add user blocks and module defined blocks to the preset blocks
+  vsite_layout_merge_default_blocks($a_widgets);
+}
+
+
+/**
+ * Add default blocks to current blocks
+ *
+ * Gathers default blocks via the hook and calls alter hook which
+ * lets other modules make changes, an example is some themes like
+ * to change the default region of a block
+ */
+function vsite_layout_merge_default_blocks(&$blocks) {
+  if(!is_array($blocks)) return;
+
+
+  static $default_blocks;
+
+  if(!isset($default_blocks)){
+	  $default_blocks = vsite_layout_get_widgets();
+	  drupal_alter('vsite_default_blocks',$default_blocks);
+  }
+
+  $blocks = array_merge($default_blocks,$blocks);  //Everywhere plus the feature
+}
+
+/**
+ * Change the boxes modal form so that it integrates with its various appearances in modals
+ */
+function vsite_layout_form_alter(&$form, $form_state, $form_id){
+switch ($form_id) {
+    case 'boxes_box_form' :
+    	if(module_exists('os_boxes')){
+        if(!is_array($form['#submit'])) $form['#submit'] = array();
+        $form['#submit'][] = "vsite_layout_box_form_submit";
+    	}
+    break;
+    case 'spaces_features_form':
+    	if(!is_array($form['#submit'])) $form['#submit'] = array();
+    	array_unshift($form['#submit'],'scholar_layout_spaces_feature_form_submit');
+    break;
+  }
+}
+
+/**
+ * Submit handler for the feature form
+ *
+ * @param $form
+ *   FAPI object representing a form
+ * @param $form_state
+ *   Mixed array representing the submitted form
+ */
+function scholar_layout_spaces_feature_form_submit($form, &$form_state){
+
+	$vsite = vsite_get_vsite();
+	if(!$vsite && $form_state['values']['op'] != t('Reset to defaults')) return;
+
+	//Filter out just the pub/private features
+	$old_features = array_intersect(variable_get('spaces_features', array()),array(1,2));
+	$new_features = array_intersect($form_state['values']['spaces_features'],array(1,2));
+
+	$newly_enabled = array_diff( array_keys($new_features), array_keys($old_features));
+
+	if(count($newly_enabled)){
+		foreach ($newly_enabled as $k => $s_feature) $newly_enabled[$k] = str_replace("scholar_","",$s_feature);
+	  $orig_context = $vsite->controllers->context->get("openscholar-feature-none:reaction:block","preset");
+	  $user_modified_context = $vsite->controllers->context->get("openscholar-feature-none:reaction:block");
+
+	  //Apply all the "Defaults" changes that the user has made prior to enabling this feature/context
+		vsite_layout_apply_layout_changes($user_modified_context,$orig_context,$newly_enabled);
+	}
+}
+
+/**
+ * Handle submission of box form from modals
+ */
+function vsite_layout_box_form_submit($form, &$form_state) {
+	$origin = arg(5);
+	if (!isset($origin)) return;
+	if($origin == "cp_layout" && $vsite = spaces_get_space()){
+    //Load the full box
+		$box = boxes_load($form_state['box']->delta);
+
+		$form_state['js commands'] = array(
+		  ctools_ajax_command_replace("div#cp-settings-layout dd#boxes-boxes_add__{$form_state['plugin_key']}", theme('vsite_layout_ui_cp_widget', "boxes-{$box->delta}", os_boxes_get_vsite_widget($box))),
+		  array('command' => 'updateLayoutForm', 'warning' => true),
+		);
+	}
+	elseif ($origin == "dropdown") {
+	  // called from the 'Add New' dropdown on the layout page
+	  $box = boxes_load($form_state['box']->delta);
+
+	  $form_state['js commands'] = array(
+	    ctools_ajax_command_before('#scholarlayout-top-widgets .scholarlayout-item:nth-child(2)', theme('vsite_layout_ui_cp_widget', 'boxes-'.$box->delta, os_boxes_get_vsite_widget($box))),
+	    ctools_ajax_command_changed('#boxes-'.$box->delta),
+	  );
+	}
+	elseif ($origin == "front") {
+	  // called from the Configure links on the public side of a site
+	  $form_state['js commands'] = array(
+	    ctools_ajax_command_reload(),
+	  );
+	}
+
+}
+
+/**
+ * Custom sort by block weight
+ */
+function vsite_layout_sort_block_by_weight($a, $b) {
+  $a = (array)$a;
+  $b = (array)$b;
+
+  if ($a['weight'] == $b['weight']) return 0;
+
+  return ($a['weight'] < $b['weight']) ? -1 : 1;
+}
+
+/**
+ *
+ */
+function vsite_layout_context_registry_alter(&$registry){
+
+	//Use our own block context reaction
+  if(isset($registry['reactions']['block'])){
+    $registry['reactions']['block']['plugin'] = "vsite_context_reaction_block";
+  }
+}
+
+/**
+ * Implementation of hook_spaces_plugins().
+ */
+function vsite_layout_context_plugins() {
+  $plugins = array();
+
+  //define the vsite controller for contexts
+  $plugins['vsite_context_reaction_block'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'vsite_layout') .'/plugins',
+      'file' => 'vsite_context_reaction_block.inc',
+      'class' => 'vsite_context_reaction_block',
+      'parent' => 'context_reaction_block',
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * The default access function for vsite widgets
+ *
+ * If the parent is a feature module and it is disabled then lets not show this block
+ * or if views does not give access (usually using the feature access)
+ *
+ * @param array $widget
+ * @param user $user
+ */
+function vsite_layout_vsite_widgets_access($widget ,$account = false){
+  $space_features = variable_get('spaces_features', array());
+
+  if (array_key_exists($widget['module'], $space_features) && !$space_features[$widget['module']]) {
+    //if this block is provided by a feature and that feature is disabled do not show the block
+    return false;
+  }
+  elseif ($wgt['module'] == 'views') {
+    if(!$account) $account = $GLOBALS['user'];
+    //Insetad of checking as admin use the site owner so they see the same blocks
+    if ($account->uid == 1) $account = user_load(array('uid' => $space->group->uid));
+
+    //if this block is provided by views then check it's access
+    list($name, $display_id) = explode('-', $widget['delta']);
+    if (($view = views_get_view($name)) && !$view->access($display_id, $account)) {
+      return false;
+    }
+    if (is_object($view)) $view->destroy();
+  }
+
+  return true;
+}
+
+/**
+ * Add new permissions for layout admin functions
+ */
+function vsite_layout_perm(){
+	return array(
+    "reset layout to defaults",
+  );
+}
+
+/**
+ * Helper function for the CP Layout
+ *
+ * Takes a new default setting and finds the diff from the old, and applies those to other page types that are not overridden
+ *
+ * @param $a_new_setting the new context
+ * @param $a_prev_setting The context to diff against
+ * @param $a_features features to apply the changes to
+ */
+function vsite_layout_apply_layout_changes($a_new_setting, $a_prev_setting = false, $a_features = false){
+  $space = vsite_get_vsite();
+  if(!$a_prev_setting) $a_prev_setting = $space->controllers->context->get("openscholar-feature-none:reaction:block");
+
+  $a_new_wgts = array();
+  $a_rem_wgts = array();
+  $a_moved_wgts = array();
+  $a_weight_wgts = array();
+  foreach ($a_new_setting['blocks'] as $key => $block) {
+    if($block['region'] != $a_prev_setting['blocks'][$key]['region']){
+      if(!$block['region']){
+        $a_rem_wgts[] = $key;
+      }elseif(!$a_prev_setting['blocks'][$key]['region']){
+        $a_new_wgts[] = $key;
+      }else{
+        $a_moved_wgts[] = $key;
+      }
+    }//region change
+
+    if($block['weight'] != $a_prev_setting['blocks'][$key]['weight']){
+      $a_weight_wgts[$key] =  $block['weight'] - $a_prev_setting['blocks'][$key]['weight'];
+    }//Weight Change
+  }//gather changes
+
+  if(!is_array($a_features)) $a_features = array_keys(vsite_layout_ui_get_pagetypes($space));
+  foreach ($a_features as $s_page_nm) {
+    if ($s_page_nm == 'none') continue;
+
+    $a_new_page = $space->controllers->context->get("openscholar-feature-".$s_page_nm.":reaction:block");
+
+    //Handle widgets added
+    foreach ($a_new_wgts as $s_widget_name) {
+      if (!$a_new_page['blocks'][$s_widget_name]['region']) {
+        $a_new_page['blocks'][$s_widget_name] = $a_new_setting['blocks'][$s_widget_name];
+      }//Already on this page?
+    }//Add new widgets
+
+    //Handle widgets removed
+    foreach ($a_rem_wgts as $s_widget_name) {
+      if (array_key_exists($s_widget_name, $a_new_page['blocks']) && $a_new_page['blocks'][$s_widget_name]['region'] == $a_prev_setting['blocks'][$s_widget_name]['region']) {
+        $a_new_page['blocks'][$s_widget_name]['region'] = false;
+      }//Already on this page?
+    }//Remove widgets
+
+    //Handle widgets moved
+    foreach ($a_moved_wgts as $s_widget_name) {
+      if ($a_new_page['blocks'][$s_widget_name]['region'] == $a_prev_setting['blocks'][$s_widget_name]['region']) {
+        $a_new_page['blocks'][$s_widget_name]['region'] = $a_new_setting['blocks'][$s_widget_name]['region'];
+      }//Already on this page?
+    }//Move widgets
+
+    //Handle weight changed
+    foreach ($a_weight_wgts as $s_widget_name => $change) {
+      if ($a_new_page['blocks'][$s_widget_name]['region'] == $a_prev_setting['blocks'][$s_widget_name]['region']) {
+        $a_new_page['blocks'][$s_widget_name]['weight'] += $change;
+      }//Already on this page?
+    }//Crude Change weight
+
+    uasort($a_new_page['blocks'], 'vsite_layout_sort_block_by_weight'); //Put them in the right order to simplify showing them in the cp
+    $space->controllers->context->set('openscholar-feature-'.$s_page_nm.":reaction:block:".$space->group->og_theme, $a_new_page);
+  }
+}

@@ -1,0 +1,67 @@
+<?php
+
+function scholar_front_update_6001(&$sandbox){
+
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+  
+  //Remove setting that may have been created incorectly before upgrade
+  db_query('DELETE FROM {spaces_overrides} WHERE type LIKE "og" AND object_type = "variable" AND object_id LIKE "vsite_setting_front" ');
+  
+  //Remove settings that were created using spaces defaults
+  db_query('DELETE FROM {spaces_overrides} WHERE type LIKE "og" AND object_type = "variable" AND object_id LIKE "site_frontpage" ');
+  
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "front" ');
+  while ($row = db_fetch_object($result)) {
+  	$a_setting = unserialize($row->value);
+  	
+  	switch ($a_setting['frontpage']){
+  		case 'bio':
+  			$nid = db_result(db_query('SELECT n.nid FROM {node} n INNER JOIN {og_ancestry} oa ON n.nid = oa.nid WHERE oa.group_nid = %d AND n.type = "bio" ', $row->sid));
+  			if($nid){
+  				$s_path = 'node/'.$nid;
+  			}
+      break;
+      case 'html':
+      	if($a_setting['front_nid']){
+      		$s_path = 'node/'.$a_setting['front_nid'];
+      	}
+      break;
+      case 'flag':
+      	$s_path = 'scholar_front/flag';
+      break;
+  		case 'feature':
+  		default:
+  			$s_path = "scholar_front/features";
+  	}
+  	
+  	if(isset($a_setting['bio_title'])){
+  		//Show node Title
+      db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'scholar_front_show_title', '%s')", $row->type, $row->sid, serialize($a_setting['bio_title']));
+  	}
+  	
+    if(isset($a_setting['node_options']) && count($a_setting['node_options'])){
+    	//Save node types to display
+      db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'scholar_front_feature_nodes', '%s')", $row->type, $row->sid, serialize($a_setting['node_options']));
+    }
+  	
+    if(isset($s_path)) db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'site_frontpage', '%s')", $row->type, $row->sid, serialize($s_path));
+  }
+  
+  $type = variable_get('scholar_content_type', 'vsite');
+  $result = db_query('SELECT nid FROM {node} n LEFT JOIN {spaces_overrides} so ON so.id = n.nid AND so.type = "og" AND so.object_type LIKE "variable" AND so.object_id LIKE "site_frontpage"  WHERE n.type LIKE "%s" AND so.id IS NULL ',$type);
+  while ($nid = db_result($result)) {
+  	db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('og', '%s', 'variable', 'site_frontpage', '%s')", $nid, serialize("scholar_front/features"));
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Front Page Settings',
+    );
+
+  return $res;
+
+}

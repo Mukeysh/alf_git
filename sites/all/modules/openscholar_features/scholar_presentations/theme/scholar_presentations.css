@@ -1,0 +1,26 @@
+.node-type-presentation.node-teaser .field-type-filefield .odd,
+.node-type-presentation.node-teaser .field-type-filefield .even {
+ float:left;
+ margin-right: .4em;
+ }
+
+.node-type-presentation.node-teaser {
+  margin-bottom: 1.5em;
+  }
+
+.node-type-presentation.node-teaser span.title,
+.node-type-presentation.node-teaser span.location {
+  font-weight:bold;
+  }
+
+.node-type-presentation.node-teaser div.filefield-file {
+  display:inline;
+  }
+
+.node-type-presentation.node-teaser div.filefield-file {
+  display:inline;
+  margin-right: .3em;
+  }
+.node-type-presentation.node-teaser div.filefield-file img {
+  vertical-align:middle;
+  }

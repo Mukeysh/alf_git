@@ -1,0 +1,17 @@
+name        = BigPic
+description = A clean site with a choice of single large background images
+flavor_name = "Desert Forms"
+plugins[vsite_design][flavor] = flavors
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-bigpic.css
+conditional-stylesheets[if lte IE 7][all][] = scholar-bigpic-ie7.css
+conditional-stylesheets[if lt IE 9][all][] = scholar-bigpic-ie.css
+
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
+
+
+os[cp_layout_css] = cp-layout-map.css

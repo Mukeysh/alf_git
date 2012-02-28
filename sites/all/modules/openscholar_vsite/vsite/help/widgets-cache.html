@@ -1,0 +1,49 @@
+<h3>Widget Caching</h3>
+
+<dl>
+
+<dt>Add cache information to your widget definition</dt>
+<dd>
+An example of a widget without caching.
+<pre>
+/**
+ * hook vsite_widgets
+ */
+function mymodule_vsite_widgets(){
+  $items = array();
+  $items['mymodule-block5'] = array(
+        'module' => 'mymodule',
+        'delta' => 'block5',
+        'weight' => -21,
+        'region' => false,
+        'label' => 'Latest Things',
+      );
+  return $items;
+}
+</pre>
+With caching.
+<pre>
+/**
+ * hook vsite_widgets
+ */
+function mymodule_vsite_widgets(){
+  $items = array();
+  $items['mymodule-block5'] = array(
+        'module' => 'mymodule',
+        'delta' => 'block5',
+        'weight' => -21,
+        'region' => false,
+        'label' => 'Latest Things',
+        'cache' => BLOCK_CACHE_CONTENT_CACHE,
+        'cache_keys' => array(
+          'node' => array('node_type' => 'node_type'),
+          'os_og' => array('current' => 'current'),
+        ),
+      );
+  return $items;
+}
+</pre>
+Where 'cache' defines the type of caching to use, currently 'BLOCK_CACHE_CONTENT_CACHE' is the only option.<br>
+'cache_keys' defines when the cache for this block should be cleared. In the example above the cache will be cleared any time a node of type 'node_tpye' is saved within the current site.  For more information on avalible keys see the "Views content cache" module.
+</dd>
+</dl>

@@ -1,0 +1,44 @@
+<?php
+/**
+ * The block is the same for every user on every page where it is visible. And is cleared based on content changes
+ */
+define('BLOCK_CACHE_CONTENT_CACHE', 0x0020);
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function os_blocks_content_cache_ctools_plugin_api() {
+  list($module, $api) = func_get_args();
+  if ($module == "context" && $api == "context") {
+    return array("version" => 3);
+  }
+}
+
+/**
+ * Set the context reaction to run through the cache check first
+ */
+function os_blocks_content_cache_context_registry_alter(&$registry){
+  
+  //Use our own block context reaction
+  if(isset($registry['reactions']['block'])){
+    $registry['reactions']['block']['plugin'] = "os_content_cache_context_reaction_block";
+  }
+}
+
+/**
+ * Implementation of hook_spaces_plugins().
+ */
+function os_blocks_content_cache_context_plugins() {
+  $plugins = array();
+ 
+  //define the os_blocks_content_cache controller for contexts
+  $plugins['os_content_cache_context_reaction_block'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'os_blocks_content_cache') .'/plugins',
+      'file' => 'os_content_cache_context_reaction_block.inc',
+      'class' => 'os_content_cache_context_reaction_block',
+      'parent' => 'vsite_context_reaction_block',
+    ),
+  );
+  return $plugins;
+}

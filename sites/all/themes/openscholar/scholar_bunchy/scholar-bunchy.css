@@ -1,0 +1,206 @@
+@font-face {
+	font-family: 'MyriadProBold';
+	src: url('fonts/MyriadPro-Bold.eot');
+	src: local('fonts/Myriad Pro Bold'), local('fonts/MyriadPro-Bold'), url('fonts/MyriadPro-Bold.woff') format('woff'), url('fonts/MyriadPro-Bold.otf') format('opentype'), url('fonts/MyriadPro-Bold.svg#MyriadPro-Bold') format('svg');
+}
+
+@font-face {
+	font-family: 'MyriadProRegular';
+	src: url('fonts/MyriadPro-Regular.eot');
+	src: local('fonts/Myriad Pro Regular'), local('fonts/MyriadPro-Regular'), url('fonts/MyriadPro-Regular.woff') format('woff'), url('fonts/MyriadPro-Regular.otf') format('opentype'), url('fonts/MyriadPro-Regular.svg#MyriadPro-Regular') format('svg');
+}
+
+@font-face {
+	font-family: 'MyriadProItalic';
+	src: url('fonts/MyriadPro-It.eot');
+	src: local('fonts/Myriad Pro Italic'), local('fonts/MyriadPro-It'), url('fonts/MyriadPro-It.woff') format('woff'), url('fonts/MyriadPro-It.otf') format('opentype'), url('fonts/MyriadPro-It.svg#MyriadPro-It') format('svg');
+}
+
+body {
+  background: url('images/body-bg.png') repeat-x #373c3e;
+  font:14px/17px 'MyriadProRegular', sans-serif;
+  color: #050505;
+  }
+
+/*TYPOGRAPHY*/
+
+#header a {
+  color: #9AD5E0;
+  }
+
+#header h1 a,
+#header h1 a:visited,
+#header h2,
+#header p {
+  color: #fff;
+  margin-bottom: 0;
+  font-weight: normal;
+  }
+
+#header h1 {
+  margin-top:0;
+  font-size: 23px;
+  }
+
+#header h2,
+#header p {
+  margin-top: 3px;
+  }
+
+#header h2 {
+  font-size: 20px;
+  }
+
+#sidebar-first h3,
+#sidebar-second h3,
+#sidebar-second div.litecal .litecal-title h3.litecal-title,
+#sidebar-first div.litecal .litecal-title h3.litecal-title {
+  background: #353a3c;
+  color:#fff;
+  padding: 4px 5px;
+  -moz-border-radius:5px;
+  -webkit-border-radius:5px;
+  border-radius: 5px;
+  float:none;
+  font-size: 14px;
+  line-height: 17px;
+  margin-bottom: 1em;
+  }
+
+
+#header-main .block-vsite_menus li a:hover {
+  color: #fff;
+  }
+
+/* LAYOUT */
+
+#page {
+  padding-top: 15px;
+  width: 970px;
+  margin: 0 auto;
+  }
+
+#content-area {
+  clear:both;
+  }
+
+#content-area .wrap {
+  background: #fff;
+  }
+
+#header {
+  min-height:117px;
+  }
+
+#navbar {
+  clear: none;
+  float:right;
+  margin-top: -20px;
+  width: 768px;
+
+  }
+
+#scholar-shield {
+  margin: 10px 0 0 auto;
+  }
+
+#sidebar-first {
+  width: 157px;
+  padding-top:0;
+  padding-left: 9px;
+  padding-right:6px;
+  right: 0;
+  border-left: 1px solid #919191;
+  margin: 0;
+  }
+
+#sidebar-second {
+  width:157px;
+  padding-top:0;
+  padding-left: 9px;
+  padding-right:6px;
+  border-left: 1px solid #919191;
+  }
+
+#content-area .hg-container {
+  background: #fdfdfd;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  }
+
+/*
+  Instead of the [sidebar, main-content, sidebar] layout we can easily change the layout to [main-content, sidebar, sidebar] thusly.
+*/
+
+#content-area .hg-container,
+body.two-sidebars #content-area .hg-container {
+  padding-left: 0 !important;
+  }
+
+body.sidebar-first #content-area .hg-container {
+  padding-right: 193px; /* sidebar-first width + content-main padding */
+  }
+
+body.sidebar-second #content-area .hg-container {
+  padding-right: 193px; /* sidebar-second width + content-main padding */
+  }
+
+body.two-sidebars #content-area .hg-container {
+  padding-left: 0;
+  padding-right: 364px; /* Total sidebar width + content-main padding */
+  }
+
+body.sidebar-first #sidebar-first {
+  margin-right: -173px;
+  }
+
+body.two-sidebars #sidebar-first {
+  margin-right: -193px; /* Total FIRST sidebar width + content-main padding */
+  right: 0;
+  left: auto;	
+  }
+
+.two-sidebars #sidebar-second {
+  right: -173px;        /* Total FIRST sidebar width */
+  }
+
+#header-left {
+	left: auto;
+  width: 180px;
+  right:210px;
+  margin-bottom: 10px;
+  padding-left:0;
+  }
+
+#header .hg-container {
+  padding-left: 190px;
+  }
+
+/* HTML ITEMS */
+
+#navbar li {
+  display: inline;
+  margin-right: 16px;
+  }
+
+#navbar li.last {
+  margin-right: 0;
+  }
+
+#navbar li a,
+#navbar li a:visited {
+  color:#ec8501;
+  font-size: 16px;
+  }
+
+#footer {
+  padding-top: 4px;
+  }
+
+p.copy, p.copy a, p.copy a:visited {
+    color:#f8f8f8;
+    }
+
+p.copy a {
+  text-decoration: underline;
+  }

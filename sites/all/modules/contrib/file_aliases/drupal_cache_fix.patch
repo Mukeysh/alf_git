@@ -1,0 +1,14 @@
+Index: file_aliases.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/file_aliases/file_aliases.module,v
+retrieving revision 1.7.2.2
+diff -r1.7.2.2 file_aliases.module
+160c160,161
+<     header('Content-Type: ' . $result->filemime);
+---
+>     
+>     drupal_set_header('Content-Type: ' . $result->filemime);
+163c164
+<     header('Cache-Control: public');
+---
+>     drupal_set_header('Cache-Control: public');

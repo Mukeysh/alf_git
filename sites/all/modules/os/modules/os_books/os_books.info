@@ -1,0 +1,6 @@
+core = 6.x
+dependencies[] = "book"
+description = "Enhancements for books."
+name = "OS Books"
+package = "Openscholar"
+version = "6.x-beta14"

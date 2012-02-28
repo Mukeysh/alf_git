@@ -1,0 +1,34 @@
+Index: purl.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/purl/purl.module,v
+retrieving revision 1.1.2.43
+diff -r1.1.2.43 purl.module
+279c279
+<  * 
+---
+>  *
+540a541
+> 	
+542,548c543,555
+<   if (check_plain($modifier['provider']) && !empty($modifier['value']) && preg_match('!^[\.a-z0-9_-]+$!', $modifier['value']) && !menu_get_item($modifier['value'])) {
+<     $id = db_result(db_query("SELECT id FROM {purl} WHERE value = '%s'", $modifier['value']));
+<     if (!$id) {
+<       return true;
+<     }
+<     else if (isset($modifier['id']) && ($id == $modifier['id'])) {
+<       return true;
+---
+>   if (check_plain($modifier['provider']) && !empty($modifier['value']) && !menu_get_item($modifier['value'])) {
+> 
+>   	//Allow Processor to determine the format it will accept
+>     $processor = purl_get_processor(variable_get('purl_method_'. $modifier['provider'], PURL_PATH));  //Retrieve processor
+>     $modifier_regex = isset($processor->modifier_regex)?$processor->modifier_regex : '!^[a-z0-9_-]+$!'; //Use processor regex or default
+>     if(preg_match($modifier_regex, $modifier['value'])){
+> 	    $id = db_result(db_query("SELECT id FROM {purl} WHERE value = '%s'", $modifier['value']));
+> 	    if (!$id) {
+> 	      return true;
+> 	    }
+> 	    else if (isset($modifier['id']) && ($id == $modifier['id'])) {
+> 	      return true;
+> 	    }
+

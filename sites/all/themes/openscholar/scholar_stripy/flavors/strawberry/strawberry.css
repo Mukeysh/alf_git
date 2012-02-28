@@ -1,0 +1,17 @@
+/* Strawberry*/
+
+body {
+  background:#9F3B3B;
+  }
+
+body.navbar-off #page {
+  background-image:url('images/body-bg-alt-strawberry.png');
+  }
+
+#navbar {
+  background-image: url('images/nav-strawberry.png');
+  }
+
+a, a:visited {
+  color: #892322;
+  }

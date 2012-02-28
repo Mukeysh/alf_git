@@ -1,0 +1,7 @@
+name = vsite help
+description = Ties in the advanced help icons for the generated help documents.
+dependencies[] = advanced_help
+stylesheets[all][] = vsitehelp.css
+core = 6.x
+package = vsite
+version = "6.x-beta14"

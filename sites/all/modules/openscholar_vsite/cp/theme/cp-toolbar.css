@@ -1,0 +1,98 @@
+#cp-toolbar-toolbar,
+#cp-toolbar-user {
+  height: 40px;
+  clear:none !important;
+  }
+
+#cp-toolbar-toolbar li, #cp-toolbar-user li {
+  height: 40px;
+  line-height: 40px;
+  margin-top: 0;
+  }
+
+#cp-toolbar-toolbar {
+  float: left;
+  margin-left: 10px;
+  }
+
+#cp-toolbar-user  {
+  float: right;
+  margin-right: 10px;
+  }
+
+#cp-toolbar-toolbar li {
+  float: left;
+  margin: 0;
+  margin-right: 18px;
+  padding: 0;
+  list-style-type: none;
+  }
+
+#cp-toolbar-toolbar li.active-trail {
+  background: url(images/topmenu-active.png) no-repeat transparent 9px 100%;
+  }
+
+#cp-toolbar-user li {
+  float: right;
+  margin-left: 18px;
+  }
+
+#cp-toolbar-toolbar li a {
+  padding-left: 30px !important;
+  background: url(images/topmenu-icons.png) no-repeat 0 0 transparent;
+  font-size: 10px !important;
+  line-height: 27px !important;
+  font-weight: normal !important;
+  color:#fff !important;
+  display:block !important;
+  height: 25px;
+  margin-top: 6px !important;
+  font-style: normal !important;
+  font-family: arial, sans-serif !important;
+  text-decoration:none !important;
+  }
+
+#cp-toolbar-toolbar li a#admin-link-cp-features {
+  background-position: 0 0;
+  }
+
+#cp-toolbar-toolbar li a#admin-link-cp-appearance {
+  background-position: 0 -24px;
+  }
+
+#cp-toolbar-toolbar li a#admin-link-cp-settings {
+  background-position: 0 -50px;
+  }
+
+#cp-toolbar-toolbar li a#admin-link-cp-content {
+  background-position: 0 -75px;
+  }
+
+#cp-toolbar-toolbar li a#admin-link-cp-users {
+  background-position: 0 -101px;
+  }
+#cp-toolbar-toolbar li a#admin-link-cp-news {
+  background-position: 0 -140px;
+  }
+
+#cp-toolbar-toolbar li a#admin-link-cp-support {
+  background-position: 0 -126px;
+  }
+
+#cp-toolbar-user li a, #cp-toolbar-user li a:visited {
+  font-size: 12px !important;
+  color: #ddd !important;
+  }
+
+#cp-toolbar-user li.last a, #cp-toolbar-user li.last a:visited {
+  padding: 1px 8px !important;
+  background: #DDDDDD;
+  color: #000 !important;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  }
+
+#cp-toolbar-user li.last a:hover {
+  text-decoration: none;
+  background: #FFF;
+  }

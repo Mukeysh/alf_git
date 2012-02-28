@@ -1,0 +1,97 @@
+#scholarlayout-container #scholarlayout-right,
+#scholarlayout-container #scholarlayout-left,
+#scholarlayout-container #scholarlayout-content-main {
+  left: 642px;
+  top: 0;
+  height: 506px;
+  width: 202px;
+  }
+
+#scholarlayout-container #scholarlayout-left {
+  left: 212px;
+  }
+
+#scholarlayout-container #scholarlayout-header-main,
+#scholarlayout-container #scholarlayout-header-left,
+#scholarlayout-container #scholarlayout-header-right,
+#scholarlayout-container #scholarlayout-navbar {
+  height: 132px;
+  width:202px;
+  left: 0;
+  top:0;
+  }
+
+#scholarlayout-container #scholarlayout-header-left {
+  top: 127px;
+  }
+
+#scholarlayout-container #scholarlayout-header-right {
+  top:266px;
+  }
+
+
+#scholarlayout-container #scholarlayout-navbar {
+  top:399px;
+  height: 107px;
+  }
+
+#scholarlayout-container #scholarlayout-content-main {
+height: 506px;
+    left: 423px;
+    top: 0;
+    width: 210px;
+  }
+  
+/*
+ * do not display these blocks when not on the front
+ */  
+#scholarlayout-container #scholarlayout-content-top,
+#scholarlayout-container #scholarlayout-content-bottom,
+#scholarlayout-container #scholarlayout-content-left,
+#scholarlayout-container #scholarlayout-content-right{
+  display: none;
+  }
+  
+/*
+ * Front page only in layout
+ */
+.front#scholarlayout-container #scholarlayout-content-main{
+  display: none;
+  }
+
+.front#scholarlayout-container #scholarlayout-content-left,
+.front#scholarlayout-container #scholarlayout-content-right{
+display: block;
+    height: 240px;
+    top: 134px;
+    width: 98px;
+  }
+  
+.front#scholarlayout-container #scholarlayout-content-left{
+  left: 425px;
+  }
+  
+.front#scholarlayout-container #scholarlayout-content-right{
+  left: 530px;
+  }
+
+.front#scholarlayout-container #scholarlayout-content-top,
+.front#scholarlayout-container #scholarlayout-content-bottom {
+	display: block;
+  width: 428px;
+  left: 0;
+  }
+
+.front#scholarlayout-container #scholarlayout-content-top{
+  top: 0;
+  height: 125px;
+  width: 202px;
+  left: 425px;
+  }
+  
+.front#scholarlayout-container.front #scholarlayout-content-bottom{
+  height: 125px;
+  top: 381px;
+  width: 202px;
+  left: 425px;
+  }  

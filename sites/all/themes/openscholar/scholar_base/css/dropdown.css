@@ -1,0 +1,355 @@
+html.js div.ctools-dropdown-container {
+  display: none;
+  position: absolute;
+  top: 0;
+  z-index:1001;
+  white-space: nowrap;
+}
+
+html.js div.ctools-dropdown div.ctools-dropdown-container ul {
+  list-style-type: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  }
+
+.ctools-dropdown div.ctools-dropdown-container ul li,
+#content .ctools-dropdown-container-wrapper ul.links li {
+  padding: 0;
+  display: block;
+  float: none;
+  margin: 0;
+  background-image: none;
+  font-family: 'helvetica neue', helvetica, arial, sans-serif !important;
+  }
+
+.ctools-dropdown-no-js .ctools-dropdown-link,
+.ctools-dropdown-no-js .ctools-dropdown-link-wrapper,
+.ctools-dropdown-no-js span.text {
+  display: none;
+  }
+
+.ctools-dropdown-no-js .ctools-dropdown div.ctools-dropdown-container ul li,
+#content .ctools-dropdown-no-js .ctools-dropdown-container-wrapper ul.links li {
+  display:inline;
+  float: left;
+  border: none;
+  padding: 0 !important;
+  clear: none;
+  width: auto;
+  }
+
+.ctools-dropdown-container-wrapper {
+  position: relative;
+  }
+
+html.js div.ctools-dropdown div.ctools-dropdown-container {
+  background: #fff !important;
+  border: 1px solid #a8bed8;
+  margin: 0 1px 0 0;
+  padding: 5px 0;
+  color: #494949 !important;
+  -moz-box-shadow:  rgba(0,0,0,0.3) 0 2px 5px;
+  -webkit-box-shadow:  rgba(0,0,0,0.3) 0 2px 5px;
+  box-shadow: 0 2px 5px #777;
+  opacity: .93;
+ 
+  }
+  
+  
+  /*CTOOLS DROPDOWN ON LAYOUT PAGE - BEGIN*/
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container { 
+ width:300px;
+ font-size:1.2em;
+ padding:8px;
+max-height: 670px;
+ overflow:auto;
+   }
+   
+ 
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li { 
+ margin-left:2px;
+ font-weight:bold;
+padding-bottom:8px;
+font-size:1em;
+text-align: center;
+   }
+   
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li.first { 
+background:#EEE;
+padding-left:8px;
+border-bottom:1px dotted #555;
+   }
+   
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li.first, 
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li.first.last,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li.last,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li { 
+background:#EEE;
+padding-left:0px;
+border-bottom:none;
+text-align: left;
+   } 
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a:hover { 
+text-decoration:underline;
+text-transform: none;
+}
+   
+
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a { 
+ font-weight:normal;
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/widget-bgSmall.png') no-repeat;
+ padding:0 0 4px 25px;
+ margin-left:-30px;
+ font-size:.9em;
+height:25px;
+   }
+   
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li .help,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li .help a:hover { 
+position:relative;
+float:right;
+ background: url('../images/scholarbase-sprite.png') 0 -297px no-repeat transparent;
+ width: 19px;
+ height: 19px;
+margin-top: -18px;
+margin-right:-12px;
+text-indent: -999em;
+   }
+    
+
+  @media screen and (-webkit-min-device-pixel-ratio:0) {
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li .help {
+margin-top:0px; /* This works only in Safari and Google Chrome */
+}
+}
+   
+   
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_pub_grps,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_pub_ca,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_pub_type,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_pub_year { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/publications.png') no-repeat;
+}
+   
+ 
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_simple { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/text.png') no-repeat;
+}  
+   
+   
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_feedreader,
+#cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_rss { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/rss.png') no-repeat;
+}
+  
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_curr_toc,
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_booktoc { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/book.png') no-repeat;
+}  
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_modal_image,
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_gallery { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/camera.png') no-repeat;
+}  
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_slideshow { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/slideshow.png') no-repeat;
+} 
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_addthis { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/addThis.png') no-repeat;
+} 
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_twitterfeed { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/twitter.png') no-repeat;
+} 
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_activityf,
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_comments,
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_facepile,
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_like,
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_likebox,
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_livestream,
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_recommend,
+  #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.fb_social_send { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/facebook.png') no-repeat;
+} 
+
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_shields { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/shield.png') no-repeat;
+} 
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_bio { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/bio.png') no-repeat;
+} 
+
+ #cp-settings-layout div.ctools-dropdown div.ctools-dropdown-container ul li ul li a.os_boxes_cclicense { 
+ background:url('/sites/all/modules/openscholar_vsite/vsite_layout/vsite_layout_ui/theme/images/smallWidgetIcons/license.png') no-repeat;
+} 
+
+
+
+
+  /*CTOOLS DROPDOWN ON LAYOUT PAGE - END*/
+ 
+ #admin-area {height:20px;clear:right;margin-bottom: 20px;}
+ 
+
+.context-links,
+.section-cp div.ctools-dropdown {
+	-moz-border-radius:5px 5px 5px 5px;
+  -webkit-border-radius:5px 5px 5px 5px;
+  border-radius: 5px 5px 5px 5px;
+  margin: 0 10px 0 0;
+  float:right;
+  background: url('../images/scholarbase-sprite.png') no-repeat 3px -380px #a1d4a1 !important;
+  padding: 1px 8px 1px 25px !important;
+}
+
+
+#cp-settings-layout .ctools-dropdown {
+	  margin: 16px 12px 0 0;	
+	  -moz-border-radius:5px 5px 0px 0px;
+  -webkit-border-radius:5px 5px 0px 0px;
+  border-radius: 5px 5px 0px 0px;
+  background: url('../images/scholarbase-sprite.png') no-repeat 3px -380px #a1d4a1 !important;
+}
+
+
+#admin-area .ctools-dropdown.context-links.vsite-section-admin-links  {
+ float:right;
+  background: url('../images/scholarbase-sprite.png') no-repeat 0px -403px !important;
+
+}
+
+
+#admin-area .ctools-dropdown.context-links.vsite-section-admin-links a.ctools-dropdown-link {
+ float:right;
+  background: url('../images/scholarbase-sprite.png') no-repeat 0px -331px !important;
+  width:23px;
+  height:23px;
+  text-indent: -9999px;
+  margin-left:-20px;
+}
+
+#admin-area .ctools-dropdown.context-links.vsite-section-admin-links a.ctools-dropdown-link:hover {
+ float:right;
+  background: url('../images/scholarbase-sprite.png') no-repeat 0px -355px !important;
+  width:23px;
+  height:23px;
+  text-indent: -9999px;
+  margin-left:-20px;
+}
+
+html.js .ctools-dropdown.context-links.vsite-section-admin-links div.ctools-dropdown-container-wrapper div.ctools-dropdown-container {
+margin-top: 20px;	
+	}
+
+
+
+.context-links:hover,
+.section-cp div.ctools-dropdown:hover{
+ background: url('../images/scholarbase-sprite.png') no-repeat 3px -380px #a1d4a1 !important;
+}
+
+
+
+.context-links li {
+  list-style:none;
+  margin:0;
+  list-style: none;
+  padding: 0;
+  display:block;
+  }
+
+.context-links a,
+.context-links a:visited {
+  color: #333 !important;
+  font-size:11px;
+  }
+
+.context-links a:hover {
+  color: #FFF !important;
+  }
+
+.context-links .ctools-dropdown a,
+.ctools-dropdown ul.links li a,
+.context-links .ctools-dropdown-container-wrapper .flag-wrapper {
+  color: #000 !important;
+  text-decoration: none !important;
+  padding: 3px 10px !important;
+  font-weight: bold !important;
+  font-size: 11px !important;
+  font-family: 'helvetica neue', helvetica, arial, sans-serif !important;
+  width: 124px;
+  letter-spacing: .5px;
+  display:block;
+  }
+
+/* the "Admin/Actions" link */
+.node a.ctools-dropdown-link,
+.biblio-entry a.ctools-dropdown-link,
+h2.title a.ctools-dropdown-link,
+.block a.ctools-dropdown-link,
+.view a.ctools-dropdown-link {
+  background: url('../images/scholarbase-sprite.png') 0 -94px no-repeat transparent !important;
+  padding: 1px 0 3px 20px !important;
+  height: 16px;
+}
+
+.ctools-dropdown-container-wrapper ul.links li.flag-featuredposts {
+  position: relative;
+}
+
+.ctools-dropdown-container-wrapper .flag-wrapper span.flag-throbber {
+  position: absolute;
+  right: -5px;
+  top: 0;
+}
+
+.ctools-dropdown-no-js .ctools-dropdown-container-wrapper ul.links li a,
+.ctools-dropdown-no-js .context-links .ctools-dropdown-container-wrapper .flag-wrapper {
+  padding:0 1px !important;
+  color: #228822 !important;
+}
+
+.context-links .ctools-dropdown-container-wrapper a:hover,
+.ctools-dropdown ul.links li a:hover,
+.ctools-dropdown-container-wrapper ul.links li a:hover {
+  color: #333 !important;
+  text-decoration: none !important;
+font-weight: bold !important;
+}
+
+#cp-settings-layout .context-links .ctools-dropdown-container-wrapper a:hover {
+  color: #333 !important;
+  text-transform: capitalize;
+  text-decoration: underline !important;
+
+  font-weight: normal !important;
+}
+
+
+.context-links .ctools-dropdown-container-wrapper .flag-wrapper a {
+  display:inline;
+}
+
+.ctools-dropdown-no-js .ctools-dropdown-container-wrapper ul.links li a:hover {
+  font-weight: normal;
+}
+
+.empty-content .item-list ul.context-links li {
+  float: left;
+}
+
+.node-inner {
+  padding: 3px;
+}
+
+/* override for post in a box */
+.box-os_boxes_node .node .os-links {
+	display: none;
+}

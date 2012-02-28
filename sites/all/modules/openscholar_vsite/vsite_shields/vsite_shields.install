@@ -1,0 +1,101 @@
+<?php
+
+function vsite_shields_requirements($phase) {
+
+  $requirements = array();
+  if ($phase == 'runtime') {
+    $shields_dir = file_create_path().'/vsite_shields/';
+    if (!file_check_directory($shields_dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      if (!is_dir($shields_dir)) {
+        $requirements['shields_dir'] = array(
+          'title' => t('Shields Directory'),
+          'value' => t('%p is not a directory or is not readable by the webserver.', array('%p' => $shields_dir)),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+      elseif (!is_writable($shields_dir)) {
+        $requirements['shields_dir'] = array(
+          'title' => t('Shields Directory'),
+          'value' => t('%p is not writeable by the webserver.', array('%p' => $shields_dir)),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+      else {
+        $requirements['shields_dir'] = array(
+          'title' => t('Shields Directory'),
+          'value' => t('An unknown error occured.'),
+          'description' => t('An unknown error occured trying to verify %p is a directory and is writable.', array('%p' => $shields_dir)),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+    }
+  }
+
+  return $requirements;
+}
+
+function vsite_shields_install() {
+  $temp = 5;
+  //Run to bring legacy sites up to date
+  vsite_shields_update_6001($temp);
+  vsite_shields_update_6002($temp);
+}
+
+function vsite_shields_update_6001(&$sandbox) {
+	
+  // search for values that point to old locations and update them.
+  $q = db_query("SELECT * FROM {spaces_overrides} WHERE object_id = 'vsite_shields_shield'");
+  while ($row = db_fetch_object($q)) {
+    $row->value = unserialize($row->value);
+
+    if (strpos($row->value, 'theme/shield/shields') !== FALSE ) {
+      $row->value = str_replace('vsite_design/theme/shield/shields', 'vsite_shields/theme/shields', $row->value);
+      drupal_write_record('spaces_overrides', $row, array('type', 'id', 'object_type', 'object_id'));
+    }
+  }
+
+  $q = db_query("SELECT * FROM {variable} WHERE name = 'vsite_shields_shield'");
+  if ($row = db_fetch_object($q)) {
+    $row->value = unserialize($row->value);
+    if (strpos($row->value, 'theme/shield/shields') !== FALSE ) {
+      $row->value = str_replace('vsite_design/theme/shield/shields', 'vsite_shields/theme/shields', $row->value);
+      drupal_write_record('variable', $row, array('name'));
+    }
+  }
+
+  return array(array('success' => TRUE, 'query' => 'Shield settings ported to new location.'));
+}
+
+function vsite_shields_update_6002(&$sandbox) {
+  // copy over existing shields to new location
+
+  if ($req_error = vsite_shields_requirements('runtime')) {
+    return array(array('success' => FALSE, 'query' => $req_error['shields_dir']['description']));
+  }
+
+  $new_path = file_create_path().'/vsite_shields/';
+  $files = file_scan_directory('sites/all/modules/openscholar_vsite', 'unsure.*');
+  if (count($files) == 0) {
+    return array(array('success' => true, 'query' => 'No shields found.'));
+  }
+  $files = current($files);
+  $old_path = str_replace($files->basename, '', $files->filename);
+
+  $shield_info = array();
+  $old_shields = file_scan_directory($old_path, '[^\.]*\.');
+  foreach ($old_shields as $old_shld) {
+    file_copy($old_shld->filename, $new_path, FILE_EXISTS_REPLACE);
+    db_query("UPDATE {variable} SET value = '%s' WHERE name = 'vsite_shields_shield' AND value LIKE '%%%s%%'", serialize($old_shld->filename), $old_shld->basename);
+    $default = db_affected_rows();
+    db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE object_type = 'variable' AND object_id = 'vsite_shields_shield' AND value LIKE '%%%s%%'", serialize($old_shld->filename), $old_shld->basename);
+    $shield_info[$old_shld->basename] = array('hidden' => 0, 'default' => $default);
+  }
+
+  variable_set('vsite_shields_shield_info', $shield_info);
+  $res[] = array(
+    'success' => TRUE,
+    'query' => 'Shields have been moved to '.$new_path.'.',
+  );
+
+  return $res;
+}

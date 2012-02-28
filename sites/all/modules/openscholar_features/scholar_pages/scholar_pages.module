@@ -1,0 +1,8 @@
+<?php
+
+include_once('scholar_pages.features.inc');
+
+function scholar_pages_form_alter($form) {
+  //if ($form['form_id']['#value'] == 'page_node_form')
+  //  dpm($form);
+}

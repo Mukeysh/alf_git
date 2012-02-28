@@ -1,0 +1,248 @@
+<?php
+
+/*
+ * Gets the root node of any book tree
+ */
+function os_books_get_root($node, $level = 0) {
+  if (is_numeric($node)) $node = node_load($node);
+
+  if (!isset($node->book)) return $node;
+  if ($level) {
+    if (isset($node->book) && $node->book['depth'] > $level) { // book page
+      while($node -> book['depth'] > $level){
+        $parent = book_link_load($node->book['plid']);
+        $pid = $parent['nid'];
+        $node = node_load(array('nid' => $pid));
+      }
+    }
+  }
+  else {
+    $node = node_load($node->book['bid']);
+  }
+  return $node;
+}
+
+/*
+ * Takes any node in a book tree and builds the entirety of that tree
+ */
+function os_books_build_tree($node, $flatten = false) {
+  $root = os_books_get_root($node);
+  static $building = array();
+
+  // if we're in the middle of building this tree, do nothing
+  // this prevents an infinite loop
+  if (isset($root->book) && !$building[$root->nid]) {
+    $building[$root->nid] = true;
+    $cache = _os_books_get_cache($root->nid);
+    if ($cache) return $cache;
+
+    $tree = book_menu_subtree_data($root->book);
+    if ($flatten) $tree = _os_books_flatten_book($tree);
+    _os_books_display_links(true);
+    foreach ($tree as $link) {
+      $nid = $link['link']['nid'];
+      $output[$nid]['content'] = menu_execute_active_handler('node/'.$nid);
+      $output[$nid]['title'] = drupal_get_title();
+    }
+    //$output = book_export_traverse($tree, 'os_books_build_node');
+
+    $cache_key = _os_books_get_cache_key($root->nid);
+    cache_set($cache_key, $output, 'cache_page', CACHE_PERMANENT);
+    $building[$root->nid] = false;
+    return $output;
+  }
+}
+
+/**
+ *
+ * Given a node in a book, builds a full table of contents for that book
+ * @param $nid	Either a nid or a full node object
+ * @param $separate	true if the function should split the top level and second level into separate
+ */
+function os_books_build_toc($node, $separate = false) {
+  $block = array();
+  if (is_numeric($node)) $node = node_load($node);
+
+  if (is_object($node) && isset($node->book)) {
+    $menu_tree = menu_tree_all_data($node->book['menu_name']);
+    if ($separate) {
+      $top = current($menu_tree);
+      $block['subject'] = theme('menu_item_link', $top['link']);
+      $block['content'] = menu_tree_output($top['below']);
+    }
+    else {
+      $block['content'] = menu_tree_output($menu_tree);
+    }
+  }
+
+  return $block;
+}
+
+function os_books_build_node($node, $children = '') {
+
+  $node->build_mode = NODE_BUILD_PRINT;
+  $node = node_build_content($node, FALSE, TRUE);
+  $node->body = drupal_render($node->content);
+
+  return theme('book_node_export_html', $node, $children);
+}
+
+/**
+ * Replace the body of the node with the full book
+ */
+function os_books_nodeapi(&$node, $op, $teaser, $page) {
+  if ($op == 'view' && $node->type == 'book' && $page) {
+    $content = os_books_build_tree($node, true);
+    // this is the page's node, not one we render through os_books
+    if ($content) {
+      drupal_set_title(check_plain($node->title));
+      drupal_add_js(array('book_pages' => $content), 'setting');
+      unset($node->content['#printed']);
+    }
+    /*/$content = str_replace(array('node-', 'class="section'), array('book-node-', 'class="book-page section'), $content);
+    $node->content['full-book'] = array(
+      '#value' => $content,
+      '#weight' => 10,
+    );*/
+  }
+  if ($op == 'view' && $node->type == 'book' && !$teaser && !$page) {
+    unset($node->content['booktoc']);
+  }
+}
+
+function os_books_preprocess_node(&$vars) {
+  if ($vars['node']->type == 'book') {
+    $path = drupal_get_path('module', 'os_books');
+    drupal_add_js($path.'/os_books.js', 'module');
+    drupal_add_css($path.'/os_books.css');
+  }
+}
+
+function os_books_preprocess_book_node_export_html(&$vars) {
+  if (0 && _os_books_display_links()) {
+    $node = $vars['node'];
+    $node->links = module_invoke_all('link', 'node', $node, false);
+    drupal_alter('link', $node->links, $node);
+
+    $vars['content'] .= theme('links', $node->links);
+  }
+}
+
+function os_books_preprocess_book_export_html(&$vars) {
+  $vars['head'] .= '    <link type="text/css" rel="stylesheet" href="'.$GLOBALS['base_url'].'/'.drupal_get_path('module', 'os_books').'/os_books_print.css'.'"/>'."\r\n";
+}
+
+/*
+ * Implementation of hook_link.
+ */
+function os_books_link($type, $node, $teaser = FALSE) {
+  $links = array();
+  if ($type == 'node' && $node->type == 'book' && !$teaser) {
+    $links['permalink'] = array(
+      'title' => t('Permalink'),
+      'href' => drupal_get_path_alias('node/'. $node->nid),
+      'attributes' => array(
+      	'id' => t('book-permalink'),
+      	'title' => t('Permanent Link')
+      ),
+    );
+  }
+  return $links;
+}
+
+/**
+ * Implementation of hook_link_alter
+ * Changes the title of the Print View link
+ */
+function os_books_link_alter(&$links, $node) {
+  $root = os_books_get_root($node);
+  if (isset($links['book_printer'])) {
+    $links['book_printer']['title'] = t('Print');
+    $links['book_printer']['href'] = 'book/export/html/'.$root->nid;
+  }
+}
+
+/**
+ * Flattens our book tree
+ * @param array $tree
+ */
+function _os_books_flatten_book($tree) {
+  if (!is_array($tree)) {
+    return array();
+  }
+  $result = array();
+  foreach ($tree as $key => $value) {
+    $result[$key]['link'] = $value['link'];
+    $result = array_merge($result, _os_books_flatten_book($value['below']));
+  }
+  return $result;
+}
+
+/**
+ * Helper function to show links in full book view, but not printed view
+ */
+function _os_books_display_links($supp = null) {
+  static $suppress = false;
+
+  if (!is_null($supp))
+    $suppress = !!$supp;
+
+  return $suppress;
+}
+
+function _os_books_get_cache($root) {
+  if (is_object($root) && isset($root->nid)) {
+    $root = $root->nid;
+  }
+  elseif (!(int)$root || !module_exists('views_content_cache')) {
+    return FALSE;
+  }
+
+  $cutoff = 0;
+  $cache_params = array(
+    'node' => array('book' => 'book'),
+    'os_og' => array('current' => 'current'),
+  );
+
+  // Retrieve the latest update time matching the settings on this View.
+  $cid = array();
+  foreach ($cache_params as $key_id => $key_values) {
+    if ($plugin = views_content_cache_get_plugin($key_id)) {
+      $cid[$key_id] = $plugin->view_key($key_values);
+    }
+  }
+  if (!empty($cid) && ($timestamp = views_content_cache_update_get($cid))) {
+    $cutoff = $timestamp;
+  }
+
+  $cache_key = _os_books_get_cache_key($root);
+  if (($cache = cache_get($cache_key, 'cache_page')) && (!$cutoff || $cache->created > $cutoff)) {
+    return $cache->data;
+  }
+}
+
+function _os_books_get_cache_key($root) {
+  global $theme, $user;
+
+  static $key = null;
+  if (!is_null($key)) return $key;
+
+  $cid_parts = array();
+
+  $vsite = vsite_get_vsite();
+  $cid_parts[] = (isset($vsite->group->purl))? $vsite->group->purl:"";
+  $cid_parts[] = "os_book";
+  $cid_parts[] = "results";
+  $cid_parts[] = $theme;
+  $cid_parts[] = scholar_book_toc_location();
+  $cid_parts[] = (spaces_access_admin())?1:0; // special caching for super user.
+
+  $cid_parts[] = $root;
+
+  if (module_exists('locale')) {
+    global $language;
+    $cid_parts[] = $language->language;
+  }
+
+  return $key = implode(':', $cid_parts);
+}

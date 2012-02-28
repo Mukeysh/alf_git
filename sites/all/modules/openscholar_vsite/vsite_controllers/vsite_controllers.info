@@ -1,0 +1,6 @@
+name = VSite Controllers
+description = Spaces controllers for VSites
+package = vsite
+core = 6.x
+dependencies[] = spaces
+version = "6.x-beta14"

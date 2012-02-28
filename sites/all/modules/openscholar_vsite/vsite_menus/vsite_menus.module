@@ -1,0 +1,532 @@
+<?php
+
+/**
+ * Define the Menu Entries for the Cp Menu Management
+ */
+function vsite_menus_menu() {
+  $items = array();
+
+  $items['cp/build/menus'] = array(
+    'title' => "Menus",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_menus_settings_form'),
+    'type' => MENU_LOCAL_TASK,
+    'menu_name' => 'cp',
+    'access callback' => 'cp_access_cp',
+    'file path' => drupal_get_path('module', 'vsite_menus') . '/includes',
+    'file' => 'vsite_menus.admin.inc',
+    'weight' => 10,
+  );
+
+  $items['cp/build/menus/add/%ctools_js'] = array(
+    'title' => "New Menu Link",
+    'page callback' => 'vsite_menus_new_link_callback',
+    'page arguments' => array(4),
+    'type' => MENU_CALLBACK,
+    'menu_name' => 'cp',
+    'access callback' => 'cp_access_cp',
+    'file path' => drupal_get_path('module', 'vsite_menus') . '/includes',
+    'file' => 'vsite_menus.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implemenation of hook_theme().
+ */
+function vsite_menus_theme() {
+  return array(
+    'vsite_menus_settings' => array(
+      'path' => drupal_get_path('module', 'vsite_menus').'/theme',
+      'template' => 'vsite-menu-settings',
+      'arguments' => array('element' => array()),
+    ),
+  );
+}
+
+/**
+ * MENU LINK Modification functions
+ * these functions handle hooking into the controller from the node form
+ */
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function vsite_menus_nodeapi(&$node, $op) {
+	$vsite = vsite_get_vsite();
+	if(!$vsite && is_array($node->og_groups)){
+	  foreach ($node->og_groups as $n_gid){
+      if(($vsite = vsite_get_vsite($n_gid))) break;
+    }
+	}//Try and Load the vsite from the group in the node object
+	if(!$vsite) return;
+
+  switch ($op) {
+    case 'insert':
+    case 'update':
+      if (isset($node->vsite_menu)) {
+        $item = &$node->vsite_menu;
+        if (!empty($item['delete'])) {
+        	if(!$item['key']) break; //This does not exist in the menu
+
+        	//Delete the menu link for this node
+        	$vsite->controllers->vsite_menu->delete_menu_item($item['menu_name'],$item['key']);
+        }
+        elseif (trim($item['link_title'])) {
+        	if(strlen($item['key'])){
+        	  list($old_menu,$path) = explode(":",$item['key'],2);
+        	  if($old_menu != $item['menu_name']){
+        	  	$vsite->controllers->vsite_menu->delete_menu_item($old_menu,$item['key']);
+        	  }//Delete this link from the old menu?
+        	}
+
+        	$item['link_title'] = trim($item['link_title']);
+          $item['link_path'] = "node/$node->nid";
+          $item['options']['attributes']['title'] = trim($node->title);
+          $item['key'] = $item['menu_name'].":".$item['link_path'];
+          
+          $a_existing_menu = $vsite->controllers->vsite_menu->get( $item['menu_name'] );
+          $a_defaults = array_key_exists($item['key'],$a_existing_menu)? $a_existing_menu[$item['key']]: array('router_path' => 'node/%', 'module' => 'vsite_menu', 'weight' => 0, 'user_created' => 1);
+          $item = $item + $a_defaults;
+
+          // Add/Update the menu link
+          $vsite->controllers->vsite_menu->set( $item['menu_name'], array_merge($a_existing_menu,array($item['key'] => $item)));
+        }
+      }
+      break;
+    case 'delete':
+      $node_link = vsite_menus_get_menu_item("node/{$node->nid}",$vsite);
+    	if(count($node_link)){
+        $vsite->controllers->vsite_menu->delete_menu_item($node_link['menu_name'], $node_link['key']);
+      }
+      break;
+    case 'prepare':
+      if (empty($node->vsite_menu)) {
+      	$a_site_menus = array_keys(variable_get('scholar_site_menus',array()));
+      	$node_link = vsite_menus_get_menu_item("node/{$node->nid}",$vsite);
+
+        // Set default values.
+        $node->vsite_menu = $node_link + array('link_title' => '', 'key' => null, 'menu_name' => current($a_site_menus), 'module' => 'vsite_menu', 'weight' => 0, 'options' => array(), 'user_created' => 1);
+      }
+      break;
+  }
+}
+
+/**
+ * hook preprocess page
+ */
+function vsite_menus_preprocess_page(&$vars){
+  // Suggest the page title be the same as the title of the
+  // active menu item (which can be changed by vsite users)
+  $item = menu_get_item();
+  if ($vsite_item = vsite_menus_get_menu_item($item['path'])){
+    if($vsite_item['link_title']){
+      $vars['title'] = $vsite_item['link_title'];
+    }
+  }
+}
+
+/**
+ * Return the vsite_menus menu item given a path
+ * @param string $path
+ */
+function vsite_menus_get_menu_item($path, $vsite = false, $include_hidden = false){
+	if(!$vsite && !($vsite = vsite_get_vsite())) return array();
+
+	$a_site_menus = array_keys(variable_get('scholar_site_menus',array()));
+	$a_site_menu_links = $vsite->controllers->vsite_menu->get_multiple( $a_site_menus );
+
+	$a_menu_link = array();
+  foreach ($a_site_menu_links as $key => $link) {
+    if($link['link_path'] == $path && (!$link['hidden'] || $include_hidden)){
+    	if(!$link['key']) $link['key'] = $key;
+      $a_menu_link = $link;
+      break;
+    }
+  }
+
+  return $a_menu_link;
+}
+
+/**
+ * Return the vsite_menus menu item(s) given a feature
+ * @param string $path
+ */
+function vsite_menus_get_feature_menu_item($s_feature, $vsite = false){
+  if(!$vsite && !($vsite = vsite_get_vsite())) return array();
+
+  $link_map = features_get_component_map('menu_links');
+
+  $a_return = array();
+  foreach ($link_map as $s_key => $a_features){
+  	if(!in_array($s_feature,$a_features)) continue;
+
+  	list($s_def_menu, $s_path) = explode(':',$s_key,2);
+  	if($a_menu = vsite_menus_get_menu_item($s_path,$vsite)){
+  		$a_return[] = $a_menu;
+  	}
+  }
+
+  return $a_return;
+}
+
+/**
+ * Change the options for the node save form so that only the active vsite menus are displayed
+ *
+ * @param $form array
+ * @param $form_state array
+ * @param $form_id string
+ * /
+ */
+function vsite_menus_form_alter(&$form, $form_state, $form_id) {
+  //Are we on a node form?
+  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id) {
+
+  	$vsite = vsite_get_vsite();
+  	//If we are not in a site or this is not a og content type do not continue
+  	vsite_include('vsiteapi');
+    if (!$vsite || !array_key_exists($form['type']['#value'], vsite_content_types(array(0, 1, 2)))) return;
+
+    /**
+     * Menu Form Settings
+     */
+  	unset($form['menu']); //Remove default menu handler
+
+  	$form['vsite_menu'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Menu settings'),
+      '#access' => ($vsite->access_admin() || user_access('administer menu')),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#tree' => TRUE,
+      '#weight' => -2,
+      '#attributes' => array('class' => 'menu-item-form'),
+  	  '#description' => "Add a link to this post in one of your site's menus.  Specify a menu for the new link and then enter the link's title in the field that appears.",
+    );
+    $item = $form['#node']->vsite_menu;
+
+    if ($item['key'] && $item['user_created']) {
+      // There is an existing link.
+      $form['vsite_menu']['delete'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Delete this menu item.'),
+      );
+    }
+
+    $form['vsite_menu']['#item'] = $item;
+    // Generate a list of possible menus
+    $options = variable_get('scholar_site_menus', array());
+
+    $default = ($item['menu_name'] && !empty($item['link_title']))?$item['menu_name']:'none';
+    $form['vsite_menu']['menu_name'] = array(
+      '#type' => 'radios',
+      '#title' => t('Choose a Menu'),
+      '#default_value' => $default,
+      '#options' => $options + array('none' => 'Not in a Menu'),
+      '#description' => t("Select the menu where you would like this link to appear. Some menu's may not show on your page if they are not included in your ".l("Page Layout",'cp/build/layout',array('attributes' => array('target' => '_blank')))."."),
+      '#attributes' => array('class' => 'menu-title-select'),
+    );
+
+    $form['vsite_menu']['link_title'] = array('#type' => 'textfield',
+      '#title' => t('Link Title'),
+      '#default_value' => $item['link_title'],
+      '#description' => t("The exact wording of how you would like the link to appear in your menu. Leave blank if you do not wish to add this post to any menu."),
+      '#required' => FALSE,
+      '#process' => array('ctools_dependent_process'),
+      '#dependency' => array('radio:vsite_menu[menu_name]' => array_keys($options)),
+      '#element_validate' => array('vsite_menus_link_title_validate'),
+    );
+
+    $form['vsite_menu']['weight'] = array(
+      '#type' => 'value',
+      '#value' => ($item['weight'])?$item['weight']:50,
+    );
+
+    $form['vsite_menu']['key'] = array(
+      '#type' => 'value',
+      '#value' => ($item['key'])?$item['key']:null,
+    );
+
+
+   /**
+    * Path Form Settings
+    */
+
+    //Alter the path settings to include the purl
+    if (module_exists('path')) {
+      $form['path']['#access'] = ($vsite->access_admin() || user_access('administer menu'));
+
+      if (module_exists('pathauto')) {
+        //BELOW HERE -- Create PathAuto Form Modifications
+        $node = $form['#node'];
+
+        // See if there is a pathauto pattern or default applicable
+        if (isset($form['language'])) {
+          $language = isset($form['language']['#value']) ? $form['language']['#value'] : $form['language']['#default_value'];
+          $pattern = trim(variable_get('pathauto_node_'. $form['type']['#value'] .'_'. $language .'_pattern', false));
+        }
+
+        if(!$pattern) $pattern = trim(variable_get('pathauto_node_'. $form['type']['#value'] .'_pattern', variable_get('pathauto_node_pattern', '')));
+
+        // If there is a pattern AND the user is allowed to create aliases AND the path textbox is present on this form
+        if (!empty($pattern) &&isset($form['path']['path']) && ($vsite->access_admin() || user_access('administer menu'))) {
+
+            $output = t('An alias will be generated for you. If you wish to create your own, untick this option.');
+
+            drupal_add_js(drupal_get_path('module', 'pathauto') .'/pathauto.js');
+            $form['path']['#collapsed'] = FALSE;
+
+            $form['path']['pathauto_perform_alias'] = array(
+              '#type' => 'checkbox',
+              '#title' => t('Automatic alias'),
+              '#default_value' => isset($node->pathauto_perform_alias) ? $node->pathauto_perform_alias : TRUE,
+              '#description' => $output,
+              '#weight' => -1,
+            );
+
+            if (!empty($node->pathauto_perform_alias) && !empty($node->old_alias) && $node->path == '') {
+              $form['path']['path']['#default_value'] = $node->old_alias;
+              $node->path = $node->old_alias;
+            }
+
+            //For Pathauto to remember the old alias and prevent the Path-module from deleteing it when Pathauto wants to preserve it
+            if (isset($node->path)) {
+              $form['path']['old_alias'] = array('#type' => 'value', '#value' => $node->path);
+            }
+
+            if ($vsite && strpos($form['path']['path']['#default_value'], $vsite->group->purl . '/') === 0) {
+              $form['path']['path']['#default_value'] = substr($form['path']['path']['#default_value'], strlen($vsite->group->purl . '/'));
+            }
+          }
+        }
+      }
+  }
+
+}
+
+function vsite_menus_link_title_validate($element, &$form_state) {
+  if ($form_state['values']['vsite_menu']['menu_name'] != 'none' && empty($form_state['values']['vsite_menu']['link_title'])) {
+    form_set_error('link_title', 'A link in a menu needs a title! Set the title or set the menu to Not in a Menu.');
+  }
+}
+
+
+/**
+ * Menu Rendering Functions
+ *
+ * Retrieve the data from the controller and display it to the user
+ */
+
+/**
+ * Iplementation of hook block
+ *
+ * @param string $op
+ * @param int $delta
+ * @param array $edit
+ */
+function vsite_menus_block($op = 'list', $delta = 0, $edit = array()) {
+  if (!user_access('access content')) return;
+
+  $site_menus = variable_get('scholar_site_menus',array());
+  $blocks = array();
+  if ($op == 'list') {
+  	foreach ($site_menus as $n_key => $menu_name) {
+  		$blocks[$n_key] = array('info' => t($menu_name));
+  	}
+    return $blocks;
+  }
+  elseif ($op == 'view') {
+  	if(is_numeric($delta)){
+  	  $menu_keys = array_keys($site_menus);
+  	  if(isset($menu_keys[$delta])) $delta = $menu_keys[$delta];
+  	}//Accept both the old indexes and the menu names
+  	
+    if(isset($site_menus[$delta])) {
+      $block['subject'] = t(''); // intentionally left empty for now.
+      $block['content'] = vsite_menus_get_menu_tree( $delta );
+      return $block ;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_vsite_widgets
+ * @return array
+ */
+function vsite_menus_vsite_widgets() {
+
+  return array(
+    'vsite_menus-features' => array(
+      'module' => 'vsite_menus',
+      'delta' => 'features',
+      'weight' => 20,
+      'region' => 'navbar',
+      'label' => 'Main menu',
+    ),
+    'vsite_menus-scholar_secondary_menu' => array(
+      'module' => 'vsite_menus',
+      'delta' => 'scholar_secondary_menu',
+      'weight' => 20,
+      'region' => 'left',
+      'label' => 'Secondary menu',
+    ),
+  );
+}
+
+/**
+ * Return the menu tree object for a scholar site, adapted for the current page
+ *
+ * @param string $s_menu
+ */
+function vsite_menus_get_menu_tree($s_menu){
+  $space = vsite_get_vsite();
+  if(!$space) return menu_tree($s_menu);
+
+  static $menu_output = array();
+
+  if (!isset($menu_output[$s_menu])) {
+  	
+  	if(!($menu_links = vsite_menus_get_menu_cache($s_menu))){
+  	
+	    //Get Menu for this site
+	    $menu_links = $space->controllers->vsite_menu->get($s_menu);
+	
+	    //Tmp MLID used for array keys when using menu's node access functions
+	    $n_tmp_mlid = 1;
+	
+	    //Apply tmp mlid and menu_router information to links
+	    foreach ($menu_links as $key => $ml){
+	    	$ml['options'] = (isset($ml['options']))?serialize($ml['options']):serialize(array());
+	
+	    	if (menu_path_is_external($ml['link_path']) || !is_array($router_info = menu_get_item($ml['link_path']))) {
+	        // Custom/External Links will not have an entry in the router table
+	    		$router_info = array();
+	      }
+	      
+	      //Let users configure thier own title (if they have one set run it through translate)
+	      if(isset($ml['link_title'])) $ml['title_callback'] = 't';
+	
+	      $menu_links[$key] = array('link' => array_merge($router_info,$ml,array('mlid' => $n_tmp_mlid++)), 'below' => false);
+	    }
+	
+	    //Gather Node access info
+	    $node_links = array();
+	    menu_tree_collect_node_links($menu_links,$node_links);
+	
+	    //Check Node and menu access
+	    menu_tree_check_access($menu_links, $node_links);
+	    
+	    $cache_key = vsite_menu_get_cache_key($s_menu);
+      cache_set($cache_key, $menu_links, 'cache_block', time() + 86400);
+  	}
+
+    //Render the Menu
+    $menu_output[$s_menu] = menu_tree_output($menu_links);
+  }
+  return $menu_output[$s_menu];
+
+}
+
+/**
+ * Handles the caching for the main publications page which is not a view
+ */
+function vsite_menus_get_menu_cache($s_menu){
+  if(!module_exists('views_content_cache')) return;
+
+  $cutoff = 0;
+  $cache_params = array(
+    'os_og' => array('current' => 'current'),
+  );
+
+  // Retrieve the latest update time matching the settings on this View.
+  $cid = array();
+  foreach ($cache_params as $key_id => $key_values) {
+    if ($plugin = views_content_cache_get_plugin($key_id)) {
+      $cid[$key_id] = $plugin->view_key($key_values);
+    }
+  }
+  if (!empty($cid) && ($timestamp = views_content_cache_update_get($cid))) {
+    $cutoff = $timestamp;
+  }
+
+  // enforce a maximum lifetime
+  if ($n_max = variable_get('vsite_menu_cache_max_lifespan',3600)) {
+    if ($n_max != -1) {
+      $max_lifespan = time() - $n_max;
+      $cutoff = max($max_lifespan, $cutoff);
+    }
+  }
+  
+  $cache_key = vsite_menu_get_cache_key($s_menu);
+  if (($cache = cache_get($cache_key, 'cache_block')) && (!$cutoff || $cache->created > $cutoff)) {
+    return $cache->data;
+  }
+
+  return false;
+}
+
+/**
+ * Returns the cache key for the menu
+ */
+function vsite_menu_get_cache_key($s_menu){
+  if($_SERVER['REQUEST_METHOD'] != 'GET') return false;
+
+  global $theme, $user;
+
+  $cid_parts = array();
+
+  $vsite = vsite_get_vsite();
+  $cid_parts[] = (isset($vsite->group->purl))? $vsite->group->purl:"";
+  $cid_parts[] = "vsite_menu";
+  $cid_parts[] = "results";
+  $cid_parts[] = $theme;
+  $cid_parts[] = ($user->uid == 1)?1:0; // special caching for super user.
+  $cid_parts[] = ($vsite->access_admin())?1:0; //Admins can see private menu items cache thier menu seperatly
+
+  $cid_parts[] = $s_menu;
+
+  if (module_exists('locale')) {
+    global $language;
+    $cid_parts[] = $language->language;
+  }
+
+  return implode(':', $cid_parts);
+}
+
+/**
+ * Controller Plugin Hooks
+ */
+
+/**
+ * Implementation of hook_spaces_registry().
+ */
+function vsite_menus_spaces_registry() {
+  return array(
+    'controllers' => array(
+      'vsite_menu' => array(
+        'title' => t('Vsite Menu'),
+        'plugin' => 'spaces_controller_vsite_menu',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_spaces_plugins().
+ */
+function vsite_menus_spaces_plugins() {
+  $plugins = array();
+
+  //define the vsite controller for vsite_menu
+  $plugins['spaces_controller_vsite_menu'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'vsite_menus') .'/plugins',
+      'file' => 'spaces_controller_vsite_menu.inc',
+      'class' => 'spaces_controller_vsite_menu',
+      'parent' => 'spaces_controller',
+    ),
+  );
+  return $plugins;
+}
+

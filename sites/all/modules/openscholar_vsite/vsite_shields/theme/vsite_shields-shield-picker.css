@@ -1,0 +1,27 @@
+.shield_wrapper {
+ position: relative;
+}
+
+.shield_wrapper fieldset {
+  border: none;
+  }
+
+.shield-picker li {
+  float: left;
+  width: 63px;
+  padding: 20px;
+  height: 75px;
+  border: 1px solid #ccc;
+  margin: 2px;
+  cursor: pointer;
+  }
+
+.shield-picker img {
+  max-width:100%;
+  }
+
+.shield-picker li.checked {
+  border-color: green;
+  border-width: 3px;
+  padding:18px;
+  }

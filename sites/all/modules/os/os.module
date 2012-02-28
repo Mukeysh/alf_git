@@ -1,0 +1,202 @@
+<?php
+
+include_once('os.features.inc');
+
+/**
+ * Includes different inc files
+ */
+function os_include($inc_files){
+  $inc_files = is_array($inc_files) ? $inc_files : array(
+    $inc_files
+  );
+
+  $path = dirname(__FILE__);
+
+  foreach ( $inc_files as $inc ) {
+    if (file_exists("$path/includes/$inc.inc")) {
+      include_once "$path/includes/$inc.inc";
+    }
+  }
+}
+
+function os_theme() {
+  $items = array();
+  $items['ctools_dropdown_content'] = array(
+    'arguments' => array(
+      'title' => NULL,
+      'content' => NULL,
+      'image' => NULL,
+      'class' => NULL,
+    ),
+    'path' => drupal_get_path('module', 'os').'/includes/',
+    'file' => 'os.theme.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function os_user($op, &$edit, &$account, $category = NULL){
+  switch ($op) {
+    case 'login' :
+      os_set_login_destination($account);
+    break;
+    case 'logout':
+      // If we don't have a destination, send them to the home of the site they were visiting
+      // The only time there should be no destination is if they're in the CP
+      if (!$_REQUEST['destination']) {
+        if ($vsite = vsite_get_vsite()) {
+          $_REQUEST['destination'] = $vsite -> get_absolute_url();
+        }
+        else {
+          $_REQUEST['destination'] = '<front>';
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_menu_alter
+ *
+ * @param array $items
+ */
+function os_menu_alter(&$items){
+	$items['user']['page callback'] = 'os_user_page';
+}
+
+/**
+ * Checks if the users should have access to /user or if they should be redirected to thier home page bacause of a stale login link
+ */
+function os_user_page(){
+	global $user;
+
+	if ($user->uid) {
+		//Set Destination or redirect
+		os_set_login_destination($user);
+
+		if($_REQUEST['destination'] && $_REQUEST['destination'] != 'user') drupal_goto();
+	}//Are they logged in?
+
+	return user_page();
+}
+
+/**
+ * Set the login destiation for "/user" and when submitting the login form
+ * @param $user
+ */
+function os_set_login_destination($account){
+
+  //If the destination has not been set then try and send them to thier site or a list of thier sites
+  //Or if the destination was set to the global site frontpage, do the same
+  if (strlen($_REQUEST['destination']) && $_REQUEST['destination'] != variable_get('site_frontpage','welcome'))
+       return;
+
+  // if is logging in for the first time or need to reset password
+  if (($account->login == 0) || (arg(0) == 'user' && arg(1) == 'reset')) {
+    //direct user to account edit page to change password
+    $_REQUEST['destination'] = "user/{$account->uid}/edit";
+  }
+}
+
+/**
+ * Submit our custom arranged flags
+ * @param $form_id string
+ * @param $form_values array
+ */
+function os_nodeapi(&$node, $op, $teaser = NULL, $page = NULL){
+  switch ($op) {
+    case 'presave' :
+      //Add default values for group type "vsite"
+      if($node->type && $node->type == variable_get('scholar_content_type', 'vsite')){
+        if(!isset($node->theme)){
+        	
+        	if(isset($node->spaces_preset_og)){
+        		$preset = spaces_preset_load($node->spaces_preset_og, $node->type);
+        		if(is_object($preset) && isset($preset->value['variable']['vsite_design_maintheme'])){
+        			$node->theme = $node->og_theme = $preset->value['variable']['vsite_design_maintheme'];
+        		}
+        	}//Load preset values manually since we may not be in the space
+        	
+        	if(!isset($node->theme)){
+        	  $node->theme = $node->og_theme = variable_get('vsite_design_maintheme','scholar_airstream'); //Set defaults, if created through node/add
+        	}
+        	
+        }
+      }//set any defaults that need setting for group types
+    break;
+  }
+}
+
+/**
+ * Add dynamic strongarm variable defaults
+ */
+function os_strongarm_alter(&$vars){
+
+  $a_new_settings = array();
+  $node_types = node_get_types();
+  foreach ( $node_types as $type ) {
+
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = 'node_options_'. $type -> type;
+    $strongarm->value = array('status');
+    $strongarm->export_module = "vsite";
+    $a_new_settings['node_options_'. $type -> type] = $strongarm;
+
+    // itweak
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = "itweak_upload_node_display_" . $type->type;
+    $strongarm->value = '3';
+    $strongarm->export_module = "vsite";
+    $a_new_settings["itweak_upload_node_display_" . $type->type] = $strongarm;
+
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = "itweak_upload_teaser_display_" . $type->type;
+    $strongarm->value = '3';
+    $strongarm->export_module = "vsite";
+    $a_new_settings["itweak_upload_teaser_display_" . $type->type] = $strongarm;
+
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = "itweak_upload_teaser_images_" . $type->type;
+    $strongarm->value = '8';
+    $strongarm->export_module = "vsite";
+    $a_new_settings["itweak_upload_teaser_images_" . $type->type] = $strongarm;
+
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = "itweak_upload_thumbnail_link_node_" . $type->type;
+    $strongarm->value = 'shadowboxgrouped';
+    $strongarm->export_module = "vsite";
+    $a_new_settings["itweak_upload_thumbnail_link_node_" . $type->type] = $strongarm;
+
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = "itweak_upload_thumbnail_link_teaser_" . $type->type;
+    $strongarm->value = 'shadowboxgrouped';
+    $strongarm->export_module = "vsite";
+    $a_new_settings["itweak_upload_thumbnail_link_teaser_" . $type->type] = $strongarm;
+
+    $strongarm = new stdClass;
+    $strongarm->disabled = FALSE; /* Edit this to true to make a default strongarm disabled initially */
+    $strongarm->api_version = 1;
+    $strongarm->name = "itweak_upload_upload_preview_" . $type->type;
+    $strongarm->value = 1;
+    $strongarm->export_module = "vsite";
+    $a_new_settings["itweak_upload_upload_preview_" . $type->type] = $strongarm;
+  }
+
+  $vars = array_merge($a_new_settings,$vars); //Existing values take precedence
+}
+

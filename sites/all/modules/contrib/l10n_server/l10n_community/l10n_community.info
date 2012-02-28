@@ -1,0 +1,14 @@
+name = Localization community UI
+description = Community interface for string translation
+dependencies[] = jquery_update
+dependencies[] = l10n_server
+package = "Localization server"
+core = 6.x
+php = 5
+
+; Information added by drupal.org packaging script on 2011-07-04
+version = "6.x-3.0-beta1"
+core = "6.x"
+project = "l10n_server"
+datestamp = "1309782419"
+

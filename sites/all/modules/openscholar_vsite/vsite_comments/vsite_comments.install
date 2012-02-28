@@ -1,0 +1,144 @@
+<?php
+
+//$Id
+
+
+function vsite_comments_install(){
+  
+  // Weight scholar to be after spaces_og
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'better_formats'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'vsite_comments'", ($weight + 1));
+  
+  $ret = array();
+  os_include('os.crud');
+  
+  // add the format filter ...
+  $format_id = os_add_format('Comments HTML', $cache = 1);
+  
+  // roles are probably not yet in the system 
+  // i.e. install profile installs this module before
+  // creating extra roles
+  $roles = array(1,2,3,4);
+  // and assing these roles to the format 
+  os_format_set_roles($roles, $format_id);
+  
+  _vsite_comments_wysiwyg_config($format_id);
+  
+  _vsite_comments_filters_config($format_id);
+  
+  // set the default format for comments 
+  
+  $roles = array(1,2,3,4);
+  
+  foreach ( $roles as $rid ) {
+    $sql = "SELECT COUNT(*) FROM {better_formats_defaults} WHERE rid=%d AND type='comment'";
+    $total = db_result(db_query($sql, $rid)); 
+    if(!$total){
+      $sql2   = "INSERT INTO {better_formats_defaults} VALUES (%d, '%s', %d, %d, %d)";
+      db_query($sql2, $rid, 'comment', $format_id, 1, 0);
+      //drupal_write_record('better_formats_defaults', $values);
+    }
+    else{
+      $sql2   = "UPDATE {better_formats_defaults} SET format=%d WHERE rid=%d AND type='comment'";
+      db_query($sql2, $format_id, $rid);
+    }
+  }
+  
+  
+  return $ret;
+}
+
+function _vsite_comments_filters_config($format_id){
+  $filters = array();
+  $filters[] = array(
+    'format' => $format_id,
+    'module' => 'filter',
+    'delta' => 2,
+    'weight' => 0,
+  );
+  
+  $filters[] = array(
+    'format' => $format_id,
+    'module' => 'filter',
+    'delta' => 0,
+    'weight' => 1,
+  );
+  
+  $filters[] = array(
+    'format' => $format_id,
+    'module' => 'filter',
+    'delta' => 1,
+    'weight' => 2,
+  );
+  
+  $filters[] = array(
+    'format' => $format_id,
+    'module' => 'filter',
+    'delta' => 3,
+    'weight' => 10,
+  );
+  
+  foreach($filters as $filter){
+    drupal_write_record('filters', $filter);
+  }
+}
+
+/**
+ * wysiwyg configurations
+ */
+function _vsite_comments_wysiwyg_config($format_id){
+  $wysiwyg_presets = _vsite_comments_wysiwyg_presets();
+  foreach ( $wysiwyg_presets as $filter_name => $settings ) {
+    $settings = serialize($settings);
+
+    $query = "INSERT INTO {wysiwyg} (format, editor, settings) VALUES ('%d', '%s', '%s')";
+    db_query($query, $format_id, 'tinymce', $settings);
+  }
+}
+
+function _vsite_comments_wysiwyg_presets(){
+  $settings = array();
+  $settings['Comments HTML'] = array(
+    "default" => 1, 
+    "user_choose" => 0, 
+    "show_toggle" => 1, 
+    "theme" => "advanced", 
+    "language" => "en", 
+    "buttons" => array(
+      "default" => array(
+        "bold" => 1, 
+        "italic" => 1, 
+        "bullist" => 1, 
+        "link" => 1, 
+        "code" => 1, 
+        "cut" => 1, 
+        "copy" => 1 
+      ), 
+      
+      "paste" => array(
+        "pastetext" => 1 
+      ), 
+      
+      "xhtmlxtras" => array(
+        "cite" => 1 
+      ) 
+    ), 
+    
+    "toolbar_loc" => "top", 
+    "toolbar_align" => "left", 
+    "path_loc" => "bottom", 
+    "resizing" => 1, 
+    "verify_html" => 1, 
+    "preformatted" => 0, 
+    "convert_fonts_to_spans" => 1, 
+    "remove_linebreaks" => 1, 
+    "apply_source_formatting" => 0, 
+    "paste_auto_cleanup_on_paste" => 0, 
+    "block_formats" => "p,address,pre,h2,h3,h4,h5,h6,div", 
+    "css_setting" => "theme", 
+    "css_path" => "", 
+    "css_classes" => "" 
+  );
+  
+  return $settings;
+}

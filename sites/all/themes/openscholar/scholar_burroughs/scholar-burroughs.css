@@ -1,0 +1,98 @@
+@import url('http://fonts.googleapis.com/css?family=Inconsolata');
+
+html {
+    min-width: 1000px;
+    }
+
+body {
+    background: url('images/body-bg.jpg') repeat-y center top #fff;
+    color:#282828;
+    font:15px/22px 'Inconsolata', arial, serif;
+    }
+
+body.cp-toolbar-full {
+  background-position: 50% 42px;
+  }
+
+#page {
+  min-height: 1536px;
+  padding-top:150px;
+  background: url('images/top.jpg') no-repeat center top transparent;
+  }
+
+.wrap {
+  width:870px;
+  margin:0 auto;
+  }
+
+a, a:visited {
+    color:#cc3300;
+    text-decoration: none;
+    font-weight: bold;
+    }
+
+a:hover {
+    text-decoration: underline;
+    }
+
+#header,
+#sidebar-second,
+#sidebar-first {
+    font-weight: bold;
+    }
+
+h2, h3, h4 {
+  margin-bottom: 0;
+  margin-top: 1em;
+  }
+
+h2.title {
+  margin-top: 0;
+  margin-bottom: 1em;
+  }
+
+/* LAYOUT ELEMENTS */
+
+
+#footer {
+    text-align: center;
+    font-size: .9em;
+    }
+
+/* HEADER ELEMENTS */
+
+#header {
+  padding-bottom: 15px;
+  }
+
+#navbar .wrap {
+  border: 1px solid #ccc;
+  border-left: none;
+  border-right: none;
+  padding: 10px;
+  }
+
+#navbar li {
+  margin-right: 15px;
+  }
+
+#header h1 {
+  font-size: 30px
+  font-weight: bold;
+  }
+
+#header h2,
+#header p {
+  font-size: 16px;
+  line-height: 18px;
+  }
+
+#header h1 a,
+#header h1 a:visited {
+    color:#282828;
+    }
+
+#header h1 a:hover {
+    color:#282828;
+    text-decoration: none;
+    }

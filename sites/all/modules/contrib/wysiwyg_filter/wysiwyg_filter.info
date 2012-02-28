@@ -1,0 +1,4 @@
+name = WYSIWYG Filter
+description = Provides an input filter that allows site administrators configure which HTML elements, attributes and style properties are allowed.
+package = Input filters
+core = 6.x

@@ -1,0 +1,196 @@
+<?php
+
+include_once('scholar_front.features.inc');
+
+function scholar_front_menu(){
+  $items = array();
+
+  //Backwards Compatiblility (redirects Home)
+  $items['home'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => '',
+    'page callback' => 'scholar_front_home',
+    'file' => 'scholar_front.pages.inc',
+    'access arguments' => array('access content'),
+    'weight' => 0,
+  );
+
+  $items['features/scholar_front'] = array(
+    'title' => 'Front Page Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('scholar_front_settings'),
+    'access callback' => module_exists('spaces') ? 'spaces_access_admin' : 'user_access',
+    'access arguments' => module_exists('spaces') ? array() : array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'scholar_front.pages.inc',
+  );
+
+  return $items;
+}
+
+function scholar_front_init() {
+  if ($_GET['q'] == variable_get('site_frontpage', 'welcome') && $_GET['q'] == variable_get('scholar_front_frontpage_path', 'welcome')) {
+    // this is likely to be an alias.
+    if ($real_path = drupal_lookup_path('source', $_GET['q'])) {
+      $_GET['q'] = $real_path;
+      drupal_init_path();
+    }
+    else {
+      // unset front page context
+    }
+  }
+}
+
+/**
+ * Implementation of hook flag_alter
+ */
+function scholar_front_flag_alter(&$flag){
+  if (!($viste = vsite_get_vsite()) || $flag -> name !== 'scholar_frontpage'){
+    return;
+  }
+  vsite_include('vsiteapi');
+
+  $types = vsite_content_types();
+
+  if (count($types)){
+    $flag -> types = array_keys($types);
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function scholar_front_nodeapi(&$node, $op, $a3, $a4){
+  switch($op){
+    case 'presave':
+    	$vsite = vsite_get_vsite();
+      if(!$vsite) return;
+
+      // set new property in node object indicating to set as front page
+      if ((isset($_GET['action']) && ($_GET['action'] === 'setfront')) ||
+          ($node->uid == $vsite->group->uid && $node->type == "bio" && variable_get('site_frontpage',false) == "scholar_front_welcome")){
+          $node -> front  = 1;
+      }
+      break;
+
+    case 'insert':
+      if ($node -> front == 1){
+      	$vsite = vsite_get_vsite();
+      	if(!$vsite) return;
+
+      	$vsite->controllers->variable->set('site_frontpage','node/'.$node->nid);
+        $link =  l('Control Panel Settings.','cp/build/features',array("query" => array("open_feature_settings" => "scholar_front")) );
+        $msg_variables = array (
+        '@type' => node_get_types('name', $node),
+        '%title' => $node -> title,
+        '!link' => $link,
+        );
+
+        //redirect the user to thier home page with message
+        drupal_set_message(t('@type <em>%title</em> has been created. You have selected this post to be your site\'s front page. To change your front page content, go the !link', $msg_variables));
+        $_REQUEST['destination'] = "<front>";
+      }
+      break;
+  }
+}
+
+/**
+ * hook preprocess page
+ */
+function scholar_front_preprocess_page(&$vars){
+	if(!variable_get('scholar_front_show_title',true) && drupal_is_front_page()){
+	  $vars['title'] = "";
+	}
+	if (drupal_is_front_page() && $new_title = variable_get('scholar_front_site_title', '')) {
+	  $vsite = vsite_get_vsite();
+	  drupal_set_title($vsite->group->title);
+	  $vsite->group->title = $new_title;
+	}
+}
+
+/**
+ * Implementation of hook_context_page_condition().
+ *
+ * Last chance to make changes before the reactions start
+ */
+function scholar_front_context_page_condition() {
+
+	$active_contexts = context_active_contexts();
+	$b_found_feature = context_isset('context','openscholar-feature-front');
+	foreach ($active_contexts as $key => $context){
+		if(strpos($key,"openscholar-feature-") !== 0 || $key == 'openscholar-feature-front') continue;
+		if($b_found_feature){
+			unset($active_contexts[$key]);//Allow only one feature active
+		}
+		$b_found_feature = true;
+	}
+
+	context_set('context',$active_contexts);
+}
+
+/**
+ * Add the JS needed by our feature popup
+ */
+function scholar_front_form_alter(&$form, $form_state, $form_id) {
+  switch($form_id){
+    case 'spaces_features_form':
+    	//These are needed for the modal popup
+      ctools_add_js('dropdown');
+      ctools_add_css('dropdown');
+      ctools_add_js('dependent');
+      drupal_add_js("misc/autocomplete.js");
+
+		  /*
+		   * remove home page settings and make them part of the front page features settings
+		   */
+      unset($form['site_frontpage']); // we dont need settings here
+      unset($form['site_frontpage_path']); //Remove reset to defaults button
+
+      /*
+       * Do not allow users to disable front feature
+       */
+      $form['spaces_features']['scholar_front']["#disabled"] = true;
+    break;
+  }
+}
+
+/**
+ * Add the context links for the front page
+ */
+function scholar_front_context_links_alter(&$links){
+  $front_context = context_get('context', 'openscholar-feature-front');
+  if ($front_context) {
+  	vsite_include('vsiteapi');
+    $items = vsite_create_links();
+
+    //Add all links if we are on the front page
+    $links = array_merge($items, $links);
+  }
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function scholar_front_block($op = 'list', $delta = false, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array('get_started' => array('info' => t('Get Started - A block to help site admins setup thier site.')));
+    case 'view':
+      $function = "scholar_front_block_{$delta}";
+      if (function_exists($function)) {
+        return $function();
+      }
+  }
+}
+
+/**
+ * Admin block to help users get started creating thier site
+ */
+function scholar_front_block_get_started(){
+
+  $vsite = vsite_get_vsite();
+  if(!$vsite || !$vsite->access_admin()) return "";
+
+  module_load_include('inc', 'scholar_front', 'scholar_front.pages');
+  return array('content' => _scholar_front_admin_frontpage());
+}

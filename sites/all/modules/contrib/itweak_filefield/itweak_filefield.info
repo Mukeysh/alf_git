@@ -1,0 +1,10 @@
+name = iTweak for filefield
+description = Tweak file upload form.
+package = Site Tweaks
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-11-27
+version = "6.x-1.0-beta1"
+core = "6.x"
+datestamp = "1290836759"
+

@@ -1,0 +1,15 @@
+name        = Eloquent
+description = A dark elegant and simple theme with serif fonts.
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+
+;------ styles ------
+stylesheets[all][]   = scholar-eloquent.css
+conditional-stylesheets[if lte IE 7][all][] = scholar-eloquent-ie.css
+
+;------ openscholar settings------
+plugins[vsite_design][flavor] = flavors
+flavor_name = "Moss"
+os[theme_type]   = "vsite"
+os[theme_access] = "public"

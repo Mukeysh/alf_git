@@ -1,0 +1,352 @@
+<?php
+include_once('iqss_openscholar_front.features.inc');
+
+/**
+ * hook strongarm
+ */
+function iqss_openscholar_front_init(){
+  global $conf;
+
+  // Site mission; to be displayed in the front page
+  $scholar_mission = '<p><strong>Scholars at Harvard</strong> is a free web site building tool available to faculty, graduate students and visiting scholars at Harvard. It is one of two main Harvard installations of <strong>OpenScholar</strong> and a creation of Harvard’s <em>Institute for Quantitative Social Science.</em></p><p><strong>Scholars at Harvard</strong> (and the project-oriented <strong>Projects at Harvard</strong>) provide simple web site creation and management with a suite of features tailored to the particular needs of academics.</p>';
+
+  $project_mission = '<p><strong>Projects at Harvard</strong> is a free web site building tool available to groups at Harvard wishing to create a site for their project. It is one of two main Harvard installations of <strong>OpenScholar</strong> and a creation of Harvard’s <em>Institute for Quantitative Social Science.</em></p><p><strong>Projects at Harvard</strong> (and the personal site-oriented <strong>Scholars at Harvard</strong>) provide simple web site creation and management with a suite of features tailored to the particular needs of academics.</p><p class="big-button">'. openscholar_front_getyoursitebutton() . '</p>';
+
+  $conf['site_mission'] = variable_get('openscholar_installation_mode', 'scholar') == 'scholar' ? $scholar_mission : $project_mission;
+}
+
+
+/**
+ * Implementation of hook_menu_alter
+ * We need to do some stuff immediately after
+ * the installation if finished; Alter the 'node' callback
+ */
+function iqss_openscholar_front_menu_alter(&$items){
+  $items['welcome']['page callback'] = 'iqss_openscholar_front_homepage';
+}
+
+/**
+ * Callback for 'welcome' menu entry
+ */
+function iqss_openscholar_front_homepage(){
+  $s_content = theme('iqss_openscholar_front_content');
+  return $s_content;
+}
+
+/**
+ * Implementation of hook_theme
+ */
+function iqss_openscholar_front_theme(){
+
+  // load a different template file depending on the installation mode
+  $install_mode = variable_get('openscholar_installation_mode', 'scholar');
+
+  $items["iqss_openscholar_front_content"] = array(
+    'arguments' => array('tree' => array()),
+    'template' => "iqss-openscholar-front-${install_mode}-content",
+  );
+
+  return $items;
+}
+
+/**
+ * implementation of hook_context_default_contexts_alter
+ */
+function iqss_openscholar_front_context_load_alter(&$context){
+  // add some extra links (block) in the 'sitewide_front'
+  if ($context->name == 'openscholar-section-sitewide_front') {
+
+    $context->reactions['block']['blocks']['iqss_openscholar_front-top_links'] = array(
+      'module' => 'iqss_openscholar_front',
+      'delta' => 'top_links',
+      'weight' => 37,
+      'region' => 'header_main',
+      'status' => 0,
+      'label' => 'OpenScholar: Top links',
+      'type' => 'context_ui'
+    );
+
+	  //Remove the blocks that are moved to the content region
+	  unset($context->reactions['block']['blocks']['openscholar_front-top_links']);
+	  unset($context->reactions['block']['blocks']['openscholar_front-site_mission']);
+	  //Site Mission Statement
+	  unset($context->reactions['block']['blocks']['openscholar_front-video_info']);
+	  //Video
+
+	  $context->reactions['block']['blocks']['iqss_openscholar_front-search'] = array(
+	    'module' => 'search',
+	    'delta' => 0,
+	    'weight' => 37,
+	    'region' => 'header_right',
+	    'status' => 0,
+	    'label' => '',
+	    'type' => 'context_ui'
+	  );
+	  
+  }
+
+  if ($context->name == 'openscholar-section-sitewide' && count($context->reactions)) {
+  	if(isset($context->reactions['block']['blocks']['openscholar_front-top_links'])){
+  	  //Remove the add site block from the iqss page, it is in the tpl
+      unset($context->reactions['block']['blocks']['openscholar_front-top_links']);
+  	}
+  }
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function iqss_openscholar_front_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $info = array(
+        'top_links' => array('info' => t('OpenScholar: Top links')),
+        'stats'     => array('info' => t('OpenScholar Statistics'), 'cache'=>BLOCK_CACHE_GLOBAL),
+      );
+
+      return $info;
+    case 'view':
+
+      $function = "_iqss_openscholar_front_block_{$delta}";
+      if (function_exists($function)) {
+        return call_user_func($function);
+      }
+      break;
+      
+    case 'configure':
+      if ($delta == 'stats') {
+   			$form['iqss_openscholar_front_stats_cache_expiration'] = array(
+   				'#type' => 'textfield',
+  				'#title' => 'OpenScholar Statistics cache expiration (in seconds)',
+  				'#default_value' => variable_get('iqss_openscholar_front_stats_cache_expiration', 3600*24),
+  			);
+  			$form['iqss_openscholar_front_stats_select'] = array(
+  				'#type' => 'fieldset',
+  				'#title' => 'Choose statistics to display',
+  				'#collapsible' => TRUE,
+  				'#collapsed' => FALSE,
+  			);
+  			$stats = _iqss_openscholar_stats();
+  			$enabled = unserialize(variable_get('iqss_openscholar_front_stats_enabled', FALSE));
+  			
+  			foreach($stats as $stat => $def) {
+  				$form['iqss_openscholar_front_stats_select']['iqss_openscholar_front_stat_'.$stat] = array(
+  					'#type' => 'checkbox',
+  					'#title' => $def['description'],
+  					'#default_value' => (isset($enabled[$stat])) ? $enabled[$stat] : TRUE,      
+  				);	
+  			}
+   			return $form;
+      }
+      break;
+      
+ 		case 'save':
+ 		  if ($delta == 'stats') {
+  			variable_set('iqss_openscholar_front_stats_cache_expiration', (int)$edit['iqss_openscholar_front_stats_cache_expiration']);
+  			
+  			$enabled_stats = array();
+  			foreach(_iqss_openscholar_stats() as $stat => $def) {
+  				//variable_set('os_stats_stat_'.$stat, (bool)$edit['os_stats_stat_'.$stat]);
+  				$enabled[$stat] = (bool)$edit['iqss_openscholar_front_stat_' . $stat]; 
+  			}
+  			
+  			variable_set('iqss_openscholar_front_stats_enabled', serialize($enabled));
+  		  cache_clear_all('iqss_openscholar_front_block_stats_data', 'cache');
+ 		  }
+ 		  break;
+  }
+}
+
+/**
+ * hook preprocess page
+ */
+function iqss_openscholar_front_preprocess_page(&$vars){
+  //Add the footer copyright message for iqss sites
+  if (context_isset('context','openscholar-section-sitewide_front')) {
+    $vars['footer_message'] = t("&copy; President &amp; Fellows Harvard University. <a class='iqss-link' href='http://iq.harvard.edu'>Institute for Quantitative Social Science</a> ") . l('Contact Us','http://openscholar.harvard.edu/contact',array('attributes'=> array('class'=>'iqss-link')));
+    }
+}
+
+/**
+ * callback function for top_links block
+ */
+function _iqss_openscholar_front_block_top_links(){
+  $block = array();
+  $block['subject'] = t('');
+  $block['content'] = theme_iqss_openscholar_front_block_top_links();
+  return $block;
+}
+
+/**
+ * callback for os stats block
+ */
+function _iqss_openscholar_front_block_stats(){
+  $block = array();
+  $block['content'] = theme_iqss_openscholar_front_block_stats();
+  return $block;
+}
+
+/**
+ * Generate content of the top_links block
+ */
+function theme_iqss_openscholar_front_block_top_links(){ // @todo make it a real theme function
+  $items = array();
+
+  global $user;
+  $items[] = array(
+    'title' => $user -> uid ? 'Log out' : 'Log in',
+    'href' =>  $user -> uid ? 'logout' : 'user',
+  );
+
+  $vsites = vsite_get_vsite_by_owner($user->uid);
+  if (!scholarregister_vsite_exists_access($vsites)) {
+    if($vsites){
+	    $items[] = array(
+		    'title' => ((count($vsites) > 1) ? 'Go to your sites' : "Go to your site"),
+		    'href' => ((count($vsites) > 1) ? 'user' : "node/".$vsites[0] -> id),
+		  );
+    } //No sites ora ablility to create one
+  }else{
+  	//Create a site
+  	$items[] = array(
+	    'title' => ((count($vsites) > 1)?"Create a web site.":'Get your web site!'),
+	    'href' => 'site/register',
+	  );
+  }
+
+  $txt = 'Need a Site for a Project?';
+  $url = 'http://projects.iq.harvard.edu';
+  $mode = variable_get('openscholar_installation_mode', 'scholar');
+
+  if ($mode == 'project'){
+    $txt = 'Need a Personal Site?';
+    $url = 'http://scholar.harvard.edu';
+  }
+
+  $items[] = array(
+    'title' => $txt,
+    'href' =>  $url,
+  );
+
+  $attributes = array('id' => 'top-front');
+  return theme('links', $items, $attributes);
+}
+
+/**
+ * stats block content
+ */
+function theme_iqss_openscholar_front_block_stats() {
+  $data = array();
+	
+	//check cache
+	if ($cache = cache_get('iqss_openscholar_front_block_stats_data')) {
+	  if ($cache->expire < time()) {
+	    cache_clear_all('iqss_openscholar_front_block_stats_data', 'cache'); //clear the expired data.  still using it for this run though.
+	  }
+		$data = unserialize($cache->data);
+		
+	} else {
+  	
+  	$stats = _iqss_openscholar_stats();
+  	function _stats_weight($a, $b) {
+  	  return ($a['weight'] > $b['weight']);
+  	}
+  	uasort($stats, '_stats_weight');
+  	$enabled = unserialize(variable_get('iqss_openscholar_front_stats_enabled', FALSE));
+  	
+  	foreach($stats as $stat => $def) {
+  	  $args = (is_array($def['query_args'])) ? $def['query_args'] : array();
+  	  if (($enabled[$stat] || !isset($enabled[$stat])) && ($result = db_result(db_query($def['query'], $args)))!=FALSE) {
+  	    
+  	    // apply optional callback.  necessary for file size labels.
+  	  	if (isset($def['callback']) && function_exists($def['callback'])) {
+    			$result = $def['callback']($result);
+    		}
+    		
+    		$data[$def['title']] = $result;
+    		
+  	  }
+  	}
+  	cache_set('iqss_openscholar_front_block_stats_data', serialize($data), 'cache', time() + variable_get('iqss_openscholar_front_stats_cache_expiration', 24*3600));	
+	}
+		
+	return _theme_item_dt($data);
+}
+
+/**
+ * @function _theme_item_dt
+ * returns definition list from an associative array
+ */
+function _theme_item_dt($data) {
+  $out = '<dl>';
+  foreach ($data as $dt => $dd) {
+    $out .= '  <dt>' . $dt . ':</dt>';
+    $out .= '    <dd>' . $dd . '</dd>';
+  }
+  $out .= '</dl>';
+  
+  return $out;
+}
+
+/**
+ * listing of stat, title, description, query, [callback] for stats to display
+ */
+function _iqss_openscholar_stats() {
+  $content_type = variable_get('scholar_content_type', 'vsite');
+	return array(
+		'Publications' => array(
+			'title' => t('Publications'),
+			'description' => t('Biblio publications'),
+			'query' => 	'SELECT COUNT(nid) FROM {node} WHERE type="biblio"',
+			'weight' => 20,
+		),
+		'Vsites' => array(
+			'title' => t('Websites'),
+			'description' => t('Virtual sites in this OS installation'),
+//			'query' => 'SELECT COUNT(nid) FROM {og}',
+    //  'query' => 'SELECT COUNT(o.nid) FROM {og} o INNER JOIN {node} n ON o.nid=n.nid WHERE n.type = "vsite" OR n.type = "project" ',
+		  'query' => 'SELECT COUNT(nid) FROM {node} WHERE type = "%s" ',
+		  'query_args' => array(variable_get('scholar_content_type', 'vsite')),
+		  'weight' => 0,
+		),
+		'Nodes' => array(
+			'title' => t('Posts'),
+			'description' => t('Drupal nodes'),
+			'query' => 'SELECT COUNT(nid) FROM {node}',
+			'weight' => 10,
+		),
+		'Files' => array(
+			'title' => t('Uploaded Files'),
+			'description' => t('Files uploaded by users'),
+			'query' => 'SELECT COUNT(fid) FROM {files}',
+			'weight' => 30,
+		),
+		'Filesize' => array(
+			'title' => t('Total uploaded'),
+			'description' => t('Size of all files uploaded by users'),
+			'query' => 'SELECT SUM(filesize) FROM {files}',
+			'callback' => '_iqss_openscholar_file_units',
+		  'weight' => -10,
+			//should the callback be in a specific file so it doesn't have to load all the time?
+		),
+		'Users' => array(
+		  'title' => t('Users'),
+		  'description' => t('User accounts'),
+		  'query' => 'SELECT COUNT(uid) FROM {users}',
+			'weight' => -10,
+		),
+	);
+}
+
+/**
+ *  converts bytes to biggest unit of file types, appends abbreviation 
+ **/
+function _iqss_openscholar_file_units($fs) {
+	$units = array('b', 'kb', 'mb' ,'gb', 'tb', 'pb');
+	$c = 0;
+	while ($fs >= 1024 && $c < sizeof($units)-1)  {
+		$c++;
+		$fs = $fs/1024.0;
+	}
+	return round($fs, 1) . $units[$c];
+}

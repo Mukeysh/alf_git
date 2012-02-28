@@ -1,0 +1,24 @@
+.form-item {
+  margin: 1em 0;
+  }
+
+#edit-settings-front-bio-title-wrapper {
+  margin: 3px 0 0 0;
+  }
+
+.form-radios {
+  height: 1.5em;
+  }
+
+.form-radios .form-item {
+  float: left;
+  margin-right: 20px;
+ }
+
+#edit-settings-front-node-options-wrapper {
+  clear:both;
+  }
+
+.form-radios .form-item label.option {
+  font-weight: bold;
+  }

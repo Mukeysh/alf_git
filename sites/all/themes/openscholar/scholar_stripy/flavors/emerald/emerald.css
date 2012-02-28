@@ -1,0 +1,17 @@
+/* Emerald version*/
+
+body {
+  background:#5B8268;
+  }
+
+body.navbar-off #page {
+  background-image: url('images/body-bg-alt-emerald.png');
+  }
+
+#navbar {
+  background-image: url('images/nav-emerald.png');
+  }
+
+a, a:visited {
+  color: #496f55;
+  }

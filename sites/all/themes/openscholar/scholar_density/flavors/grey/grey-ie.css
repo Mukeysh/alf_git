@@ -1,0 +1,29 @@
+#footer, #extradiv {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#C1414141,endColorstr=#C1414141)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#C1414141,endColorstr=#C1414141);   /* IE6 & 7 */
+      zoom: 1;
+}
+
+#sidebar-first {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#C1E2E2E2,endColorstr=#C1E2E2E2)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#C1E2E2E2,endColorstr=#C1E2E2E2);   /* IE6 & 7 */
+      zoom: 1;
+}
+
+
+#block-vsite_menus-features ul.menu li.active-trail {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#DB414141,endColorstr=#DB414141)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#DB414141,endColorstr=#DB414141);   /* IE6 & 7 */
+      zoom: 1;
+}
+
+
+.node-teaser {{
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#9BE9E9E9,endColorstr=#9BE9E9E9)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#9BE9E9E9,endColorstr=#9BE9E9E9);   /* IE6 & 7 */
+      zoom: 1;
+}

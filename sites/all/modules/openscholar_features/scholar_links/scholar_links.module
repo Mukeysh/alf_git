@@ -1,0 +1,23 @@
+<?php
+
+include_once('scholar_links.features.inc');
+
+
+/**
+ * Implementation of hook_context_links_alter().
+ */
+function scholar_links_context_links_alter(&$links) {
+  if (!empty($links['link'])) {
+    $links['link']['query'] = drupal_get_destination();
+  }
+}
+
+/**
+ * Implementation of hook_form_alter
+ */
+function scholar_links_form_alter(&$form, $form_state, $form_id){
+  // change the label of the href field (too late to rename the field now)
+  if ($form_id === 'link_node_form') {
+    $form['field_link_href'][0]['#title'] = t('URL (Web address)');
+  }
+}

@@ -1,0 +1,26 @@
+<?php
+
+function scholar_book_update_6001(&$sandbox){
+
+  $res = array();
+
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+  
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "scholar_book" ');
+  while ($row = db_fetch_object($result)) {
+    $value = unserialize($row->value);
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'scholar_book_toc_location', '%s')", $row->type, $row->sid, $value['scholar_book_toc_location']);
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Book Settings',
+    );
+
+  return $res;
+
+}
+

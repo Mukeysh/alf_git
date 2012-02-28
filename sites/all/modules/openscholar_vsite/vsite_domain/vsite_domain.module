@@ -1,0 +1,187 @@
+<?php
+
+/**
+ * This Module creates a domain handler for scholar that overides the default purl domain handler
+ * It also also has an admin form for creating domains for vsites
+ */
+
+include_once('vsite_domain.features.inc');
+
+
+// Change the default domain proccessor to our custom processor
+define('PURL_VSITE_DOMAIN', 'vsite_domain');
+
+// Change the default domain proccessor to our custom processor
+define('PURL_VSITE_PATH', 'vsite_path');
+
+
+/**
+ * Implementation of hook_purl_provider().
+ * This provides the domain provider for our vsite
+ */
+function vsite_domain_purl_provider() {
+  $items = array();
+  $items['vsite_domain'] = array(
+    'name' => 'Vsite Domain Provider',
+    'description' => t('Sets a spaces context for a domain match.'),
+    'callback' => 'vsite_domain_apply_context',
+    'callback arguments' => array('og'),
+    'example' => 'my-space',
+  );
+
+  return $items;
+}
+
+/**
+ * Context prefix provider callback.
+ */
+function vsite_domain_apply_context($type, $sid) {
+  static $once;
+  if (empty($once)) {
+    spaces_init_space($type, $sid);
+    $space = spaces_get_space();
+    $space->purl_provider = 'vsite_domain';
+    $once = TRUE;
+  }
+}
+
+/**
+ * Context prefix provider callback.
+ */
+function vsite_domain_purl_processor() {
+  $info = array();
+  $info['vsite_domain'] = array(
+    'title' => t('Scholar Vsite Domain Modifier'),
+    'handler' => array(
+      'class' => 'purl_vsite_domain',
+      'file' => 'purl_vsite_domain.inc',
+      'path' => drupal_get_path('module', 'vsite_domain') .'/includes',
+      'parent' => 'domain',
+    ),
+  );
+  $info['vsite_path'] = array(
+    'title' => t('Scholar Vsite Path Modifier'),
+    'handler' => array(
+      'class' => 'purl_vsite_path',
+      'file' => 'purl_vsite_path.inc',
+      'path' => drupal_get_path('module', 'vsite_domain') .'/includes',
+      'parent' => 'path',
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implement Hook vsite_generic_settings
+ * @return array
+ */
+function vsite_domain_vsite_generic_settings() {
+  $a_settings = array();
+
+  //If vsite_domain has been enabled as a purl type then add the form to manage it
+  //This check is here in case another module disables this or in case strongarm has
+  //not initilized the variable yet
+  if(in_array('vsite_domain',array_keys(variable_get('purl_types',array())))){
+
+	  $s_vsite_domain = variable_get('vsite_domain_name', '');
+
+	  $space = spaces_get_space();
+	  $a_settings['vsite_domain_name'] = array(
+      'group' => array(
+        '#id' => 'domain',
+        '#title' => t('Domain'),
+        '#weight' => 0,
+      ),
+	    'form' => purl_form('vsite_domain', $space->group->nid, $s_vsite_domain),
+	    'submit' => array('vsite_domain_vsite_generic_settings_domain_submit'),
+	  );
+
+	  //Set the title since purl does not give you control over this
+	  $a_settings['vsite_domain_name']['form']['value']['#title'] = "Your Sites Custom Domain";
+	  $a_settings['vsite_domain_name']['form']['value']['#required'] = FALSE; //Not required
+	  $a_settings['vsite_domain_name']['form']['#element_validate'] = array('vsite_domain_vsite_generic_settings_domain_validate'); //Use our validate function
+	  $a_settings['vsite_domain_name']['form']['#access'] = user_access('change vsite domain');
+
+	  $a_settings['vsite_domain_name']['form']['vsite_domain_proccessing'] = array(
+	    '#type' => 'radios',
+	    '#title' => t('Domain Type'),
+	    '#default_value' => db_result(db_query("SELECT id FROM {purl} WHERE id = '%s' AND provider = '%s' ", $space->group->nid, 'vsite_domain'))?0:1,
+	    '#options' => array(t('Domain Owner'), t('Domain Group')),
+	    '#weight' => -20,
+	    '#description' => "Is your site the only one that uses this domain or is it one site of several that share the domain?",
+	  );
+  }
+
+  return $a_settings;
+}
+
+/**
+ * Validate function for handling the vsite_domain generic setting
+ * @param $space vsite
+ * @param $value array
+ */
+function vsite_domain_vsite_generic_settings_domain_validate($form) {
+
+  if (strlen($form['value']['#value'])) return purl_form_validate($form);
+
+  return TRUE;
+}
+
+/**
+ * Submit function for handdling the vsite_domain generic setting
+ * @param $space vsite
+ * @param $value array
+ */
+function vsite_domain_vsite_generic_settings_domain_submit(&$form, &$form_state) {
+
+  $value = &$form_state['values'];
+  if (is_array($value['vsite_domain_name'])) {
+
+    $modifier = array(
+      'provider' => $value['vsite_domain_name']['provider'],
+      'id' => $value['vsite_domain_name']['id'],
+      'value' => $value['vsite_domain_name']['value'],
+    );
+
+    if (strlen($modifier['value']) && $value['vsite_domain_name']['vsite_domain_proccessing'] == 0) {
+      //Save the new purl
+      if (purl_validate($modifier)) {
+        $id = db_result(db_query("SELECT id FROM {purl} WHERE id = '%s' AND provider = '%s' ", $modifier['id'], $modifier['provider']));
+        if (!empty($id)) {
+          drupal_write_record('purl', $modifier, array('provider', 'id')); //UPDATE
+        }
+        else {
+          drupal_write_record('purl', $modifier); //CREATE
+        }
+      }//Valid?
+    }
+    else {
+      //Delete an old purl
+      purl_delete($modifier);
+    }
+  }
+  $value['vsite_domain_name'] = $value['vsite_domain_name']['value'];
+}
+
+/**
+ * Maintain a array of purl's that have been processed, only one vsite_provider should adjust each path
+ */
+function vsite_domain_processed_purls($s_purl = FALSE) {
+  static $processed;
+
+  if (!isset($processed)) $processed = array();
+
+  if (strlen($s_purl)) $processed[$s_purl] = $s_purl;
+
+  return $processed;
+}
+
+/**
+ * Add new permissions for managing domains
+ */
+function vsite_domain_perm(){
+  return array(
+    "change vsite domain",
+  );
+}

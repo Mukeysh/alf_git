@@ -1,0 +1,96 @@
+<?php
+//$Id: cs_meta.module,v 1.4 2009/06/10 15:26:54 jweiner Exp $ 
+
+/**
+* @file
+*  This is a submodule of module Cite Distribute to allow disemination of meta data 
+*  to the Computer Science Repository from content such as research papers and articles.
+*/
+
+include('./'. drupal_get_path('module', 'biblio') .'/biblio.import.export.inc');
+global $base_url;
+DEFINE(BASE_URL, $base_url);
+
+
+/**
+ * Implementation of hook_cite_distribute_register()
+ * 
+ * registers this module's repository information with the
+ * core cite distribute API database
+ */
+function cs_meta_cite_distribute_register(){
+  $module_info[] = array(
+    'name'       => 'cs_meta',
+    'repository' => 'Computer Science',
+    'file' => 'single',
+    'filename' => 'bibliography.bib',
+    'flag' => FILE_APPEND,
+    'dynamic_paths' => FALSE, 
+    'rebuild_all' => TRUE,
+    'place_once' => TRUE,
+    );
+  return $module_info;
+}
+
+/**
+* Implementation of hook_menu().
+*
+*/
+function cs_meta_menu() {
+  $items = array();
+  $items['admin/settings/cite_distribute/cs_meta'] = array(
+  'title' => t('CS Meta'),
+  'type' => MENU_LOCAL_TASK ,
+  'file' => 'cs_meta.admin.inc',
+  'file path' =>  $path_inc = drupal_get_path('module', 'cs_meta'),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('cs_meta_config'),	
+  'weight' => 2,
+  'access callback' => user_access('administer cite distribute')
+  );  
+      
+  return $items;
+}
+
+/**
+* Implementation of hook_perm()
+*
+*/
+function cs_meta_perm(){
+ return array('submit to cs repository');
+}
+
+/**
+ * Implementation of hook_cite_distribute_template()
+ *
+ * @param object $node
+ * @param string $module_mode
+ * @param OPTIONAL int $iteration
+ * @return template
+ */
+
+function cs_meta_cite_distribute_template($node_arr, $module_mode, $iteration = NULL){
+  $make_template = array();
+  $archive_path = variable_get('cs_meta_archive_path','');
+  
+  foreach($node_arr as $n){
+  
+  if(!$n->biblio_url){
+    //adding drupal url here if value for biblio_url does already exist
+    $n->biblio_url = BASE_URL . '/node/' . $n->nid;
+  }
+
+  //$results is an array containing the node object which is passed to _bibtex_export()
+  $results[] = $n;
+  }
+   //creating the bibtext file here
+  $template = biblio_bibtex_export($results);
+ 
+  $make_template = array(
+  'template' => $template,
+  );
+      
+  unset($node);
+  return $make_template;
+}
+

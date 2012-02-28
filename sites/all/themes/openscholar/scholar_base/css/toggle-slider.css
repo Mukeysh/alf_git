@@ -1,0 +1,119 @@
+.toggle {
+  display:inline;
+  font-weight: bold;
+  cursor: pointer;
+  }
+
+.slider {
+  display:none;
+  color: #000;
+  position: static;
+  width: auto;
+  background: #EEF3FB;
+  border: 1px solid #c0c5cc;
+  padding: 1em;
+  }
+
+.toggle {
+  background: url('../images/scholarbase-sprite.png') 100% -196px no-repeat transparent;
+  padding-right: 15px;
+  }
+
+.toggle.expanded {
+  background-color:#eef3fb;
+  background-position: 100% -214px;
+  }
+
+.slider ul.links li {
+  display:block;
+  }
+
+/* WELCOME MESSAGE SPECIFIC */
+
+#block-scholar_front-get_started {width:80%;}
+
+#message_welcome_message {
+  margin-bottom: 1em;
+  position: static;
+  }
+
+#message_welcome_message .toggle,
+#message_welcome_message .slider {
+  background-color: #eaf7e7;
+  border:1px solid #c5d4c2;
+  position: relative;
+    z-index: 2;
+  }
+
+#message_welcome_message .toggle {
+  margin: 0;
+  padding: 3px 23px 3px 10px;
+  cursor: pointer;
+  color: #444;
+  font-size:13px !important;
+  background-position: 98% -193px
+  }
+
+#message_welcome_message .slider {
+  padding: 10px;
+  margin-top: 5px;
+  }
+
+#message_welcome_message .expanded {
+  background-position: 98% -211px;
+  border-bottom: none;
+  padding-bottom: 8px;
+  }
+
+/* "Hide this message" */
+#message_welcome_message .vsite-admin {
+  text-align:right;
+  position: relative;
+  padding-bottom:20px;
+  }
+
+#message_welcome_message .vsite-admin .toggle {
+  padding: 0;
+  border: none;
+  background-image: none;
+  font-size: 11px;
+  }
+
+
+#message_welcome_message .vsite-admin .slider {
+  position: absolute;
+  top: 18px;
+  right: 1px;
+  left: auto;
+  border-top: none;
+  padding: 0;
+  width: 93px;
+  border: none;
+  }
+
+#message_welcome_message .slider a,
+#message_welcome_message .vsite-admin .toggle {
+  color: #005C9C;
+  text-decoration:underline;
+  font-weight: normal;
+  font-size:11px;
+  }
+
+#message_welcome_message .vsite-admin .expanded {
+  text-decoration: none;
+  }
+
+#message_welcome_message .vsite-admin .slider ul.links li {
+  display:inline;
+  float: left;
+  padding:0;
+  }
+
+#message_welcome_message .vsite-admin .slider ul.links li.first {
+  margin-right: 10px;
+  }
+
+#resource-list li {
+  padding-left: 20px;
+  list-style: disc inside;
+  }

@@ -1,0 +1,89 @@
+<?php
+
+/**
+ * @file
+ * Spaces SimpleViews
+ * 
+ * - Based on the simpleviews module
+ */
+
+/**
+ * Implemenation of hook_menu()
+ */
+function spaces_simpleviews_menu(){
+  $items = array();
+
+  $items['spaces_simpleviews/nodetype_js'] = array(
+    'title' => 'Create your web site',
+    'page callback' => 'spaces_simpleviews_nodetype_js',
+    'access callback' => 'cp_access_cp',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function spaces_simpleviews_nodetype_js(){
+  $type = $_POST['ctools_changed'];
+  $node_type = end(explode(':', $type));
+  
+  $path = "";
+  //"all" and "biblio" are special cases
+  if ('biblio' == $node_type) {
+    $path = 'publications';
+  }
+  else {
+    //which feature owns this node type?
+    $nodes_map = features_get_component_map('node');
+    $feature = $nodes_map[$node_type][0];
+
+    if ($feature == 'feeds_news') {
+      $feature = $nodes_map[$node_type][1];
+    }
+    
+    // get the 'default view' and 'default display' for that feature
+    if ($view_info = vsite_get_default_feature_view($feature)) {
+      // enough info to get the path for "more" link
+      $view = views_get_view($view_info['view']);
+      $view->init();
+      $view->set_display($view_info['display'] ? $view_info['display'] : 'default');
+      $path = $view->get_path();
+    }
+  }
+  
+  ctools_include('ajax');
+  ctools_add_js('ajax-responder');
+  $commands = array();
+  $commands[] = ctools_ajax_command_attr("input[type=text][name=more_link]", 'value', $path);
+  ctools_ajax_render($commands);
+}
+
+
+
+/**
+ * Builds the view
+ * @param $simpleview
+ */
+function spaces_simpleviews_build_view($simpleview = array()){
+  module_load_include('inc', 'spaces_simpleviews', 'spaces_simpleviews');
+  return _spaces_simpleviews_build_view($simpleview);
+}
+
+/**
+ * Implementation of hook_boxes_plugins().
+ */
+function spaces_simpleviews_boxes_plugins(){
+  $info = array();
+  
+  $info['spaces_sv_post_list'] = array(
+    'title' => 'List of posts', 
+    'description' => 'List of posts', 
+    'handler' => array(
+      'class' => 'spaces_simpleviews_post_list', 
+      'file' => 'spaces_simpleviews_post_list.inc', 
+      'path' => drupal_get_path('module', 'spaces_simpleviews') . '/plugins' 
+    ) 
+  );
+  
+  return $info;
+}

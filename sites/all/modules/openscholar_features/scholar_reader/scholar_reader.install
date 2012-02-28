@@ -1,0 +1,125 @@
+<?php
+/**
+ * @file
+ * Install hooks.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function scholar_reader_schema() {
+  // Install data tables.
+  //include_once('scholar_reader.features.inc');
+  include_once('scholar_reader.data_default.inc');
+  $tables = scholar_reader_data_default();
+  $schema = array();
+  foreach ($tables as $name => $table) {
+    $schema[$name] = $table->table_schema;
+  }
+  return $schema;
+  //return array();
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function scholar_reader_install() {
+  drupal_install_schema('scholar_reader');
+}
+
+/**
+ * Implementation of hook_uninstall();
+ */
+function scholar_reader_uninstall() {
+  drupal_uninstall_schema('scholar_reader');
+}
+
+function scholar_reader_update_6000(){
+  $res = array();
+  // Enable twitter pull module if need
+  if(!module_exists('twitter_pull')){
+
+    include_once('includes/install.inc');
+	  module_rebuild_cache();
+	  drupal_install_modules(array('twitter_pull'));
+	  $res[] = array(
+	    'success' => true,
+	    'query' => 'Installed scholar_pull module and enabled it',
+	  );
+
+  }
+
+  return $res;
+}
+
+function scholar_reader_update_6001(&$sandbox){
+
+  $res = array();
+
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "reader" ');
+  while ($row = db_fetch_object($result)) {
+    $value = unserialize($row->value);
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'scholar_reader_twitter_username', '%s')", $row->type, $row->sid, serialize($value['twitter_username']));
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Scholar Reader Settings',
+    );
+
+  return $res;
+
+}
+
+function scholar_reader_update_6002(&$sandbox){
+
+	if (drupal_get_installed_schema_version("feeds") < 6010) {
+		return array("#abort" => array('success' => FALSE, 'query' => 'Waiting on the feeds module to run updates, please run update again.'));
+	}
+
+	if (module_exists('feeds_news')) drupal_uninstall_module("feeds_news");
+
+	if (module_exists('feeds_import')) drupal_uninstall_module("feeds_import");
+	if (module_exists('feeds_fast_news')) drupal_uninstall_module("feeds_fast_news");
+
+	$res[] = array(
+    'success' => true,
+    'query' => 'Configured scholar_reader to work with the new version of Feeds',
+  );
+
+    return $res;
+}
+
+function scholar_reader_update_6003(&$sandbox){
+
+  if (drupal_get_installed_schema_version("feeds") < 6013) {
+    return array("#abort" => array('success' => FALSE, 'query' => 'Waiting on the feeds module to run updates, please run update again.'));
+  }
+
+  if (module_exists('feeds_news')){
+  	module_disable(array('feeds_news'), TRUE);
+  	drupal_uninstall_module("feeds_news");
+  }
+
+  if (module_exists('feeds_import')){
+  	module_disable(array('feeds_import'), TRUE);
+  	drupal_uninstall_module("feeds_import");
+  }
+  
+  if (module_exists('feeds_fast_news')){
+  	module_disable(array('feeds_fast_news'), TRUE);
+  	drupal_uninstall_module("feeds_fast_news");
+  }
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'Disabled feeds_import and feeds_fast_news which conflict with scholar_reader',
+  );
+
+    return $res;
+}

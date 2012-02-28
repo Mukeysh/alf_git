@@ -1,0 +1,155 @@
+<?php
+
+/* API */
+
+function vsite_contextual_init() {
+  if (user_is_logged_in()) {
+    drupal_add_css(drupal_get_path('module', 'vsite_contextual').'/vsite_contextual.css');
+  }
+}
+
+/**
+ * Retrieve the admin links for a given object.
+ */
+function vsite_contextual_get_admin_links($type, $object){
+  
+  $links = module_invoke_all('vsite_admin_link', $type, $object);
+  drupal_alter('vsite_admin_link', $links, $type, $object);
+
+  return $links;
+}
+
+/* IMPLEMENTATIONS */
+
+/**
+ * Implementation of hook_scholar_admin_link() on behalf of the node module.
+ */
+function node_vsite_admin_link($type, $object){
+  $links = array();
+  if ($type == 'node') {
+    $path = "node/{$object->nid}/edit";
+    $item = menu_get_item($path);
+    if ($item && $item['access']) {
+
+      $links['node-edit'] = array(
+        'title' => t('Edit'),
+        'href' => $path,
+        'attributes' => array(
+          'class' => 'icon-edit'
+        ),
+        'query' => array(
+          'destination' => $_GET['q']
+        )
+      );
+    }
+    $path = "node/{$object->nid}/delete";
+    $item = menu_get_item($path);
+    if ($item && $item['access']) {
+      $links['node-delete'] = array(
+        'title' => t('Delete'),
+        'href' => "node/{$object->nid}/delete",
+        'attributes' => array(
+          'class' => 'icon-delete'
+        ),
+        'query' => array(
+          'destination' => $_GET['q']
+        )
+      );
+    }
+  }
+  return $links;
+}
+
+/*
+ * Implementation of hook_vsite_admin_link
+ */
+function block_vsite_admin_link($type, $object) {
+  $links = array();
+  if ($type != 'block') return;
+  if (!context_isset('context', 'vsite-section-public')) return;
+
+  // if this block comes from Views, the admin links will overlap
+  // merge them into one set of links
+  if ($object->module == 'views') {
+    $view_name = explode('-',$object->delta);
+    // get view from id
+    $view = views_get_view($view_name[0]);
+    // set display of view
+    $view->set_display($view_name[1]);
+    $view->from_block = true;
+    // get links from id
+    $links = array_merge($links, vsite_contextual_get_admin_links('view', $view));
+  }
+
+  return $links;
+}
+
+function views_vsite_admin_link($type, $object) {
+  $links = array();
+  if ($type != 'view') return;
+
+  // FROM views/theme/theme.inc
+  if (user_access('administer views') && module_exists('views_ui') && empty($object->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {
+    $links = array(
+      array(
+        'title' => t('Edit View'),
+        'alt' => t("Edit this view"),
+        'href' => "admin/build/views/edit/$object->name",
+        'fragment' => 'views-tab-' . $object->current_display,
+        'query' => drupal_get_destination(),
+      ),
+      array(
+        'title' => t('Export View'),
+        'alt' => t("Export this view"),
+        'href' => "admin/build/views/export/$object->name",
+      ),
+      array(
+        'title' => t('Clone View'),
+        'alt' => t("Create a copy of this view"),
+        'href' => "admin/build/views/clone/$object->name",
+      ),
+    );
+
+    drupal_alter('views_admin_links', $links, $object);
+  }
+
+  return $links;
+}
+
+function block_vsite_admin_link_alter(&$links, $type, $object) {
+  static $views = array();
+
+  // if a view provides a block, they're collapsed into a single dropdown
+  // only print out links from views once
+  if ($type == 'view' && strpos($object->current_display, 'block') !== FALSE && !$object->from_block) {
+    $links = array();
+  }
+}
+
+/* PREPROCESS FUNCTIONS */
+
+function vsite_contextual_preprocess_node(&$vars) {
+  $node = &$vars['node'];
+  // node admin links (see hook_vsite_admin_link)
+  if ($links = vsite_contextual_get_admin_links('node', $node)) {
+    drupal_add_css(drupal_get_path('module', 'vsite_contextual').'/vsite_contextual.css');
+    $vars['vsite_admin_links'] = theme('ctools_dropdown', "Admin", $links , false, 'vsite-admin');
+  }
+}
+
+function vsite_contextual_preprocess_block(&$vars) {
+  $block = &$vars['block'];
+  if ($links = vsite_contextual_get_admin_links('block', $block)) {
+    drupal_add_css(drupal_get_path('module', 'vsite_contextual').'/vsite_contextual.css');
+    $vars['vsite_admin_links'] .= theme('ctools_dropdown', "", $links , false, 'vsite-admin');
+  }
+}
+
+function vsite_contextual_preprocess_views_view(&$vars) {
+  $view = &$vars['view'];
+  $vars['admin_links'] = '';  // views' admin links;
+  if ($links = vsite_contextual_get_admin_links('view', $view)) {
+    drupal_add_css(drupal_get_path('module', 'vsite_contextual').'/vsite_contextual.css');
+    $vars['vsite_admin_links'] .= theme('ctools_dropdown', "", $links , false, 'vsite-admin');
+  }
+}

@@ -1,0 +1,101 @@
+<?php
+
+include_once('scholar_classes.features.inc');
+
+function scholar_classes_init(){
+  global $conf;
+  
+  //Do not show files in teaser (overrides vsite strongarm) this will be handled by strongarm when we update it
+  $conf['itweak_upload_teaser_display_class'] = 0;
+  
+}
+
+/**
+ * content_extra_fields callback for this plugin
+ */
+function scholar_classes_content_extra_fields($type_name){
+  $extras = array();
+  if ('class' == $type_name) {
+    $extras['classes_add_class_material_link'] = array(
+      'label' => t('Add "class material" link'), 
+      'description' => t('Add "Class Material" to this class'), 
+      'weight' => 100 
+    );
+  }
+  return $extras;
+}
+
+/**
+ * Hook nodeapi
+ * Used to trickle deltes to an image galleries dependent image childern
+ */
+function scholar_classes_nodeapi(&$node, $op, $teaser, $a4){
+  if ($node->type != 'class')
+    return;
+  switch ($op) {
+    case 'view' :
+      
+      // "Add images to this gallery" link
+      $link = nodereference_url_build_all_links($node, FALSE);
+      $weight = (module_exists('content')) ? content_extra_field_weight($node->type, 'classes_add_class_material_link') : 100;
+      $node->content['classes_add_class_material_link'] = array(
+        '#weight' => $weight, 
+        '#value' => theme('links', $link, $attributes = array(
+          'class' => 'add-reference-node' 
+        )) 
+      );
+      break;
+    
+    case 'delete' :
+      vsite_include('vsite');
+      $a_referers = vsite_get_referrers($node->nid, array(), array(
+        'class_material' 
+      ));
+      foreach ( $a_referers as $nid => $info )
+        node_delete($nid);
+      break;
+  }
+}
+
+
+/**
+ * hook link_alter (admin at the end of links)
+ */
+function scholar_classes_link_alter(&$links, $node){
+  if (isset($links['class_material_field_class'])) {
+    unset($links['class_material_field_class']);
+  }
+  
+  /*
+   * If a class_material node, we want all the children
+   * to be of class_material type too. But the default
+   * child type is set to 'book'. Alter here
+   */
+  // @todo : Dont think this has any effect currently
+  //if (!empty($links['book_add_child']) && $node->type == 'class_material') {
+  //  $links['book_add_child']['href'] = 'node/add/class-material';
+  //}
+  
+}
+
+
+
+
+/**
+ * hook  vsite_content_types_alter
+ */
+function scholar_classes_vsite_content_types_alter(&$content_types){
+  unset($content_types['class_material']);
+}
+
+/**
+ * Implementation of hook_context_links_alter().
+ */
+function scholar_classes_context_links_alter(&$links){
+  if (! empty($links['class_material'])) {
+    unset($links['class_material']);
+  }
+}
+
+
+

@@ -1,0 +1,816 @@
+<?php
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function os_boxes_ctools_plugin_api($module, $api) {
+  if ($module == 'boxes' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+  if ($module == "boxes" && $api == "box") {
+    return array("version" => 1);
+  }
+}
+
+/**
+ * Implementation of hook_boxes_plugins().
+ */
+function os_boxes_boxes_plugins() {
+  $info = array();
+  $path = drupal_get_path('module', 'os_boxes') .'/plugins/';
+
+  $info['os_boxes_default'] = array(
+    'handler' => array(
+      'class' => 'os_boxes_default',
+      'file' => 'os_boxes_default.inc',
+      'path' => $path . '/os_boxes_default',
+      'parent' => 'box',
+    ),
+  );
+
+  $info['os_boxes_content'] = array(
+    'handler' => array(
+      'class' => 'os_boxes_content',
+      'file' => 'os_boxes_content.inc',
+      'path' => $path . '/os_boxes_content',
+      'parent' => 'box',
+    ),
+  );
+
+	$addthis_css = drupal_get_path('module', 'os_boxes') . '/theme/css/addthis.css';
+	$info['os_boxes_addthis'] = array(
+	  'title' => 'Addthis',
+	  'description' => 'Social media links',
+	  'css' => $addthis_css,
+	  'tags' => array('Social'),
+	  'module dependencies' => array("addthis"),
+	  'handler' => array(
+	    'class' => 'os_boxes_addthis',
+	    'file' =>  'os_boxes_addthis.inc',
+	    'path' => $path . '/os_boxes_addthis',
+	    'parent' => 'os_boxes_default',
+	  ),
+	);
+
+
+  $info['os_boxes_feedreader'] = array(
+    'title' => 'Feed Reader',
+    'description' => 'List of feed items',
+    'tags' => array('Content','Social'),
+    'module dependencies' => array("scholar_reader"),
+    'handler' => array(
+      'class' => 'os_boxes_feedreader',
+      'file' => 'os_boxes_feedreader.inc',
+      'path' => $path  . '/os_boxes_feedreader',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_gallery'] = array(
+    'title' => 'Image Gallery',
+    'description' => 'List of images',
+    'tags' => array('Media'),
+    'module dependencies' => array("scholar_image_gallery"),
+    'handler' => array(
+      'class' => 'os_boxes_gallery',
+      'file' => 'os_boxes_gallery.inc',
+      'path' => $path . '/os_boxes_gallery',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_rss'] = array(
+    'title' => 'RSS feed',
+    'description' => 'RSS feed ??',
+    'tags' => array('Social'),
+    'handler' => array(
+      'class' => 'os_boxes_rss',
+      'file' => 'os_boxes_rss.inc',
+      'path' => $path . '/os_boxes_rss',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_twitterfeed'] = array(
+    'title' => 'Twitter Feed',
+    'description' => 'Latest tweets',
+    'tags' => array('Social'),
+    'handler' => array(
+      'class' => 'os_boxes_twitterfeed',
+      'file' => 'os_boxes_twitterfeed.inc',
+      'path' => $path . '/os_boxes_twitterfeed',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_cclicense'] = array(
+    'title' => 'CC License',
+    'description' => 'Displays CC license widget',
+    'tags' => array('Misc'),
+    'module dependencies' => array("vsite_cc"),
+    'handler' => array(
+      'class' => 'os_boxes_cclicense',
+      'file' => 'os_boxes_cclicense.inc',
+      'path' => $path . '/os_boxes_cclicense',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+
+  $info['os_boxes_node'] = array(
+    'title' => 'Post in a widget',  // i.e. view
+    'description' => 'Displays the content of a post in the widget',
+    'tags' => array('Content'),
+    'handler' => array(
+      'class' => 'os_boxes_node',
+      'file' => 'os_boxes_node.inc',
+      'path' => $path . '/os_boxes_node',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_bio'] = array(
+    //'title' => 'Bio Box',  // i.e. view
+    'description' => 'Displays biography blurb',
+    'tags' => array('Misc'),
+    'module dependencies' => array("scholar_biocv"),
+    'handler' => array(
+      'class' => 'os_boxes_bio',
+      'file' => 'os_boxes_bio.inc',
+      'path' => $path . '/os_boxes_bio',
+      'parent' => 'os_boxes_node',
+    ),
+    'access' => false, //This box has no options yet, just use the default instance
+  );
+
+  $info['os_boxes_oembed'] = array(
+    'title' => 'Media Embed',  // i.e. view
+    'description' => 'Embed Media',
+    'tags' => array('Media'),
+    'module dependencies' => array("os_wysiwyg"),
+    'handler' => array(
+      'class' => 'os_boxes_oembed',
+      'file' => 'os_boxes_oembed.inc',
+      'path' => $path . '/os_boxes_oembed',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_shields'] = array(
+    'description' => 'Department Shield',
+    'tags' => array('Misc'),
+    'handler' => array(
+      'class' => 'os_boxes_shields',
+      'file' => 'os_boxes_shields.inc',
+      'path' => $path . '/os_boxes_shields',
+      'parent' => 'os_boxes_default',
+    )
+  );
+
+  $info['os_boxes_booktoc'] = array(
+    'title' => 'Book Table of Contents',
+    'description' => 'Table of Contents',
+    'tags' => array('Content'),
+    'module dependencies' => array("scholar_book"),
+    'handler' => array(
+      'class' => 'os_boxes_booktoc',
+      'file' => 'os_boxes_booktoc.inc',
+      'path' => $path . '/os_boxes_booktoc',
+      'parent' => 'os_boxes_default',
+    )
+  );
+
+  $info['os_boxes_curr_toc'] = array(
+    //'title' => 'Active Book\'s TOC',
+    'description' => 'Table of Contents',
+    'tags' => array('Content'),
+    'module dependencies' => array("scholar_book"),
+    'handler' => array(
+      'class' => 'os_boxes_curr_toc',
+      'file' => 'os_boxes_booktoc.inc',
+      'path' => $path . '/os_boxes_booktoc',
+      'parent' => 'os_boxes_booktoc',
+    ),
+    'access' => false, //Do not allow instances of this to be created
+  );
+
+  $info['os_boxes_recent_docs'] = array(
+    'title' => 'Recent Documents',
+    'description' => 'List of Recently Created Documents',
+    'tags' => array('Content'),
+    'module dependencies' => array('scholar_book'),
+    'handler' => array(
+      'class' => 'os_boxes_documents_list',
+      'file' => 'os_boxes_documents_list.inc',
+      'path' => $path . '/os_boxes_documents_list',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_sv_list'] = array(
+    'title' => 'List of posts',
+    'description' => '',
+    'tags' => array(
+      'Content'
+    ),
+    'handler' => array(
+      'class' => 'os_boxes_simpleview_list',
+      'file' => 'os_boxes_simpleview_list.inc',
+      'path' => $path . '/os_boxes_simpleview_list',
+      'parent' => 'spaces_sv_post_list'
+    ),
+  );
+/*
+  $info['os_boxes_pub_grps'] = array(
+    'title' => 'Publication Groupings',
+    'description' => 'Group Publications By...',
+    'tags' => array (
+      'Content'
+    ),
+    'module dependencies' => array('scholar_publications'),
+    'handler' => array(
+      'class' => 'os_boxes_pub_grps',
+      'file' => 'os_boxes_pub_grps.inc',
+      'path' => $path . '/os_boxes_pub_grps',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+*/
+  $info['os_boxes_pub_type'] = array(
+    'title' => 'Publications By Type',
+    'description' => 'Group Publications By Type',
+    'tags' => array('Content'),
+    'module dependencies' => array('scholar_publications'),
+    'handler' => array(
+      'class' => 'os_boxes_pub_type',
+      'file' => 'os_boxes_pub_type.inc',
+      'path' => $path . '/os_boxes_pub_type',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_pub_year'] = array(
+    'title' => 'Publications By Year',
+    'description' => 'Group Publications By Year',
+    'tags' => array('Content'),
+    'module dependencies' => array('scholar_publications'),
+    'handler' => array(
+      'class' => 'os_boxes_pub_year',
+      'file' => 'os_boxes_pub_year.inc',
+      'path' => $path . '/os_boxes_pub_year',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_pub_ca'] = array(
+    'title' => 'Publications By Co-Authors',
+    'description' => 'Group Publications By Co-Authors',
+    'tags' => array('Content'),
+    'module dependencies' => array('scholar_publications'),
+    'handler' => array(
+      'class' => 'os_boxes_pub_ca',
+      'file' => 'os_boxes_pub_ca.inc',
+      'path' => $path . '/os_boxes_pub_ca',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['vsite_taxonomy_fbt'] = array(
+    'title' => 'Taxonomy widget',
+    'description' => 'Filter content by category',
+    'tags' => array('Content'),
+    'handler' => array(
+      'class' => 'vsite_taxonomy_fbt',
+      'file' =>  'vsite_taxonomy_fbt.inc',
+      'path' => $path . '/vsite_taxonomy_fbt',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+
+  $info['os_boxes_manual_list'] = array(
+    'title' => 'Featured Posts',
+    'description' => 'Create your own list of posts',
+    'tags' => array('Content'),
+    'handler' => array(
+      'class' => 'os_boxes_manual_list',
+      'file' => 'os_boxes_manual_list.inc',
+      'path' => $path.'/os_boxes_manual_list',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_pub_typ_list'] = array(
+    'title' => 'List of Publications',
+    'description' => 'List of Publications',
+    'tags' => array('Content'),
+    'module dependencies' => array('scholar_publications'),
+    'handler' => array(
+      'class' => 'os_boxes_publication_list',
+      'file' => 'os_boxes_publication_list.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_present_list'] = array(
+    'title' => 'List of Presentations',
+    'description' => 'List of Presentations',
+    'tags' => array('Content'),
+    'module dependencies' => array('scholar_presentations'),
+    'handler' => array(
+      'class' => 'os_boxes_presentation_list',
+      'file' => 'os_boxes_presentation_list.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  $info['os_boxes_follow'] = array(
+    'title' => '\'Follow Me\' Links',
+    'description' => '\'Follow Me\' Links',
+    'tags' => array('Social'),
+    'handler' => array(
+      'class' => 'os_boxes_follow',
+      'file' => 'os_boxes_follow.inc',
+      'path' => $path.'/os_boxes_follow',
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  //vsite_comments_recent_comments
+  $info['vsite_comments_recent'] = array(
+    'title' => 'Recent Comments',
+    'description' => 'Recent Comments',
+    'tags' => array('Social'),
+    'module dependencies' => array('vsite_comments'),
+    'handler' => array(
+      'class' => 'vsite_comments_recent_comments',
+      'file' => 'vsite_comments_recent_comments.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_default',
+    ),
+  );
+
+  foreach ($info as $key => $block) {
+  	if(isset($info[$key]['module dependencies'])){
+  		foreach ($info[$key]['module dependencies'] as $module) {
+  			if(!module_exists($module)){
+  				unset($info[$key]);
+  				continue(2);
+  			}
+  		}
+  	}
+  }
+
+
+  return $info;
+}
+
+/**
+ * Implementation of hook_boxes_plugins_alter
+ */
+function os_boxes_boxes_plugins_alter(&$boxes){
+  // Add 'social' tag to all boxes from fb_social module
+  foreach($boxes as $name => $box){
+    if ($box['handler']['parent'] == 'fb_social_default'){
+      $boxes[$name]['tags'] = array('Social');
+    }
+  }
+
+  // unset the default "box" box
+  unset($boxes['simple']);
+
+  // os have its own plugin that extends the one
+  // provided by spaces_simpleviews module
+  unset($boxes['spaces_sv_post_list']['title']);
+}
+
+/**
+ * Get all the boxes plugins or a plugin by name
+ * @param $name
+ * 		Name of the box
+ */
+function os_boxes_get_boxes_plugins($name = NULL){
+  ctools_include('plugins');
+  $boxes = ctools_get_plugins('boxes', 'plugins');
+  drupal_alter('boxes_plugins', $boxes);
+
+  if (isset($name)) {
+    return isset($boxes[$name]) ? $boxes[$name] : FALSE;
+  }
+
+  return $boxes;
+}
+
+/**
+ * hook vsite_sidgets
+ *
+ * This function translates the box intances and the box defintions into vsite widgets for use in the
+ * openscholar layout structure
+ */
+function os_boxes_vsite_widgets(){
+  $items = array();
+
+  /**
+   * Avalible block defintions
+   */
+  $plugins = os_boxes_get_boxes_plugins();
+
+  $items = array();
+  foreach ( $plugins as $key => $info ) {
+
+    if (isset($info['title'])) {
+      $items["boxes-boxes_add__$key"] = array(
+        'module' => 'boxes',
+        'delta' => "boxes_add__$key",
+        'weight' => -10,
+        'region' => $info['region']?$info['region']:false,
+        'label' => $info['title'],
+        'block_config_path' => "cp/osboxes/nojs/boxes_add__{$key}/configure",
+        'factory' => true,
+      );
+      if (is_array($plugins[$key]['tags']) && count($plugins[$key]['tags'])) {
+        $items["boxes-boxes_add__$key"]['tags'] = $plugins[$key]['tags'];
+      }
+
+      if ($info['factory_path']) {
+        $items["boxes-boxes_add__$key"]['block_config_path'] = $info['factory_path']."/modal/box/$key";
+      }
+    }
+  }
+
+  /**
+   * Block instances for this site
+   */
+  $boxes = boxes_load();
+  foreach ($boxes as $box) {
+  	if(!$box->delta) continue;
+
+  	//Is this box not applicable everywhere
+    if(isset($box->sitewide) && !$box->sitewide) continue;
+
+    $items["boxes-{$box->delta}"] = os_boxes_get_vsite_widget($box);
+
+    if(isset($plugins[$box->plugin_key]) && is_array($plugins[$box->plugin_key]['tags']) && count($plugins[$box->plugin_key]['tags'])) {
+        $items["boxes-{$box->delta}"]['tags'] = $plugins[$box->plugin_key]['tags'];
+    }//retrieve tags from plugin
+
+    if(isset($plugins[$box->plugin_key]) && isset($plugins[$box->plugin_key]['block_config_path'])) {
+        $items["boxes-{$box->delta}"]['block_config_path'] = $plugins[$box->plugin_key]['block_config_path'];
+    }//assign configure path from plugin
+
+    $items["boxes-{$box->delta}"]['access callback'] = 'os_boxes_box_access';
+  }
+
+  return $items;
+}
+
+/**
+ * Return a widget array when passed a box instance
+ */
+function os_boxes_get_vsite_widget($box, $weight = 0, $region = false){
+  $plugins = os_boxes_get_boxes_plugins();
+
+	$a_wgt = array(
+    'module' => 'boxes',
+    'delta' => $box->delta,
+    'weight' => $weight,
+    'region' => $region,
+    'label' => $box->description,
+	  'plugin' => $box->plugin_key,
+    'cache' => BLOCK_CACHE_CONTENT_CACHE,
+	  'block_config_path' => "cp/osboxes/".($plugins[$box->plugin_key]['popup']?$plugins[$box->plugin_key]['popup']:'nojs')."/{$box->delta}/configure",
+  );
+
+  if(!$region && isset($box->region)){
+    $a_wgt['region'] = $box->region;
+  }
+
+  if (is_array($plugins[$box->plugin_key]['tags'])) {
+    $a_wgt['tags'] = $plugins[$box->plugin_key]['tags'];
+    $a_wgt['class'] = implode(' ', $a_wgt['tags']);
+  }
+
+  if (isset($plugins[$box->plugin_key]['icon_path'])) {
+    $a_wgt['icon_path'] = $plugins[$box->plugin_key]['icon_path'];
+  }
+
+  if (is_a($box, 'os_boxes_modalframe')) {
+    $a_wgt['block_config_path'] = $box->get_config_path();
+  }
+
+  if (isset($plugins[$box->plugin_key]['title'])) {
+    $a_wgt['can_delete'] = true;
+    $a_wgt['block_delete_path'] = "cp/build/layout/nojs/".$a_wgt['delta']."/delete";
+  }
+
+  return $a_wgt;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function os_boxes_menu() {
+
+  $items['cp/osboxes/%ctools_js/%/configure'] = array(
+    'title' => 'Configure this Widget',
+    'page callback' => 'os_boxes_box_modal',
+    'page arguments' => array( 2,3),
+    'access callback' => 'os_boxes_cp_layout_configurable',
+    'access arguments' => array(3),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Determine if this box has a form, return true if it does, false otherwise
+ */
+function os_boxes_cp_layout_configurable($delta){
+
+	if(!cp_access_cp()) return false;
+
+  if ($delta && strpos($delta, 'boxes_add__') !== 0) {
+  	//Box instance
+    if ($box = boxes_load($delta)) {
+      return ($box->options_form())?true:false;
+    }
+  }else{
+  	//New Box
+  	$plugin_key = str_replace('boxes_add__', '', $delta);
+    if ($box = boxes_factory($plugin_key)) {
+      return ($box->options_form())?true:false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Addes a boxes 'Configure' link as a contextual link
+ */
+function os_boxes_vsite_admin_link($type, $object) {
+  $links = array();
+  if ($type != 'block') return $links;
+
+  if ($object->module == 'boxes' && ($box = boxes_load($object->delta))) {
+    if (os_boxes_cp_layout_configurable($object->delta)) {
+      if (!$object->block_config_path) {
+        $wdgt = os_boxes_get_vsite_widget($box);
+        $object->block_config_path = $wdgt['block_config_path'];
+      }
+      $links[] = array(
+        'title' => 'Configure',
+        'href' => $object->block_config_path.'/front',
+        'attributes' => array(
+          'class' => 'ctools-use-modal',
+        ),
+        'admin_type' => 'config',
+      );
+    }
+  }
+  return $links;
+}
+
+/**
+ * A modal callback for configuring a box
+ */
+function os_boxes_box_modal($js = NULL, $delta){
+  module_load_include('inc', 'boxes', 'boxes.admin');
+  module_load_include('inc', 'boxes', 'plugins/boxes_box');
+
+  $b_newbox = (strpos($delta,"boxes_add__") === 0);
+  $title = '';
+  if($b_newbox){
+    $plugin_key = str_replace('boxes_add__', '', $delta);
+    $delta = os_boxes_create_delta();
+	  $box = boxes_factory($plugin_key, array(
+	    'delta' => $delta
+	  ));
+	  $plugin = ctools_get_plugins('boxes', 'plugins', $plugin_key);
+	  $title = $plugin['title'];
+  }else{
+  	$box = boxes_load($delta);
+  	$title = $box->description;
+  }
+
+  // Fall back if $js is not set.
+  ctools_include('form');
+  if (!$js) {
+    $form_state = array('box' => $box);
+    if (module_exists('modalframe') && isset($_GET['modal'])) {
+      modalframe_child_js();
+    }
+    return ctools_build_form('boxes_box_form', $form_state);
+  }
+
+  ctools_include('modal');
+  ctools_include('ajax');
+
+
+  $form_state = array(
+    'box' => &$box,
+    'plugin_key' => $box->plugin_key,
+    'custom_action' => TRUE,
+    'ajax' => 'TRUE',
+    'no_redirect' => TRUE,
+    'title' => t('Custom Widget: @title', array('@title' => $title)),
+  );
+
+  $output = ctools_modal_form_wrapper("boxes_box_form", $form_state);
+
+  if (empty($output)) {
+    $output = array();
+    $output[] = ctools_modal_command_dismiss();
+  }
+  else {
+    $output[] = ctools_ajax_command_after('#modal-content #edit-submit','<input class="form-submit close" onClick="$(\'div.modal-header a.close\').click(); return false;" value="Cancel" />');
+  }
+
+  if(isset($form_state['js commands']) && is_array($form_state['js commands'])){
+  	$output = array_merge($form_state['js commands'],$output);
+  }
+
+  ctools_ajax_render($output);
+}
+
+/**
+ * @param $space_key string for manually passing type-id
+ */
+function os_boxes_create_delta($identifier = false) {
+
+	  if(!$identifier) $identifier = (module_exists('spaces') && $space = spaces_get_space()) ? "{$space->type}-{$space->id}" : 'box';
+    $hash = boxes_create_hash($identifier);
+    $delta = $identifier . "-" . $hash;
+    return $delta;
+}
+
+/**
+ * Implementation of form alter
+ * @param $form
+ * @param $form_state
+ */
+function os_boxes_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id){
+  	case "boxes_box_form":
+  	  $form['description']['#title'] = t('Widget Name');
+  	  $form['description']['#description'] = t('This name will only appear in your Control Panel.');
+
+  	  $form['title']['#title'] = t('Widget Title');
+  	  $form['title']['#description'] = t('The title of the widget as shown to the user.');
+
+  	  //Keep track of boxes last update time, can be used to expire cache
+  	  $form['changed'] = array('#type' => 'value', '#value' => time());
+
+  		//Allow each box to handle it's own validation && submission
+  		$form['#validate'][] = 'os_boxes_box_validate';
+  		$form['#submit'][] = 'os_boxes_box_submit';
+  	break;
+  }
+}
+
+/**
+ * Allow each box to validate it's form
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function os_boxes_box_validate(&$form, &$form_state){
+
+	ctools_include('plugins');
+	$box_class = ctools_plugin_load_class('boxes', 'plugins', $form_state['values']['plugin_key'], 'handler');
+	if ($box_class && is_callable("{$box_class}::options_validate")) {
+		$params = array(&$form, &$form_state);
+		call_user_func_array(array($box_class,'options_validate'),$params); //user_func_array is used to allow pass by ref
+	}
+}
+
+/**
+ * Allow each box to implement a submit handler
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function os_boxes_box_submit(&$form, &$form_state){
+
+	ctools_include('plugins');
+	$box_class = ctools_plugin_load_class('boxes', 'plugins', $form_state['values']['plugin_key'], 'handler');
+  if ($box_class && is_callable("{$box_class}::options_submit")) {
+  	$params = array(&$form, &$form_state);
+    call_user_func_array(array($box_class,'options_submit'),$params);
+  }
+}
+
+function os_boxes_preprocess_block(&$vars) {
+  $block = &$vars['block'];
+  // remove the inline edit links added by boxes module
+  // why do they make me do it this way... ugh...
+  $block->content = str_replace($block->controls, '', $block->content);
+
+  // boxes plugins can optionally add their own css file
+  $plugins = os_boxes_get_boxes_plugins();
+  if ($block -> module == 'boxes' && isset($block -> plugin)){
+    if (isset($plugins[$block -> plugin]['css'])){
+      drupal_add_css($plugins[$block -> plugin]['css']);
+    }
+  }
+
+  /**
+   * Adds useful plugin classes to blocks for theming
+   */
+  if(is_object($block) && $block->plugin){
+    $vars['block_classes'] .= " box-{$block->plugin}";
+  }
+}
+
+
+/**
+ * Provide an access function for os_boxes to enable/disable boxes based on feature information
+ * @param array $block
+ * @param uid $user
+ */
+function os_boxes_box_access($block,$user = false){
+
+  if ($block['module'] == 'boxes') {
+  	if(isset($block['plugin'])){
+  		$plugin = os_boxes_get_boxes_plugins($block['plugin']);
+	  	if(isset($plugin['module dependencies'])){
+	      foreach ($plugin['module dependencies'] as $module) {
+	        if(!module_exists($module)){
+	          return false;
+	        }//If the module is not enabled then do not show the box
+	        if (!spaces_access_feature('view', $module)) {
+	          return false;
+	        }//If they do not have access to view the feature then do not show the box
+	      }
+	    }
+  	}// Check module dependencies for plugin
+
+  	$box = boxes_load($block['delta']);
+  	if(is_object($box) && method_exists($box,'access')){
+  		return $box->access();
+  	}//If the box has an access function call it
+  }
+
+	return true;
+}
+
+/**
+ * Alter the default public blocks, do not add factory blocks to the default layouts
+ *
+ * @param $a_widgets
+ */
+function os_boxes_vsite_default_blocks_alter(&$default_blocks) {
+
+  foreach ($default_blocks as $bid => $block) {
+    //Do not include admin/factory boxes
+    if($block['factory']) unset($default_blocks[$bid]);
+  }
+}
+
+/**
+ * Alter the output for a specific help file
+ * Adds the list of acceptable domains we give to embedfilter
+ */
+function os_boxes_advanced_help_topic_alter(&$output, $popup) {
+  if (strpos($output, '[embed_filter_tips]') !== FALSE) {
+    $output = str_replace('[embed_filter_tips]', embedfilter_filter_tips(0,0), $output);
+  }
+}
+
+/**
+ * hook theme_registry_alter
+ */
+function os_boxes_theme_registry_alter(&$theme_registry){
+  /*
+   * Override the box theme function
+   */
+  $theme_registry['boxes_box']['function'] = 'theme_os_boxes_box';
+}
+
+/**
+ * Hook views_pre_view (called pre execute
+ */
+function os_boxes_views_pre_view(&$view, &$display_id, &$args) {
+	//If this view has been configured to work with boxes then run alter for that box
+	if(isset($view->dom_id)){
+		list($module,$delta) = explode("-",$view->dom_id,2);
+		if($module == "boxes" && ($box = boxes_load($delta)) && method_exists($box,'views_alter')){
+			$box->views_alter($view,$display_id,$args);
+		}
+	}
+}
+
+
+/**
+ * Theme function for the box.
+ */
+function theme_os_boxes_box($block) {
+
+	//Do not print anything if the box is empty, it is as if it does not exist
+	if(!strlen($block['content'])) return "";
+
+	//Use the default theme function
+	return theme_boxes_box($block);
+}

@@ -1,0 +1,358 @@
+body {
+  background: #efefef;
+  color:#313030;
+  font:.9em/165% arial, helvetica, sans-serif;
+  }
+
+#page {
+  margin-top: 14px;
+  }
+
+.wrap {
+  width: 870px;
+  margin: 0 auto;
+  }
+
+.not-front #content-main,
+.front #content-top,
+.front #content-bottom {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px 0;
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  }
+
+.not-front #content-main {
+  padding: 10px;
+  }
+
+a,
+a:visited {
+  color:#990000;
+  text-decoration: none;
+  }
+
+a:hover {
+  color:#3399CC;
+  }
+
+#header h1 {
+  font-weight:normal;
+  font-size: 26px;
+  line-height: 44px;
+  margin-left: 30px;
+  float:left;
+  }
+
+#header h1 a,
+#header h1 a:visited {
+  color: #313030;
+  }
+
+h2, h3, #sidebar-left a, #header {
+  font-weight: bold;
+  }
+
+h2.title {
+  font-weight:normal;
+  font-size: 26px;
+  line-height: 44px;
+  }
+
+h3 {
+  font-size: 1.4em;
+  }
+
+div.form-item {
+  border: none;
+  }
+
+/*HEADER */
+
+#header {
+  min-height: 70px;
+  }
+
+#block-openscholar_front-top_links .content {
+  float:right;
+  }
+
+#block-openscholar_front-top_links a {
+  background:url('../images/get-your-site-button.png') no-repeat;
+  text-align: center;
+  line-height: 38px;
+  display: block;
+  width: 169px;
+  height: 42px;
+  color: #FFF;
+  text-decoration: none;
+  font-weight: bold;
+  text-shadow: #333 0px 1px 1px;
+  text-shadow: rgba(51,51,51, .4) 0px 1px 1px;
+  }
+
+ul#top-front li#get-form a:hover {
+  color: #f0ff00;
+  }
+
+#block-openscholar_front-site_mission h2.title {
+  float:right;
+  color:#9f9e9e;
+  font-weight: normal;
+  font-size: 30px;
+  margin-top: 8px;
+  margin-right: 27px;
+  }
+
+/* Footer */
+
+.front #footer .wrap {
+  width: 810px;
+  }
+
+p.copy {
+  margin-top: 0;
+  }
+
+/* Different Tables for admin use */
+
+table {
+  font-size: .8em;
+  }
+
+table th {
+  font-size: .8em;
+  text-transform: uppercase;
+  background-color: #eee;
+  border: 1px solid #ddd;
+  padding: 5px;
+  }
+
+tr.even, tr.odd {
+  border-bottom: 1px solid #ccc;
+  padding: .1em .6em;
+  }
+
+tr.even {
+  background-color: #eee;
+  }
+
+td, td.description {
+  border: 1px solid #ddd;
+  padding: 5px;
+  color: #222;
+  font-size: .9em;
+  }
+
+.section-websites .view-openscholar-sites td {
+  width: 25%;
+  }
+  
+  
+  .admin-disabled, .admin-missing {color:red;}
+
+/* FRONT PAGE LAYOUT */
+
+.front #content-top {
+  min-height: 359px;
+  position: relative;
+  margin-bottom: 10px;
+  }
+
+.front #content-top #block-openscholar_front-video_info {
+  float:left;
+  width: 638px;
+  margin-left:15px;
+  }
+
+.front #content-top #block-openscholar_front-site_mission {
+  float:right;
+  font-size: 23px;
+  margin-bottom: 0;
+  color: #4a4949;
+  line-height: 1.4em;
+  width: 226px;
+  margin-top:59px;
+  margin-right: 3px;
+  }
+
+/* SEARCH FORM */
+
+.block-search h3 {
+  display:none;
+  }
+
+.block-search .content {
+  background:url('../images/search.png') no-repeat scroll 100% 0 transparent;
+  float:right;
+  height:32px;
+  margin:37px 0 0;
+  width:218px;
+  }
+
+.block-search .form-item,
+.block-search .form-submit,
+.block-search .clear-block {
+  border:medium none;
+  margin:0;
+  padding:0;
+  }
+
+.block-search label {
+  display:none;
+  }
+
+.block-search .form-text {
+  border:medium none;
+  float:right;
+  height:25px;
+  margin:3px 9px 0 0;
+  width:184px;
+  }
+
+.block-search input.form-submit {
+  -moz-border-radius:0 0 0 0;
+  background:none repeat scroll 0 0 transparent;
+  border:medium none;
+  float:left;
+  height:30px;
+  margin-left:10px;
+  margin-right:0;
+  margin-top:2px;
+  padding:0 !important;
+  text-indent:-9999em;
+  width:12px;
+  }
+
+/* CONTENT PROFILES */
+
+.field-field-user-profile-photo {
+  float: right;
+  }
+
+p.single, ul.single, ul.single li {
+  display:inline;
+  }
+
+p.single {
+  margin-right: 8px;
+  }
+
+
+/* FRONT PAGE vSITE PROFILES */
+
+.front #content-bottom:after {
+  content: ',';
+  font-size: .1em;
+  visibility: hidden;
+  clear: both;
+  display: inline-block;
+  }
+
+html[xmlns] #content-bottom:after {
+  display:block;
+  }
+
+#block-views-openscholar_sites-block_2 ul {
+  padding-top: 12px;
+  margin: 0 0 0 85px;
+  }
+
+#block-views-openscholar_sites-block_2, #footer {
+  position:relative;
+  }
+
+#block-views-openscholar_sites-block_2 h3 {
+  background: url('../images/featured.png') 0 0 no-repeat transparent;
+  text-indent: -999em;
+  width:70px;
+  height: 64px;
+  margin: 0;
+  margin: -11px 0 0 -1px;
+  float:left;
+  -moz-border-radius: 6px 0 0 0;
+  -webkit-border-radius: 6px 0 0 0;
+  border-radius: 6px 0 0 0;
+  }
+
+#block-views-openscholar_sites-block_2 {
+  clear: both;
+  background:#fff;
+  position:relative;
+  }
+
+#block-views-openscholar_sites-block_2 .views-row {
+  float: left;
+  clear: none;
+  width: 270px;
+  margin: 2px 8px;
+  overflow: hidden;
+  }
+
+#block-views-openscholar_sites-block_2 .views-row,
+.view-openscholar-sites td {
+  height: 100px;
+  font-size: 12px;
+  }
+
+#block-views-openscholar_sites-block_2 img,
+.view-openscholar-sites img,
+.view-openscholar-sites img {
+  border: 1px solid #8b8b8b;
+  float: left;
+  margin:0 10px 5px 0;
+  }
+
+.views-field-description p {
+  font-weight: normal;
+  line-height: 1.1em;
+  margin: 0 auto;
+  font-size: 11px;
+  }
+
+.view-openscholar-sites .views-field-title a {
+  font-weight: normal;
+  }
+
+#block-views-openscholar_sites-block_2 .more-link {
+  clear: both;
+  }
+
+#block-views-openscholar_sites-block_2 .views-admin-links {
+  position:absolute;
+  right:0;
+  top: 0;
+  width: 103px;
+  }
+
+#block-views-openscholar_sites-block_2 .views-admin-links ul {
+  background: transparent;
+  height: auto;
+  padding: 0;
+  margin:0;
+  }
+
+#block-views-openscholar_sites-block_2 .more-link a {
+  background: url('../images/arrow-black.png') no-repeat 100% 50% #fff;
+  padding-right: 11px;
+  color: #000;
+  text-transform: capitalize;
+  font-weight: bold;
+  margin-right: 30px;
+  }
+
+#block-views-openscholar_sites-block_2 .more-link a:after {
+  content: none;
+  }
+
+a.imagecache-openscholar_front_logo {
+  width: 80px;
+  height: 80px;
+  border: 1px solid #535252;
+  display:block;
+  }
+
+#block-views-openscholar_sites-block_2 img, .view-iqss-project-sites img {
+  border: 1px solid #535252;
+  }

@@ -1,0 +1,35 @@
+When you create a box plugin you can extend your class to recieve the following functionality.
+
+<h3>New functions</h3>
+<dl>
+<dt>Implent function ->cache()</dt>
+<dd>If you create the function 'cache' and have it return cache parameters then caching for your box will be taken care of.<br/> Example return value would be:
+<pre>
+       array( 
+        'cache' => BLOCK_CACHE_CONTENT_CACHE,
+        'cache_keys' => array(
+          'node' => array('node_type' => 'node_type'),
+          'os_og' => array('current' => 'current'),
+        ));  
+</pre>
+Where 'cache' defines the type of caching to use, currently 'BLOCK_CACHE_CONTENT_CACHE' is the only option.<br>
+'cache_keys' defines when the cache for this block should be cleared. In the example above the cache will be cleared any time a node of type 'node_tpye' is saved within the current site.  For more information on avalible keys see the "Views content cache" module.        
+</dd>
+
+<dt>Implent function ->access()</a></dt>
+<dd>Control when a widget is avalible to an administrator of a site, for example return false if a required feature for this block is not avalible.</dd>
+
+</dl>
+
+<h3>Plugin Definition</h3>
+<dl>
+<dt>"title"</dt>
+<dd>A Title must be present for your plugin to be included in the list of avalible boxes </dd>
+
+<dt>Standard Vsite Widget keys</dt>
+<dd>Additionally your plugin definition can add any key provided in the <a href="&topic:vsite/widgets-create&">vsite widgets</a> hook.</dd>
+
+<dt>"module dependencies"</dt>
+<dd>You may provide an array of modules that should be enabled. This can include features and the box will be disabled if the feature is not enabled in the site.</dd>
+
+</dl>

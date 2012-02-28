@@ -1,0 +1,14 @@
+Index: biblio_theme.inc
+===================================================================
+--- biblio_theme.inc	(revision 2167)
++++ biblio_theme.inc	(working copy)
+@@ -807,7 +807,8 @@
+     foreach ($node->files as $file) {
+       if ($file->list) {
+         $file_count++;
+-        $href = file_create_url($file->filepath);
++        $alias = db_result(db_query("SELECT dst FROM {url_alias} WHERE src = '%s'",'filefield_paths/alias/' . $file -> fid));        
++        $href = ($alias) ?  $alias : file_create_url($file->filepath);
+         $text = $file->description ? $file->description : $file->filename;
+         $files .= l($text, $href) .'&nbsp;('. format_size($file->filesize).')';
+       }

@@ -1,0 +1,78 @@
+h2.with-tabs {
+  float: left;
+  }
+
+div.tabs {
+  height: auto;
+  position:absolute;
+  left: 0;
+  right: 0;
+  }
+
+.page-cp-users div.tabs,
+.page-cp-users-myaccount-personal div.tabs {
+  right: auto;
+  left: 257px;
+  }
+
+ul.secondary li {
+  border: none;
+  }
+
+div.tabs ul {
+  margin: 0 auto;
+  padding: 0;
+  border-width: 0;
+  list-style: none;
+  white-space: nowrap;
+  line-height: normal;
+  text-align:center;
+  font-size: 0; /* removes white space between li's */
+  }
+
+div.tabs li {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	background:#fff;
+  }
+
+div.tabs li a,
+div.tabs li a:visited {
+	display: inline-block;
+	margin: 0;
+	border-width: 0;
+	font-weight: bold;
+	text-decoration: none;
+	border: 1px solid #cecece;
+	border-left:none;
+	border-top: none;
+	color: #626161;
+  padding: 6px 23px;
+  font-size: 13px;
+  }
+
+div.tabs li a.active {
+  background: #b8c0c0;
+  color: #000;
+  text-decoration: none;
+  text-shadow:0 1px 0 #e6e8ea;
+  border-color:#a4abab;
+  }
+
+div.tabs li:first-child a {
+  border-left: 1px solid #cecece;
+  -moz-border-radius: 0 0 0 8px;
+  }
+
+div.tabs li:last-child a {
+  -moz-border-radius: 0 0 8px 0;
+  }
+
+div.tabs li a:hover {
+	background-color: #e7eaef;
+  }
+
+div.tabs li a.active {
+	background: #c5d0e2 !important;
+  }

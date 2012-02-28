@@ -1,0 +1,45 @@
+#menu_sort_table th, #menu_sort_table td {
+  text-align: center;
+  }
+
+#menu_sort_table td:first-child, #menu_sort_table th:first-child {
+  text-align: left;
+  font-weight: bold;
+  }
+
+#menu_sort_table th:first-child {
+  padding-left: 24px;
+  }
+  
+#cp-settings-menus .form-text {
+	width: auto;
+}
+
+#cp-settings-menus .description a {
+	color: #999999;
+}
+
+#modalContent fieldset .form-text {
+  display: block;	
+}
+
+#vsite-menus-settings-form td.region {
+	font-size: larger;
+	font-weight: bolder;
+}
+
+#vsite-menus-settings-form tr.draggable td:first-child {
+	padding-left: 20px;
+}
+
+#modal-content legend {
+	display: none;
+}
+
+.vsite-menus-new-menu {
+	float: right;
+}
+
+#fields tr.region-populated {
+	display: none;
+}

@@ -1,0 +1,28 @@
+<?php
+//$Id
+
+function vsite_taxonomy_update_6000(){
+  $res = array();
+  // Weight scholar to be after og_vocab
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'og_vocab'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'vsite_taxonomy'", ($weight + 1));
+  return $res;
+}
+
+function vsite_taxonomy_update_6001(){
+  $res = array();
+  // Enable dialog module if need
+  if(!module_exists('dialog')){
+    
+    include_once('includes/install.inc');
+    module_rebuild_cache();
+    drupal_install_modules(array('dialog'));
+    $ret[] = array(
+      'success' => true,
+      'query' => 'Installed dialog module and enabled it',
+    );
+    
+  }
+  
+  return $res;
+}

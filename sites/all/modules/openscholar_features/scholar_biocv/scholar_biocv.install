@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * Implementaton of hook_enable().
+ */
+function scholar_biocv_enable() {
+  // Weight of biocv needs to be lower than content profiles so it can control profile uid's
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'content_profile'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'scholar_biocv'", ($weight - 1));
+  
+}
+
+function scholar_biocv_update_6001(&$sandbox){
+
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "scholar_biocv" ');
+  while ( $row = db_fetch_object($result) ) {
+    $value = unserialize($row->value);
+    // there is only one system variable here: use_pdf_as_cv
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'scholar_biocv_use_pdf_as_cv', '%s')", $row->type, $row->sid, serialize($value['use_pdf_as_cv']));
+  }
+  $res[] = array(
+    'success' => true,
+    'query' => 'Migrated the Bio/CV Settings'
+  );
+
+  return $res;
+
+}
+
+function scholar_biocv_update_6002(&$sandbox){
+
+  $res = array();
+  
+  // Weight of biocv needs to be lower than content profiles so it can control profile uid's
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'content_profile'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'scholar_biocv'", ($weight - 1));
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'Updated Bio/CV Weight'
+  );
+  
+  return $res;
+
+}
+
+/**
+ * Remove content field that was inadvertantly added
+ * @param array $sandbox
+ */
+function scholar_biocv_update_6003(&$sandbox){
+	$res = array();
+  
+  // Migrate cv attachments to correct field
+  db_query("UPDATE `content_type_cv` SET field_cv_attach_fid = field_cv_attached_fid, field_cv_attach_list = 1, field_cv_attach_data = 'a:0:{}' WHERE `field_cv_attach_fid` IS NULL AND `field_cv_attached_fid` IS NOT NULL");
+  
+  module_load_include('inc', 'content', 'includes/content.crud');
+  content_field_instance_delete('field_cv_attached', 'cv');
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'Remove field cv-field_cv_attached'
+  );
+  
+  return $res;
+}

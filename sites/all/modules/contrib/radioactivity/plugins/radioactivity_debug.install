@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Radioactivity debug install hooks
+ */
+function radioactivity_debug_install() {
+  // nothing required
+}
+
+function radioactivity_debug_uninstall() {
+  // nothing required
+}

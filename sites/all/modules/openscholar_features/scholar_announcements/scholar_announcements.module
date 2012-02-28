@@ -1,0 +1,31 @@
+<?php
+
+include_once('scholar_announcements.features.inc');
+
+/**
+ * Implementation of hook_context_links_alter().
+ */
+function scholar_announcements_context_links_alter(&$links) {
+  if (!empty($links['announcement'])) {
+    $links['announcement']['query'] = drupal_get_destination();
+  }
+}
+
+/**
+ * Implement hook menu
+ */
+function scholar_announcements_menu(){
+  $items = array();
+  
+  $items['features/scholar_announcements'] = array(
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('scholar_announcements_settings'),
+    'access callback' => module_exists('spaces') ? 'spaces_access_admin' : 'user_access',
+    'access arguments' => module_exists('spaces') ? array() : array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'scholar_announcements.pages.inc',
+  );
+  
+  return $items;
+}

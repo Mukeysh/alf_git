@@ -1,0 +1,16 @@
+diff --git a/sites/all/modules/contrib/itweak_upload/itweak_upload.module b/sites/all/modules/contrib/itweak_upload/itweak_upload.module
+index 979ca24..c5c896e 100644
+--- a/sites/all/modules/contrib/itweak_upload/itweak_upload.module
++++ b/sites/all/modules/contrib/itweak_upload/itweak_upload.module
+@@ -834,7 +834,10 @@ function itweak_upload_upload_form_current($form) {
+ 
+     $rows[] = array('data' => $row, 'class' => 'draggable mime-' . $extension);
+   }
+-  $output = theme('table', array(), $rows, array('id' => 'upload-attachments'));
++  $output = "";
++  if(count($rows)){
++  	$output .= theme('table', array(), $rows, array('id' => 'upload-attachments'));
++  }
+   $output .= drupal_render($form);
+   return $output;
+ }

@@ -1,0 +1,23 @@
+#extradiv {
+  background-image: url('images/fabric-strip-floral-pattern.png');
+  }
+
+body {
+  background-color: #300d0f;
+  }
+
+#navbar {
+  background-image: url('images/menu-strip-floral-pattern.png');
+  }
+
+a, a:visited {
+  color:#8B0D09;
+  }
+
+#navbar li a, #navbar li a:visited {
+  color: #fff;
+  }
+
+#navbar li a:hover, #navbar li a.active, #navbar .active-trail a {
+  background: #8a0f0b;
+  }

@@ -1,0 +1,7 @@
+; $Id: cs_meta.info,v 1.1.1.1 2008/11/21 20:42:34 jweiner Exp $ v.1.0 - Joe Weiner
+name = Computer Science
+description = "Creates formatted template files for The Collection of Computer Science Bibliographies respository at http://liinwww.ira.uka.de/bibliography/index.html"
+dependencies[] = cite_distribute
+package = Cite Distribute
+core = 6.x
+version = "6.x-beta14"

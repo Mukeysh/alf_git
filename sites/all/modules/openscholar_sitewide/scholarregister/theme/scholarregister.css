@@ -1,0 +1,115 @@
+.page-site #page {
+  margin-top: 5%;
+  font-family: 'helvetica neue',helvetica, arial, sans-serif;
+  }
+
+.page-site .wrap {
+  width: 660px;
+  }
+
+.page-site #footer .wrap {
+  width: 575px;
+  }
+
+.page-site #user_register {
+  padding: 0 30px 30px 30px;
+  }
+
+.page-site #content-main {
+  background: transparent !important;
+  border: none !important;
+  padding: 0;
+  }
+
+#user_register {
+  -moz-border-radius: 6px 6px 6px 6px;
+  background: none repeat scroll 0 0 #FFFFFF;
+  border: 1px solid #CCCCCC;
+  }
+
+.page-site h2.title,
+.page-site #edit-submit {
+  margin:15px 0 15px 0;
+  }
+
+.page-site h2.title {
+  margin-left: 30px;
+  margin-bottom: 2px;
+  }
+
+.page-site #edit-submit {
+  display:block;
+  margin: 30px 0 0 auto;
+  }
+
+#scholarregister-signup-form #name-field,
+#scholarregister-signup-form #mail-field {
+  padding-bottom: 5px;
+  }
+
+#scholarregister-signup-form .form-item {
+  margin:10px 0;
+  }
+
+#scholarregister-signup-form label {
+  font-weight:bold;
+  display:block;
+  font-size: 11px;
+  color: #333;
+  }
+
+#scholarregister-signup-form input.form-text, #scholarregister-signup-form textarea.form-textarea, #scholarregister-signup-form div.description {
+  width: 94%;
+  }
+
+#scholarregister-signup-form div.description {
+  font-size: 11px;
+  line-height: 14px;
+  }
+
+#scholarregister-signup-form #name-field,
+#scholarregister-signup-form #mail-field,
+#edit-password-pass1-wrapper,
+#edit-password-pass2-wrapper,
+#edit-password-pass1-wrapper,
+#edit-password-pass2-wrapper {
+  display:inline-block;
+  vertical-align: top;
+  width: 49.5%;
+  margin: 0;
+  }
+
+#scholarregister-signup-form,
+#edit-password-wrapper,
+#domain-field,
+.page-site #container #domain-suffix {
+  padding-top: 8px;
+  }
+
+#edit-send-mail-wrapper {
+  padding-bottom: 20px;
+  }
+
+#domain-field .field-prefix,
+#domain-field input.form-text {
+  float:left;
+  margin-right: 3px;
+  }
+
+#domain-field input.form-text {
+  width: 200px !important;
+  }
+
+#domain-field .description {
+  clear:left;
+  margin: 3px 0;
+  }
+
+#success-message {
+  clear:both;
+  font-weight:bold;
+  }
+
+.page-site #footer {
+  padding-top: 5px;
+  }

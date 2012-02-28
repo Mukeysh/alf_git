@@ -1,0 +1,14 @@
+name        = Redhead
+description = A clean fixed layout design - white background with a crimson header area.
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+flavor_name = "Crimson"
+plugins[vsite_design][flavor] = flavors
+
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
+
+
+
+stylesheets[all][]   = scholar-redhead.css

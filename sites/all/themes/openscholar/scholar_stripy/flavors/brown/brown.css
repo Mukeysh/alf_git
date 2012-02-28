@@ -1,0 +1,17 @@
+/* Brown*/
+
+body {
+  background:#7A6834;
+  }
+
+body.navbar-off #page {
+  background-image:url('images/body-bg-alt-brown.png');
+  }
+
+#navbar {
+  background-image: url('images/nav-brown.png');
+  }
+
+a, a:visited {
+  color: #658ab2;
+  }

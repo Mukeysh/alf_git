@@ -1,0 +1,104 @@
+<?php
+
+function vsitehelp_help($path) {
+  switch ($path) {
+    //features
+    case 'cp/build':
+    case 'cp/build/features':
+      return theme('advanced_help_topic', 'vsitehelp', 'Features');
+
+    //appearance
+    case 'cp/build/layout':
+      return theme('advanced_help_topic', 'vsitehelp', 'Customizing-Your-Site-Layout');
+
+    case 'cp/appearance':
+    case 'cp/appearance/theme':
+      return theme('advanced_help_topic', 'vsitehelp', 'Theme-Selection');
+
+    case 'cp/build/menus':
+      return theme('advanced_help_topic', 'vsitehelp', 'Menus');
+      
+    case 'cp/build/taxonomy':
+      return theme('advanced_help_topic', 'vsitehelp', 'Categorizing-Your-Content---Taxonomy');
+
+    case 'cp/settings/site_info/%':
+      return theme('advanced_help_topic', 'vsitehelp', 'Site-Information');
+
+    //settings
+    case 'cp/settings':
+    case 'cp/settings/generic':
+    return theme('advanced_help_topic', 'vsitehelp', 'Site-Settings');
+
+    //content
+    case 'cp/content':
+      return theme('advanced_help_topic', 'vsitehelp', 'Managing-Your-Content');
+
+    case 'cp/content/files':
+      return theme('advanced_help_topic', 'vsitehelp', 'Managing-Files-and-Images');
+
+    //users
+    case 'cp/users':
+    	return theme('advanced_help_topic', 'vsitehelp', 'Managing-Your-Users');
+
+     //news
+    case 'cp/news':
+      return theme('advanced_help_topic', 'vsitehelp', 'Getting-Project-News');
+
+    //support
+    case 'cp/support':
+      return theme('advanced_help_topic', 'vsitehelp', 'Getting-Support');
+  }
+}
+
+function vsitehelp_step_form(&$element, $form_id, $callback) {
+  if (is_object($element)) {
+    $element = (array)$element;
+  }
+  foreach (element_children($element) as $child) {
+    vsitehelp_step_form($element[$child], $form_id . ':' . $child, $callback);
+  }
+  $callback($element, $form_id);
+}
+
+function vsitehelp_form_alter(&$form, $form_state, $form_id) {
+  vsitehelp_step_form($form, $form_id, 'vsitehelp_help_link');
+  $form['#description'] = isset($form['#description']) ? vsitehelp_get_from_key('form', $form_id) . ' ' . $form['#description'] : vsitehelp_get_from_key('form', $form_id);
+}
+
+function vsitehelp_get_from_key($key) {
+  static $helpkeys = array(
+    'spaces_features_form:spaces_features:scholar_announcements' => array('module' => 'vsitehelp', 'file' => 'Announcement-feature'),
+    'spaces_features_form:spaces_features:scholar_biocv' => array('module' => 'vsitehelp', 'file' => 'Bio---CV-feature'),
+    'spaces_features_form:spaces_features:scholar_blog' => array('module' => 'vsitehelp', 'file' => 'Blog-feature'),
+    'spaces_features_form:spaces_features:scholar_book' => array('module' => 'vsitehelp', 'file' => 'Booklet-feature'),
+    'spaces_features_form:spaces_features:scholar_classes' => array('module' => 'vsitehelp', 'file' => 'Class-feature'),
+    'spaces_features_form:spaces_features:scholar_pages' => array('module' => 'vsitehelp', 'file' => 'Pages-feature'),
+    'spaces_features_form:spaces_features:scholar_events' => array('module' => 'vsitehelp', 'file' => 'Events-feature'),
+    'spaces_features_form:spaces_features:scholar_dvn' => array('module' => 'vsitehelp', 'file' => 'Dataverse-feature'),
+    'spaces_features_form:spaces_features:scholar_feeds' => array('module' => 'vsitehelp', 'file' => 'Feed-feature'),
+    'spaces_features_form:spaces_features:scholar_front' => array('module' => 'vsitehelp', 'file' => 'Front-feature'),
+    'spaces_features_form:spaces_features:scholar_image_gallery' => array('module' => 'vsitehelp', 'file' => 'Image-Gallery-feature'),
+    'spaces_features_form:spaces_features:scholar_links' => array('module' => 'vsitehelp', 'file' => 'Links-feature'),
+    'spaces_features_form:spaces_features:scholar_profiles' => array('module' => 'vsitehelp', 'file' => 'Profiles-feature'),
+    'spaces_features_form:spaces_features:scholar_publications' => array('module' => 'vsitehelp', 'file' => 'Publications-feature'),
+    'spaces_features_form:spaces_features:scholar_presentations' => array('module' => 'vsitehelp', 'file' => 'Presentations-feature'),
+    'spaces_features_form:spaces_features:scholar_reader' => array('module' => 'vsitehelp', 'file' => 'Reader-feature'),
+    'spaces_features_form:spaces_features:scholar_software' => array('module' => 'vsitehelp', 'file' => 'Software-feature'),
+    'vsite_layout_settings_form:page_type' =>                  array('module' => 'vsitehelp', 'file' => 'Customizing-Your-Site-Layout'),
+  );
+  return isset($helpkeys[$key]) ? $helpkeys[$key] : FALSE;
+}
+
+function vsitehelp_help_link(&$element, $form_id) {
+  if (isset($element['#type']) && !in_array($element['#type'], array('button', 'image_button', 'submit', 'markup', 'token', 'hidden', 'form', 'value', 'weight'))) {
+    if ($result = vsitehelp_get_from_key($form_id)) {
+      $link = theme('advanced_help_topic', $result['module'], $result['file']);
+      if ($element['#type'] == 'fieldset') {
+        drupal_add_css(drupal_get_path('module', 'vsitehelp') . '/vsitehelp.css');
+        $link = preg_replace('/class="(.+?)"/', 'class="\1 vsitehelp-nofloat"', $link);
+      }
+      $element['#description'] = isset($element['#description']) ? $link . ' ' . $element['#description'] : $link;
+    }
+  }
+}
+

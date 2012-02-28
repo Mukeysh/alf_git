@@ -1,0 +1,14 @@
+; $Id$
+name = OpenScholar Translation
+description = Provides connection to OpenScholar translation server
+dependencies[] = l10n_update
+dependencies[] = os
+dependencies[] = strongarm
+core = 6.x
+package = Multilanguage
+project = OpenScholar Localization
+l10n server = http://scholar-dev1.iq.harvard.edu/
+features[ctools][] = 'strongarm:strongarm:1'
+features[variable][] = l10n_client_server
+features[variable][] = l10n_client_use_server
+features[variable][] = language_negotiation

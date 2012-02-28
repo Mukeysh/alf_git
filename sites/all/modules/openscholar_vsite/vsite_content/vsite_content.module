@@ -1,0 +1,131 @@
+<?php
+
+include_once('vsite_content.features.inc');
+
+/**
+ * hook menu
+ */
+function vsite_content_menu() {
+  $items = array();
+  
+  //Add local task for cp content
+  $items['cp/content/all'] = array(
+    'title' => 'Content',
+    'page callback' => 'views_page',
+    'page arguments' => array('vsite_content','page_1'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'menu_name' => 'cp',
+    'access callback' => 'cp_access_cp',
+    'weight' => -10,
+  );
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu_alter
+ */
+function vsite_content_menu_alter(&$items){
+  //Remove the edit local task, this will be handled by the context links.
+  $items['node/%node/edit']['type'] = MENU_CALLBACK;
+}
+
+function vsite_content_form_views_bulk_operations_form__1_alter(&$form, $form_state, $form_id = 'views_bulk_operations_form__1') {
+  //Add collapsible JS
+  global $base_url;
+  
+  $url = ltrim(  url($_GET['q']),'/'  );
+  $url = str_replace( $base_url.'/', '', $url);
+  
+  drupal_add_js('misc/collapse.js');
+  if ($form['#id'] == 'views-bulk-operations-form--1') {
+   $form['select']['#title'] = 'Update options';
+  }
+}
+
+/**
+ * hook form_alter
+ * Alter the views exposed form:
+ */
+function vsite_content_form_views_exposed_form_alter(&$form, $form_state, $form_id = 'views_exposed_form') {
+
+  if ($form['#id'] == 'views-exposed-form-vsite-content-page-1') {
+
+    //Add collapsible JS
+    drupal_add_js('misc/collapse.js');
+  
+
+    // the "type" dropdown contains all content types
+    // it needs only content type from features enabled in this vsite
+  	vsite_include('vsiteapi');
+  	$all_options = $form['type']['#options'];
+  	$vsite_option = vsite_content_types($privacy = array(1,2));
+  	$form['type']['#options'] = array_intersect($all_options, $vsite_option);
+  	$form['type']['#options']['All'] = '<Any>';
+    
+    //@todo this is not used anymore. check
+    $type = arg(2);
+    //set action to current url
+    $form['#action'] = request_uri();
+
+    $options = array(
+      'All' => check_plain('<Any>'),
+      1 => 'Yes',
+      0 => 'No'
+    );
+    
+    //promoted to front page filter
+    $form['promote']['#type'] = 'radios';
+    $form['promote']['#options'] = $options;
+
+    //published status filter
+    $form['status']['#type'] = 'radios';
+    $form['status']['#options'] = $options;
+
+    //sticky on top of lists filter
+    $form['sticky']['#type'] = 'radios';
+    $form['sticky']['#options'] = $options;
+
+    // ugly reset button
+    $vsite = vsite_get_vsite();
+    if (!$vsite) {
+      return;
+    }
+    $active_menu = menu_get_item();
+    $path = url($active_menu['path']);
+
+    $form['reset'] = array(
+      '#type' => 'markup',
+      '#value' => '<input class="form-button" type="reset" value="Reset" onClick="javascript:window.location=\''. $path .'\';" />',
+    );
+  }
+}
+
+
+/**
+ * Edit the content view form to put it into fieldsets
+ */
+function vsite_content_form_alter(&$form, $form_state, $form_id) {
+
+  switch ($form_id) {
+    case 'views_exposed_form':
+      if ($form['#id'] == "views-exposed-form-vsite-content-page-1") {
+        $vals = $form_state['input'];
+        //is the filter set? if so don't collapse it
+        $s_state = (!is_array($vals) || !(strlen($vals['title'] || $vals['promote'] != 'All' || $vals['sticky'] != 'All' || $vals['status'] != 'All' || count($vals['tid']))))?'collapsed':'';
+      $form['#prefix'] = '<fieldset class="vsite_content_filter_box collapsible"><legend>Filter options</legend>';
+        $form['#suffix'] = '</fieldset>';
+      }
+    break;
+    case 'views_bulk_operations_form__1':
+      if (arg(0) == 'cp' && arg(1) == 'content') {
+        if (is_array($form['select']['#attributes'] )) {
+          $form['select']['#attributes'] += array('class' => 'vsite_content_bulk_update collapsible collapsed');
+        }
+        else $form['select']['#attributes'] = array('class' => 'vsite_content_bulk_update collapsible collapsed');
+      }
+    break;
+    default:
+  }
+}
+

@@ -1,0 +1,30 @@
+body.header-left-main-right #header-left {
+left: 190px;
+*left: -200px;
+  }
+
+body.header-left-main #header-left {
+  left: -20px !important;
+	}
+
+#block-vsite_menus-features ul.menu li a {
+  height: 1%;
+  }
+
+body.sidebar-first #sidebar-first, body.two-sidebars #sidebar-second, body.sidebar-second #sidebar-second {
+  right: 0;
+  left: 0;
+   * left: 170px;
+  }
+  
+  
+ body.two-sidebars #sidebar-first { 
+ right: 0;
+  left: 0;
+  *left: 600px;
+ }
+
+
+#content-area .hg-container, #sidebar-first h3, #sidebar-second h3 {
+  _zoom:1;
+  }

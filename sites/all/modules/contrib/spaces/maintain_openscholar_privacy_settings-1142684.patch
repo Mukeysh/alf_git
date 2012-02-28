@@ -1,0 +1,46 @@
+diff --git a/sites/all/modules/contrib/spaces/spaces.install b/sites/all/modules/contrib/spaces/spaces.install
+index 7663e6e..7a4bd0d 100644
+--- a/sites/all/modules/contrib/spaces/spaces.install
++++ b/sites/all/modules/contrib/spaces/spaces.install
+@@ -310,8 +310,24 @@ function spaces_update_6301() {
+         // Note how a feature entry is converted to a spaces_override by folding
+         // the feature setting into the value array of a
+         // spaces_features override.
++        
++      	//Patch to maintain feature privacy values for OpenScholar
++      	switch ($feature->value){
++      		// 1 was private now it is public
++      		case 1:
++      		  $newval = 2;
++      		break;
++      		// 2 was public now it is private
++          case 2:
++            $newval = 1;
++          break;
++          //Disabled remains the same
++          default:
++          	$newval = 0;
++      	}
++      	
+         $value = array(
+-          $id => empty($feature->value) ? '0' : '1',
++          $id => $newval
+         );
+         if ($override = db_fetch_array(db_query("SELECT * FROM {spaces_overrides} WHERE type = '%s' AND id = '%s' AND object_type = 'variable' AND object_id = 'spaces_features'", $type, $sid))) {
+           $value += unserialize($override['value']);
+@@ -354,7 +370,7 @@ function spaces_update_6302() {
+   }
+   // Migrate objects.
+   spaces_migrate_api_3_presets($presets);
+-  return array();  
++  return array();
+ }
+ 
+ /**
+@@ -397,5 +413,5 @@ function spaces_migrate_api_3_presets($presets) {
+       db_query("INSERT INTO {spaces_presets} (name,title,description,space_type,value) VALUES ('%s', '%s', '%s', '%s', '%s')", $new['name'], $new['title'],$new['description'], $new['space_type'], $new['value']);
+       drupal_set_message('Updated spaces preset: '. $new['name']);
+     }
+-  }  
++  }
+ }

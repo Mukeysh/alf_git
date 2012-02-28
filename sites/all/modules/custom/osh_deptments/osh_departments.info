@@ -1,0 +1,4 @@
+name = OS harvard departments
+description = Custom stuff for harvard departments
+core = 6.x
+version = "6.x-beta14"

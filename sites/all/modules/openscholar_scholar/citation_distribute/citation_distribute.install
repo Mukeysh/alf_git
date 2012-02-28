@@ -1,0 +1,126 @@
+<?php
+
+// $Id;$
+
+/**
+ * Implementation of hook_schema().
+ */
+function citation_distribute_schema() {
+
+  $schema['citation_distribute'] = array(
+    'description' => t('Manages status for various submoule template types'),
+    'fields' => array(
+  
+      'nid' => array(
+        'description' => t("Drupal node ID"),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+
+      'plugin' => array(
+        'description' => t("Contains the name of the submodule to identify the type of template"),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      
+      'noauto' => array(
+        'description' => t('Do not autoflag this plugin/node pair.'),
+      	'type' => 'int',  
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+
+      'batch_command' => array(
+        'description' => t('Command to run when this node is next processed by cron'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      
+    ),
+    'primary key' => array('nid','plugin'),
+    'unique key' => array('nid_plug' => array('nid', 'plugin')),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install()
+ * 
+ * Installs citation_distribute table and presets.  
+ * If cite_distribute is installed, copies out its data. 
+ */
+function citation_distribute_install(){
+  //install citation_distribute table
+  drupal_install_schema('citation_distribute');
+  
+  //set default module mode
+  variable_set('citation_distribute_module_mode','per_submission');
+
+  //check if table exists
+  $msg = db_table_exists('citation_distribute') ? '' :  'Error creating Cite Disitribute table';
+  //if cannot create table then display message
+  if (!empty($msg)) {
+    drupal_set_message(t($msg));
+  }
+  
+  //copy data from previous incarnation of this module
+  if (module_exists('cite_distribute')) {
+    _citation_distribute_import_old();
+  }
+}
+
+/**
+ * Implementation of hook_uninstall()
+ */
+function citation_distribute_uninstall(){
+  //remove citation_distribute table
+  drupal_uninstall_schema('citation_distribute');
+  
+  //remove autoflag variables
+  foreach( _citation_distribute_plugins() as $plugin ) {																	
+		variable_del('citation_distribute_' . $plugin['name'] . '_auto_flag', false);
+  }
+  
+  //remove system variables
+  foreach( array('module_mode', 'cron_limit') as $var) {
+	  variable_del('citation_distribute_' . $var);
+  }
+}
+
+
+/**
+ * copies info from cite_distribute, if that table is still active.
+ * hook_enable was the wrong timing, so do this during installation after drupal_install_schema.
+ */
+function _citation_distribute_import_old() {
+  $types = array('googlescholar_meta' => 'googlescholar', 'repec_meta' => 'service_repec');
+  
+  //upd and remove are always 0 in our table, so don't worry about them too hard.
+  //ignore remove.  items scheduled for remove shouldn't be recopied.
+  $query = 'SELECT nid,type,upd,remove FROM {cite_distribute} ';
+  $result = db_query($query);
+
+  if ($result) {
+    $insert = array();
+    while ($r = db_fetch_object($result)) {
+      $cmd = '';
+      ($r->upd) && $cmd = 'update';
+      ($r->remove) && $cmd = 'remove';
+      $insert[] = '(' . $r->nid . ', \'' . $types[$r->type] . '\', 0, \'' . $cmd . '\')';
+    }
+    
+    if (count($insert) > 0) {
+      $i = db_query('INSERT INTO {citation_distribute} (nid, plugin, noauto, batch_command) VALUES ' . implode(',', $insert));
+      $err = mysql_error();
+    }
+  }
+
+}

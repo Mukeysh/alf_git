@@ -1,0 +1,272 @@
+<?php
+
+include_once('os_wysiwyg.features.inc');
+
+
+/**
+ * Implementation of hook_init
+ * Ensure that every content type has a better formats default added to it
+ */
+function os_wysiwyg_init() {
+  // keep variable that contains all the types we've dealt with
+  // if there's a new type, update better_formats_defaults with this info
+
+  // it needs to be in init instead of install because fresh installs don't have strongarm vars available
+  $types = variable_get('os_wysiwyg_better_formats_defaults_added', array());
+  if (empty($types)) {
+    $types = array_fill_keys(array_keys(content_types()), 1);
+    module_load_install('os_wysiwyg');
+    _os_wysiwyg_set_default_formats();
+    variable_set('os_wysiwyg_better_formats_defaults_added', $types);
+    return;
+  }
+
+  $missing = array_diff_key(content_types(), $types);
+  if (!empty($missing)) {
+    module_load_install('os_wysiwyg');
+    _os_wysiwyg_set_default_formats($missing);
+    $types = array_merge($types, array_fill_keys(array_keys($missing), 1));
+    variable_set('os_wysiwyg_better_formats_defaults_added', $types);
+  }
+}
+
+/**
+ * Adds a small javascript file that ensures the editor has been initialized
+ * This is an issue when the editor is in a ctools modal
+ */
+function os_wysiwyg_wysiwyg_editor_settings_alter(&$settings, $context) {
+  if ($context['profile']->editor == 'tinymce') {
+    drupal_add_js(drupal_get_path('module', 'os_wysiwyg').'/theme/os_wysiwyg.js', 'module');
+
+    // allows spellchecking in the wysiwyg
+    // this defaults to off for some reason
+    $settings['gecko_spellcheck'] = true;
+
+    // split up the buttons into separate rows to pdw will work
+    $btns = explode(',', $settings['theme_advanced_buttons1']);
+    $bar2_start = array_search('formatselect', $btns);
+    $bar3_start = array_search('wysiwyg_fields_field_os_inline_image',$btns);
+    if ($bar2_start !== FALSE) {
+      $settings['theme_advanced_buttons1'] = implode(',', array_slice($btns,0,$bar2_start-1));
+      $settings['theme_advanced_buttons2'] = implode(',', array_slice($btns, $bar2_start, $bar3_start-$bar2_start));
+      $settings['theme_advanced_buttons3'] = implode(',', array_slice($btns, $bar3_start));
+    }
+    else {
+      $settings['theme_advanced_buttons1'] = implode(',', array_slice($btns, 0, $bar3_start-1));
+      $settings['theme_advanced_buttons2'] = implode(',', array_slice($btns, $bar3_start));
+    }
+    $settings['forced_root_block'] = '';
+
+    //Add the css from the public non/cp view if the editor is setup to use theme settings
+    if($context['profile']->settings['css_setting'] == 'theme' && context_isset('context', 'vsite-section-cp')){
+      os_wysiwyg_add_public_css($settings, $context);
+    }
+  }
+}
+
+function os_wysiwyg_nodeapi(&$node, $op, $teaser, $page) {
+  if ($op == 'presave') {
+    if (strpos($node->body, '<!--break-->') !== FALSE) {
+      $no_tags = strip_tags(str_replace($node->teaser,'',$node->body),'<img>,<script>,<embed>,<object>,<param>,<iframe>');
+      if ($no_tags == '') {
+        $node->teaser = str_replace('<!--break-->','',$node->body);
+        $node->body = $node->teaser.'<!--break-->';
+      }
+    }
+  }
+}
+
+/**
+ * Adds the pdw plugin to the wysiwyg
+ *
+function os_wysiwyg_wysiwyg_include_directory($type) {
+  if ($type == 'plugins') {
+    return $type;
+  }
+}
+
+function os_wysiwyg_wysiwyg_plugin($editor, $version) {
+switch ($editor) {
+    case 'tinymce':
+      if ($version > 3) {
+        return array(
+          'pdw' => array(
+            // A URL to the plugin's homepage.
+            'url' => 'http://www.neele.name/pdw_toggle_toolbars/',
+            // The full path to the native editor plugin, no trailing slash.
+            // Ignored when 'internal' is set to TRUE below.
+            'path' => drupal_get_path('module', 'os_wysiwyg') . '/plugins/pdw',
+            // The name of the plugin's main JavaScript file.
+            // Ignored when 'internal' is set to TRUE below.
+            // Default value depends on which editor the plugin is for.
+            'filename' => 'editor_plugin_src.js',
+            // A list of buttons provided by this native plugin. The key has to
+            // match the corresponding JavaScript implementation. The value is
+            // is displayed on the editor configuration form only.
+            'buttons' => array(
+              'pdw' => t('Toggle toolbars'),
+            ),
+            'options' => array(
+              'pdw_toggle_on' => 1,
+              'pdw_toggle_toolbars' => '2,3,4',
+            ),
+            'load' => TRUE,
+          ),
+        );
+      }
+      break;
+  }
+}
+
+/**
+ * wysiwyg configurations
+ */
+function _os_wysiwyg_config(){
+  $wysiwyg_presets = _openscholar_wysiwyg_presets();
+  foreach ( $wysiwyg_presets as $filter_name => $settings ) {
+    $settings = serialize($settings);
+
+    $query = "SELECT format FROM {filter_formats} WHERE name='%s'";
+    $format = db_result(db_query($query, $filter_name));
+    $query = "INSERT INTO {wysiwyg} (format, editor, settings) VALUES ('%d', '%s', '%s')";
+    db_query($query, $format, 'tinymce', $settings);
+  }
+}
+
+function _os_wysiwyg_presets(){
+  $settings = array();
+
+
+  $settings['Filtered HTML'] = array(
+    'default' => 1,
+    'user_choose' => 0,
+    'show_toggle' => 1,
+    'theme' => 'advanced',
+    'language' => 'en',
+    'buttons' => array(
+      'default' => array(
+        'bold' => 1,
+        'italic' => 1,
+        'strikethrough' => 1,
+        'bullist' => 1,
+        'numlist' => 1,
+        'link' => 1,
+        'unlink' => 1,
+        'image' => 1,
+        'code' => 1,
+        'cut' => 1,
+        'copy' => 1,
+        'paste' => 1,
+        'charmap' => 1,
+        'style' => 1
+      ),
+
+      'font' => array(
+        'formatselect' => 1
+      ),
+      'fullscreen' => array(
+        'fullscreen' => 1
+      ),
+      'paste' => array(
+        'pastetext' => 1
+      ),
+      'table' => array(
+        'tablecontrols' => 1
+      ),
+      'safari' => array(
+        'safari' => 1
+      ),
+      'drupal' => array(
+        'break' => 1
+      )
+    ),
+
+    'toolbar_loc' => 'top',
+    'toolbar_align' => 'left',
+    'path_loc' => 'bottom',
+    'resizing' => 1,
+    'verify_html' => 1,
+    'preformatted' => 0,
+    'convert_fonts_to_spans' => 1,
+    'remove_linebreaks' => 1,
+    'apply_source_formatting' => 0,
+    'paste_auto_cleanup_on_paste' => 1,
+    'block_formats' => 'p,address,pre,h2,h3,h4,h5,h6',
+    'css_setting' => 'theme',
+    'css_path' => '',
+    'css_classes' => 'Quotation=quote' . "\n" .
+                      'Float Image Left=img-flL' . "\n" .
+                      'Float Image Right=img-flR'
+  );
+
+  return $settings;
+}
+
+/**
+ * Add wysiwyg css settings for public site
+ * @param array $settings
+ * @param array $context
+ */
+function os_wysiwyg_add_public_css(&$settings, $context){
+
+	$vsite = spaces_get_space();
+	//Are we in a site with a valid og_theme, if so continue
+	if(!$vsite || !$vsite->group->og_theme) return;
+
+	$themes = list_themes();
+	$wysiwyg_styles = array();
+
+	// Grab stylesheets from base theme
+  if(isset($themes[$vsite->group->og_theme]->base_theme)) {
+    $base = $themes[ $themes[$vsite->group->og_theme ]->base_theme];
+    $wysiwyg_styles = _os_wysiwyg_get_theme_css($base);
+  }
+
+  //Add css for the main theme
+  if(isset($themes[$vsite->group->og_theme])) {
+    $wysiwyg_styles = array_merge($wysiwyg_styles,_os_wysiwyg_get_theme_css($themes[$vsite->group->og_theme]));
+
+    if(function_exists('vsite_design_get_flavors')){
+	    // load the css for the theme flavor
+	    $flavor = variable_get('vsite_design_'.$vsite->group->og_theme.'_flavor', '');
+
+      $theme_flavors = vsite_design_get_flavors($vsite->group->og_theme);
+	    if ($flavor && isset($theme_flavors[$flavor]) && is_array($theme_flavors[$flavor]['css'])) {
+		    foreach ($theme_flavors[$flavor]['css'] as $s_css){
+		      $wysiwyg_styles[] = base_path().$theme_flavors[$flavor]['path'].'/'.$s_css;
+		    }
+	    }
+    }
+  }
+
+  //Add custom wysiwyg css to the list to override some theme actions
+  $wysiwyg_styles[] = base_path().drupal_get_path('module', 'os_wysiwyg').'/theme/os_wysiwyg.css';
+
+  $settings['content_css'] = implode(",",$wysiwyg_styles);
+
+  //Add node classes to the mce editor's iframe body to help match css styles
+  $settings['body_class'] = "page-node not-front node node-inner content";
+
+}
+
+/**
+ * Return valid wysiwyg sheets given a theme
+ * @param unknown_type $stylesheets
+ */
+function _os_wysiwyg_get_theme_css($theme){
+	$wysiwyg_styles = array();
+	if (!empty($theme->stylesheets)) {
+	  foreach ($theme->stylesheets as $media => $stylesheets) {
+	    //Skip print stylesheets
+	    if($media != 'print'){
+	      foreach ($stylesheets as $name => $stylesheet) {
+	        if (file_exists($stylesheet)) {
+	          $wysiwyg_styles[] = base_path() . $stylesheet;
+	        }
+	      }
+	    }
+	  }
+	}
+
+  return $wysiwyg_styles;
+}

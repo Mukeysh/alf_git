@@ -1,0 +1,17 @@
+This is a utility module that provides integration of filefields, filefield_paths, file_alias, itweak_upload, and upload and helps them to play more nicely together in openscholars default setup.
+
+<h3>Functionality provided by os Files</h3>
+<dl>
+<dt>Upload JS Callback</dt>
+<dd>When the upload js ajax is executed the file_alias settings are checked within filefield_paths, if the current type has been setup to use file aliases the correct alias is generated and displayed in the returned file element instead of a path that will be incorrect after the node is saved.</dd>
+
+<dt>iTweak Upload file display</dt>
+<dd>iTweak displays files nicely in the teaser and node view however it does not link to the aliased file path since it takes over file processing early.  This code checks for a existing file alias and if it exists it changes the file path to the correct aliased path to reduce confusion.</dd>
+
+<dt>filefield upload ajax callback</dt>
+<dd>Extra proccessing is added to the upload of files via standard cck filefield elements.  This moves the file to the correct location and returns the correct aliased file path.  This solves two issues, if files are orphaned they are no longer in the root of the file directory but in the directory specified by filefiled_paths, also the correct final path is displayed to the user. <b>Assumtions Made:</b> are that you will not use tokens in your path or alias that you need a complete node for.  Since in some cases the node has not yet been created if you were to use node elements as tokens then the incorrect path will be displayed or the wrong location will be chosen for the file.</dd>
+
+<dt>Adds to filefield paths processing.</dt>
+<dd>When you delete one file on a node and re-upload a new file it gets a new file[id], if the files had the same name the end user expects the path to stay the same ex(site1/cv) however since the file is created and deleted in one instance the path alias still exists and you end up with paths like (site1/cv-0). The code created checks to see if the existing alias in conflict belongs to a file that is bieng removed and if so it allows the new file to claim the old files alias.</dd>
+
+</dl>

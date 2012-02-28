@@ -1,0 +1,47 @@
+diff --git a/creativecommons.class.php b/../../../../Zend/Apache2/htdocs/os/sites/all/modules/contrib/creativecommons/creativecommons.class.php
+index c7580cb..47f5e49 100644
+--- a/creativecommons.class.php
++++ b/../../../../Zend/Apache2/htdocs/os/sites/all/modules/contrib/creativecommons/creativecommons.class.php
+@@ -53,10 +53,14 @@ class creativecommons_license {
+       $this->type = '';
+     }
+ 
+-    if (empty($this->metadata)) {
++    if (!is_array($this->metadata)) {
+       // ensure metadata is an array
+       $this->metadata = array();
+     }
++
++    if (empty($this->metadata['description'])) {
++      $this->metadata['description'] = '';
++    }
+   }
+ 
+ 
+@@ -222,7 +226,7 @@ class creativecommons_license {
+     $img = array();
+     $img_dir = base_path() . drupal_get_path('module', 'creativecommons') .'/images';
+     $nc = variable_get('creativecommons_nc_img', '');
+- 
++
+     switch ($style) {
+       case 'button_large':
+         //TODO: missing jp large buttons... not on creativecommons.org
+@@ -253,7 +257,7 @@ class creativecommons_license {
+         if (!isset($px)) {
+           $px = '32';
+         }
+-        
++
+         foreach (explode('-', $this->type) as $filename) {
+           // NC options
+           if ($filename == 'nc' && $nc) {
+@@ -387,7 +391,7 @@ class creativecommons_license {
+               "\n\tclass=\"creativecommons\">\n\t\t";
+ 
+     // Image
+-    
++
+     $img = $this->get_image(variable_get('creativecommons_image_style', 'button_large'));
+     if ($img) {
+       $attributes['rel'] = 'license';

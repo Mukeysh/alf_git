@@ -1,0 +1,6 @@
+name = VotingAPI support for Radioactivity
+description = "VotingAPI energy source for radioactive nodes and comments. Provides 'most voted' metrics."
+dependencies[] = radioactivity
+dependencies[] = votingapi
+package = Radioactivity
+core = 6.x

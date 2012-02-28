@@ -1,0 +1,22 @@
+Index: sites/all/modules/contrib/biblio/endnote8_export.inc
+===================================================================
+--- endnote8_export.inc	(revision 2678)
++++ endnote8_export.inc	(working copy)
+@@ -77,7 +77,7 @@
+   // TODO: fix URLS
+   if (!empty($node->biblio_url)) {
+     $xml .= "<web-urls>";
+-    $xml .= '<url><style face="normal" font="default" size="100%">'.$node->biblio_url."</style></url>";
++    $xml .= '<url><style face="normal" font="default" size="100%">'.htmlspecialchars($node->biblio_url)."</style></url>";
+     $xml .= "</web-urls>";
+   }
+   unset($node->biblio_url);
+@@ -85,7 +85,7 @@
+     $xml .= "<related-urls>";
+     foreach($node->files as $file) {
+       $xml .= '<url><style face="normal" font="default" size="100%">';
+-      $xml .= file_create_url($file->filepath);
++      $xml .= htmlspecialchars(file_create_url($file->filepath));
+       $xml .= "</style></url>";
+     }
+     $xml .= "</related-urls>";

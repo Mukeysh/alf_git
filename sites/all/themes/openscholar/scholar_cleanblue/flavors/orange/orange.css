@@ -1,0 +1,38 @@
+#navbar {
+	background: #C75A26;
+	}
+
+#navbar .wrap {
+	background: #C75A26;
+	}
+
+#navbar li a {
+	background: none; color:#FFFFFF;
+	border-bottom:none;
+}
+
+#navbar li a.active, #navbar li.active-trail a {
+background: #D4D4D5;  
+color: #C75A26;
+}
+
+ .teaser-extra a {color:#C75A26;}
+ 
+.more-link a {
+  color:#C75A26;
+}
+
+.sidebar .content h1 a {color:#C75A26;}
+
+#header h1 a,
+#header h1 a:visited {
+    color:#C75A26;
+    }
+    
+.sidebar h3.title {
+  color: #767676;
+  }
+
+#sidebar-second h3.title, #sidebar-second h3.title a {
+  color:#767676;
+  }

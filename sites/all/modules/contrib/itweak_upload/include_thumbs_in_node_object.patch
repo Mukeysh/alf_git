@@ -1,0 +1,13 @@
+diff --git a/sites/all/modules/contrib/itweak_upload/itweak_upload.module b/sites/all/modules/contrib/itweak_upload/itweak_upload.module
+index b50a1b2..9380472 100644
+--- a/sites/all/modules/contrib/itweak_upload/itweak_upload.module
++++ b/sites/all/modules/contrib/itweak_upload/itweak_upload.module
+@@ -837,6 +837,8 @@ $show_caption = FALSE;   // FIXME - setting: = variable_get('itweak_upload_thumb
+         if ($teaser_images_max === '') $teaser_images_max = -1;
+         $cnt_other = _itweak_upload_preprocess_files($node->files, $thumbnails, $files_display, $derivative, $show_title, $show_caption, $options);
+ 
++        $node->itweak_upload = $thumbnails;
++        
+         // Add regular attachment list
+         if ($cnt_other) {
+           if ($files_display != 4) {

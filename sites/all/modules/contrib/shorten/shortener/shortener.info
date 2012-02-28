@@ -1,0 +1,12 @@
+name = Shorten URLs Input Filter
+description = "Provides an input filter that replaces URLs with a shortened version."
+core = 6.x
+package = Shorten URLs
+dependencies[] = shorten
+
+; Information added by drupal.org packaging script on 2011-11-05
+version = "6.x-1.12"
+core = "6.x"
+project = "shorten"
+datestamp = "1320472235"
+

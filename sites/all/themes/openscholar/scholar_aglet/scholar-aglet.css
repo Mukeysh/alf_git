@@ -1,0 +1,338 @@
+body {
+    background: #4e4e4e;
+    color:#000;
+    font: 13px/1.6em 'HelveticaNeue-Light', 'helvetica neue', helvetica, arial, sans-serif;
+    }
+
+/* TYPOGRAPHY*/
+
+#content-area .hg-container a {
+  text-decoration:underline;
+  }
+
+h2, h3, h4 {
+  margin-bottom: 0;
+  margin-top: 1em;
+  font-weight:bold;
+  color: #de1709;
+  }
+
+h2.title {
+  margin-top: 0;
+  margin-bottom: 1em;
+  }
+
+h2.title, h3.title {
+  color:#de1709;
+  font-size: 16px;
+  line-height: normal;
+  }
+
+h3.title {
+  font-size: 14px;
+  }
+
+.links li {
+  font-size: .8em;
+  }
+
+
+p.copy {
+  margin-top: 0;
+  }
+
+/* LAYOUT ELEMENTS */
+
+#page {
+  background: url('images/bg.png') repeat-y 0 0 transparent;
+  width: 1096px;
+  margin:auto;
+  padding-top:0;
+  }
+
+#page-wrapper {
+  background:url('images/footer.png') no-repeat 0 100% transparent;
+  }
+
+.wrap {
+  margin:0 48px;
+  }
+
+#header .wrap {
+  min-height: 99px;
+  background:#d9e3e5;
+  padding: 0 30px;
+  }
+
+#footer {
+  padding-top: 0;
+  height: 154px;
+  position: relative;
+  }
+
+#header {
+  background: url(images/header.png) no-repeat 50% 0;
+  padding-top:1px;
+  }
+
+#content-main #content {
+  padding-right:21px;
+  padding-left: 25px;
+  padding-top: 30px;
+  }
+
+#sidebar-first {
+  width: 221px;
+  padding-top:30px;
+  padding-left: 0;
+  padding-right:0;
+  right: 173px;
+  background:#e0ece8;
+  margin: 0;
+  left: 0;
+  margin-right: -100%;
+  }
+
+#sidebar-second {
+  width:254px;
+  padding-top:30px;
+  padding-left: 0;
+  padding-right:0;
+  background: #d9e3e5;
+  }
+
+#content-main,
+#sidebar-first,
+#sidebar-second {
+  padding-bottom: 20010px;  /* X + padding-bottom */
+  margin-bottom: -20000px;  /* X */
+  }
+
+#content-area .hg-container {
+  overflow: hidden;
+  }
+
+.page-datavere #content-area .hg-container {
+  overflow: visible;
+  }
+
+/*
+  Instead of the [sidebar, main-content, sidebar] layout we can easily change the layout to [main-content, sidebar, sidebar] thusly.
+*/
+
+#content-area .hg-container,
+body.two-sidebars #content-area .hg-container {
+  padding-left: 0 !important;
+  }
+
+body.sidebar-first #content-area .hg-container {
+  padding-right: 241px; /* sidebar-first width + content-main padding  */
+  }
+
+body.sidebar-second #content-area .hg-container {
+  padding-right: 274px; /* sidebar-second width */
+  }
+
+body.two-sidebars #content-area .hg-container {
+  padding-left: 0;
+  padding-right: 495px; /* Total sidebar width + content-main padding */
+  }
+
+body.sidebar-first #sidebar-first {
+  margin-right: -221px;
+  right: 20px /* content-main padding */
+  }
+
+body.two-sidebars #sidebar-first {
+  right: 0;
+  }
+
+.two-sidebars #sidebar-second {
+  right: -221px;        /* Total FIRST sidebar width */
+  }
+
+#sidebar-second a,
+#sidebar-second a:visited,
+#sidebar-first a,
+#sidebar-first a:visited {
+  color: #000;
+  text-decoration: underline;
+  }
+
+#sidebar-first .block,
+#sidebar-second .block,
+#sidebar-first h3.title,
+#sidebar-second h3.title {
+  padding: 14px 25px 11px 14px;
+  }
+
+#sidebar-first .block,
+#sidebar-second .block {
+  padding-top: 0;
+  }
+
+#sidebar-first h3.title,
+#sidebar-second h3.title {
+  padding-top: 21px;
+  padding-bottom: 24px;
+  background: #d1dcd8;
+  margin: 0 -25px 0 -14px;
+  }
+
+#sidebar-second .block
+#sidebar-second h3.title {
+  padding-left: 32px;
+  padding-right: 41px;
+  }
+
+
+#sidebar-second .content
+#sidebar-second h3.title {
+  background: #c8d1d3;
+  }
+
+/* HEADER ELEMENTS */
+
+#header h1,
+#header h2,
+#header p {
+  font-size: 25px;
+  line-height: normal;
+  font-weight:normal;
+  color:#000;
+  margin: 0;
+  }
+
+#header h2 {
+  font-size: 18px;
+  line-height: normal;
+  font-style:normal;
+  }
+
+#header p {
+  font-size: 13px;
+  line-height: normal;
+  }
+
+#header h1 a,
+#header h1 a:visited {
+  color:#000;
+  }
+
+#header h1 a:hover {
+  color:#282828;
+  text-decoration: none;
+  }
+
+#navbar {
+  padding: 0;
+  }
+
+#navbar .wrap {
+  height: 43px;
+  padding-left: 25px;
+  padding-right: 25px;
+  background: #d4d866;
+  }
+
+#navbar li {
+  float:left;
+  padding:0;
+  }
+
+#navbar li.last {
+  margin-right: 0;
+  }
+
+#navbar li a {
+  color: #000;
+  font-weight:bold;
+  font-size: 14px;
+  letter-spacing:1px;
+  line-height: 43px;
+  height: 43px;
+  display:block;
+  padding-right: 12px;
+  padding-left: 12px;
+  }
+
+#header #block-vsite_menus-scholar_secondary_menu {
+  width: 251px;
+  float:right;
+  }
+
+#header #block-vsite_menus-scholar_secondary_menu ul li {
+  list-style: none;
+  border-left: 1px solid #000;
+  padding-left: 11px;
+  float: left;
+  display:inline;
+  width: 113px;
+  line-height: 1.3em;
+  }
+
+#header #block-vsite_menus-scholar_secondary_menu li a,
+#header #block-vsite_menus-scholar_secondary_menu li a:visited{
+  color: #000;
+  font-size: 12px;
+  }
+
+#header #block-vsite_menus-scholar_secondary_menu li a:hover {
+  text-decoration:underline;
+  }
+
+#navbar li a, #navbar li a:visited {
+  color: #000;
+  }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar li.active-trail a {
+  background: #e5ea5a;
+  color: #000;
+  text-decoration: none;
+  }
+
+/*Footer */
+
+#footer .wrap {
+  padding: 34px 58px;
+  background:#c7d0d2;
+  height:33px;
+  }
+
+/* Nodes */
+
+.submitted {
+  color: #a1b1b1;
+  border-bottom: 1px solid #a1b1b1;
+  display:block;
+  }
+
+/* SEARCH */
+
+#header .search-form .container-inline {
+  background-image: url('images/search.png');
+  height: 28px;
+  width:173px;
+  padding-right: 0;
+  margin-top:15px;
+  padding-left: 27px;
+  }
+
+#header #search-form #edit-submit {
+  margin: 0 0 0 -100% !important;
+  left: -27px;
+  }
+
+#header .search-form .container-inline .form-item .form-text {
+  border: none;
+  height: 21px;
+  background:transparent;
+  }
+
+#header .search-form input.form-submit,
+#header #search-block-form #edit-submit,
+#header #search-form #edit-submit{
+  background: transparent;
+  }

@@ -1,0 +1,618 @@
+<?php 
+
+/**
+ * @file
+ * 
+ * citation_distribute allows users to push biblio nodes to myriad repositories
+ */
+
+/**
+ * Cron limit defines how many nodes can be pushed in any one cron run during batch mode
+ */
+define('_CRON_LIMIT', 25);
+
+/**
+ * Implementation of hook_menu() defines admin page
+ */
+function citation_distribute_menu() {
+	$items = array();
+	/* main admin menu for this module */
+	$items ['admin/settings/citation_distribute'] = array(
+		'title' => t( 'Citation Distribute' ), 
+		'page callback' => 'drupal_get_form', 
+		'page arguments' => array('citation_distribute_admin' ), 
+		'file' => 'citation_distribute.admin.inc', 
+		'access arguments' => array('administer citation distribute' ) 
+	);
+	
+	/* add a menu link for each plugin that implements admin_menu() */
+	foreach (_citation_distribute_plugins() as $plugin) {
+	  if ($plugin['title'] && $class = ctools_plugin_get_class($plugin, 'handler', TRUE)) {
+  		$service = new $class();
+  		
+  		if (method_exists($service, 'admin_form')) {
+  			$items['admin/settings/citation_distribute/'.$plugin['name']] = array(
+  			  'title' => t('Configure ' . $plugin['title']),
+  			  'page callback' => 'drupal_get_form',
+  			  'page arguments' => array('citation_distribute_plugin_admin', $plugin['name']),
+  				'file' => 'citation_distribute.admin.inc', 
+  			  'access arguments' => array('administer citation distribute'),
+  			);
+  		}
+	  }	  
+	}
+	return $items;
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function citation_distribute_perm() {
+	return array ('administer citation distribute' );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function citation_distribute_ctools_plugin_api($module, $api) {
+  if ($module == 'citation_distribute' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory
+ */
+function citation_distribute_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'citation_distribute' && !empty($plugin)) {
+    return "plugins/$plugin";
+   }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_plugins()
+ */
+function citation_distribute_ctools_plugin_plugins() {
+	return array(
+		'use hooks' => TRUE,
+	);
+}
+
+/**
+ * Implementation of hook_citation_distribute_plugins
+ * Provides definition for each of citation_distribute's plugins.
+ */
+function citation_distribute_citation_distribute_plugins(){
+	$info = array();	
+	$path = drupal_get_path('module', 'citation_distribute') . '/plugins/';
+
+	$info['citation_distribute_service'] = array(
+		'handler' => array(
+			'class' => 'citation_distribute_service',
+			'file'  => 'citation_distribute_service.inc',
+			'path'  => $path,
+		)
+	);
+	
+	$info['service_sword'] = array(
+		'type' => 'push',
+		'description' => 'SWORD destination',
+		'handler' => array(
+			'parent' => 'citation_distribute_service',
+			'class' => 'citation_distribute_service_sword',
+			'file' => 'citation_distribute_service_sword.inc',
+			'path' => $path,
+		)
+	);
+	
+	$info['sword_dash'] = array(
+		'type' => 'push',
+		'title' => 'DASH',
+		'description' => 'Harvard\'s open access repository',
+		'handler' => array(
+			'parent' => 'service_sword',
+			'class' => 'citation_distribute_service_sword_dash',
+			'file' => 'citation_distribute_service_sword_dash.inc',
+			'path' => $path,
+		)
+	);
+	
+	$info['googlescholar'] = array(
+		'type' => 'metadata',
+		'title' => 'Google Scholar',
+		'description' => 'Google\'s searchable index of citations',
+		'handler' => array(
+			'parent' => 'citation_distribute_service',
+			'class' => 'citation_distribute_service_googlescholar',
+			'file' => 'citation_distribute_service_googlescholar.inc',
+			'path' => $path,		
+		)
+	);
+	
+	$info['service_repec'] = array(
+		'type' => 'file',
+		'title' => 'RePEc',
+		'description' => 'Research Papers in Economics',
+		'handler' => array(
+			'parent' => 'citation_distribute_service',
+			'class'  => 'citation_distribute_service_repec',
+			'file'   => 'citation_distribute_service_repec.inc',
+			'path' 	 => $path,
+		),
+	);
+	
+	return $info;
+}
+
+
+
+/**
+ * Implementation of hook_form_alter()
+ * Adds list of available destinations to biblio node creation form
+ */
+function citation_distribute_form_alter(&$form, $form_state, $form_id) {
+	
+	switch($form_id) {
+	case 'biblio_node_form': 
+		/*Add cite distribute options to biblio node creation page*/
+		
+		$form['citation_distribute_selections'] = array(
+			'#type' => 'fieldset', 
+			'#title' => t('Distribute to Academic Repositories'),
+			'#attached' => array(
+				'js' => array(drupal_get_path('module', 'citation_distribute' ) . '/citation_distribute.js') 
+			) 
+		);
+		
+		$form['citation_distribute_selections']['intro'] = array(
+		  '#type' => 'item', 
+		  '#title' => t('Distribute this publication to the following academic repositories') 
+		);
+		
+		// List all plugins with a title
+		foreach( _citation_distribute_plugins() as $plugin ) {				
+			if (isset($plugin['title'])) {
+				$status = db_fetch_object( db_query( "SELECT nid,noauto from {citation_distribute} WHERE plugin = '%s' AND nid = %d ", 
+																  	$plugin['name'], $form['nid']['#value'] ));
+																				
+				//Automatically mark distribution of plugins with autoflag enabled
+				$autoflag = variable_get($plugin['handler']['class'] . '_auto_flag', false);
+				$auto = (($autoflag || $status->nid) && !$status->noauto ) ; //noauto only true for published nodes, removed from CD autoflag.
+				
+				$form['citation_distribute_selections'][$plugin['name']] = array(
+					'#type'=>'checkbox',
+					'#title' => t('@repos', array('@repos' => $plugin['title'])),
+					'#description' => t('@desc', array('@desc' => $plugin['description'])),
+					'#default_value' => (bool)$auto,	
+					'#disabled' => false, //(bool)$published, //published items can't be unpublished.  should we try to support unpublish where possible?
+			  );
+			}
+		}
+		
+		$form['citation_distribute_selections']['nid'] = array(
+		  '#type' => 'hidden',
+		  '#value' => $form['nid']['#value'], 
+		);
+		
+		//add the cite distribute submit function
+		array_unshift ( $form ['#submit'], 'citation_distribute_form_submit' );
+		break;
+	}
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ * Applies flag to node if it's being published to a CD repository
+ */
+function citation_distribute_nodeapi(&$node, $op, $a3) {
+	if ($node->type == 'biblio') {
+	
+		switch ($op) {
+			
+			case 'insert':
+			case 'update':
+				$distributed = array();
+				
+				foreach( _citation_distribute_plugins() as $plugin ) {
+					if (isset($node->{$plugin['name']})) {
+						$flag = flag_get_flag($plugin['name']);
+
+						if ( $node->{$plugin['name']} ) {
+							$flag->flag('flag', $node->nid); //flag returns if the node was flagged.  my output never gets returned.
+							$distributed[] = $plugin['name'];
+						} else {
+							if (variable_get($plugin['handler']['class'] . '_auto_flag', false)) { //if user has unselected an autoflag, mark noauto.  
+                _citation_distribute_unlist_db($plugin['name'], $node->nid);
+							}
+							$flag->flag('unflag', $node->nid); //remove old flags 				
+							
+						}
+					}
+				}			
+			break;
+
+			case 'validate':			
+				//repec and dash need to validate.  here or in validate hook?
+				foreach (_citation_distribute_plugins() as $plugin) {
+					if ( isset($node->$plugin['name']) && $node->$plugin['name'] )  {
+						if ($class = ctools_plugin_get_class($plugin, 'handler', TRUE)) {
+							$service = new $class();
+							//validate!
+							if (method_exists($service, 'validate')) {
+								$valid = $service->validate($a3);
+							}
+						}
+					}
+				}
+			break;
+			
+
+			case 'delete':
+				//clean up flags from deleted nodes
+				foreach( _citation_distribute_plugins() as $plugin ) {
+					if ( $flag = flag_get_flag($plugin['name']) ){
+  					$flag->flag('unflag', (int)$node -> nid);
+     			  _citation_distribute_removefrom_db($plugin['name'], (int)$node->nid); //node is gone, remove its entry
+					}
+				}
+			break;
+		}
+	}
+}
+
+/**
+ * Implementation of hook_flag()
+ * This gets called whenever a node recieves a flag.  If it gets a citation_distribute flag, process it.
+ */
+function citation_distribute_flag($event, $flag, $nid, $account) {
+  $dist_mode = variable_get('citation_distribute_module_mode', '');
+		
+	foreach (_citation_distribute_plugins() as $plugin) {
+		if ($flag->name == $plugin['name']) {
+			switch($event) {
+				
+				case 'flag':
+					if (!_citation_distribute_published($nid)) {
+					  // don't send unpublished nodes to repos.  break before db is updated.
+				    drupal_set_message('This node is not listed for publication and has not been sent to ' . $plugin['title'] . '.' ,'warning');
+				    break;
+				  }
+				  
+				  if ($dist_mode == 'per_submission') { 
+						$dist = _citation_distribute_distribute($nid, $plugin['name']);
+					} else {
+					  $batch_cmd = 'distribute'; 					  //assume batch mode
+					}
+					_citation_distribute_update_db($plugin['name'], $nid, $batch_cmd); 
+					
+			  	if ($output = theme('citation_distribute_form_msg', array($plugin['name']))) {
+				  	drupal_set_message(t($output)); 
+		    	}
+		    	
+					break;
+					
+				case 'unflag':
+				  if ($dist_mode == 'per_submission') {
+            //try to remove now.
+  				  if ($class = ctools_plugin_get_class($plugin, 'handler', TRUE)) {
+  						$service = new $class();
+  						if (method_exists($service, 'remove')) {
+  							$removed = $service->remove($nid);
+  						}
+  					}
+				  } else {
+            $batch_cmd = 'remove'; //schedule a removal at next cron run
+				  }
+
+				  _citation_distribute_unlist_db($plugin['name'], $nid, $batch_cmd); //unlist, don't delete
+				  drupal_set_message('Publication has been removed from ' . $plugin['title']);
+					break;
+			}
+		}
+	}
+}
+
+/**
+* Implementation of module_preprocess_hook().
+* Metadata style plugins to add their data when the page is drawn.
+*/
+function citation_distribute_preprocess_page(&$variables) {
+	/* only display on a node page */
+	if (isset ($variables['node'])) {
+				
+		/* check that each metadata plugin has been marked for this node.  add metadata for marked ones */
+		foreach(_citation_distribute_plugins() as $plugin) {
+			if (isset($plugin['type']) && isset($plugin['name']) && $plugin['type'] == 'metadata') {
+				$query = "SELECT nid FROM {citation_distribute} WHERE plugin = '%s' AND nid = %d AND noauto != 1";
+				
+				if (db_result(db_query($query,$plugin['name'], (int)$variables['node']->nid))) {
+					if ($class = ctools_plugin_get_class($plugin, 'handler', TRUE)) {
+						$service = new $class();
+						$out = $service->render($service->map_metadata($variables['node']->nid));
+  					$variables['head'] .= $out;				
+					}
+
+				} 
+			}
+		}
+	}
+}
+
+/**
+ * Implementation of hook_theme()
+ * passes theming of metadata plugins to each of those plugins
+ */
+function citation_distribute_theme($existing, $type, $theme, $path) {
+	$args_array = array('');
+
+	/* theme the output message that happens after any plugin is used */
+	$theme = array(
+		'citation_distribute_form_msg' => array(
+	 	  'arguments' => array('modules' => NULL),
+			'file' => 'citation_distribute.theme.inc',
+			'path' => drupal_get_path('module', 'citation_distribute'),
+	  ),
+	);
+	
+	/* metadata plugins also ahve the option to theme their output */
+	foreach(_citation_distribute_plugins() as $plugin) {
+		if ($plugin['type'] == 'metadata') {
+			$theme[$plugin['name']] = array(
+				'arguments' => $args_array,
+				'file' => $plugin['handler']['class'] . '.theme.inc',
+				'path' => $plugin['handler']['path'],
+			);
+		}
+	}
+	return $theme;
+}
+
+
+/**
+ * _citation_distribute_distribute()
+ * 
+ * Pushes node data to repository
+ * 
+ * @param int $nid
+ * 	 node->nid to be distributed
+ * @param string $plugin_name
+ *   name of plugin to distribute to
+ */
+function _citation_distribute_distribute($nid, $plugin_name) {
+	$plugins = _citation_distribute_plugins();
+	$plugin = $plugins[$plugin_name];
+	
+	if ($class = ctools_plugin_get_class($plugin, 'handler', TRUE)) {
+		$service = new $class();
+		$out = $service->save($nid, $plugin_name);
+	}
+	
+	//Failed to send.  Tell user (also write logs for admins and change upd in db?)
+	if (!$out) {
+		drupal_set_message('Error sending document to ' . $plugin['title'], 'error');
+	}
+	
+	return $out;
+}
+
+/**
+ * Sets table row for nid/plugin to indicate that node is distributed.  Optionally takes 
+ * batch command, to run during next cron
+ * 
+ * @param string $plugin
+ * 		name of plugin to send data to
+ * @param int $nid
+ * 		biblio node to publish
+ * @param string $batch_command
+ *  	(optional) Command to be run during next cron job.  See citation_distribute_cron for available commands
+ */
+function _citation_distribute_update_db($plugin, $nid, $batch_command = '') {	
+	$module_mode = variable_get('citation_distribute_module_mode', '' );
+	$nid = (int)$nid;  
+	
+	//insert or update row for this plugin/nid
+	if (db_result(db_query( 'SELECT nid FROM {citation_distribute} WHERE nid = %d AND plugin = "%s"', $nid, $plugin))) {
+	  $query = 'UPDATE {citation_distribute} SET batch_command = "%s", noauto = 0 WHERE nid = %d AND plugin = "%s"';
+	  $result = db_query($query, $batch_command, $nid, $plugin);  
+	} else {
+	  $query = 'INSERT INTO {citation_distribute} (nid, plugin, batch_command, noauto) VALUES (%d, "%s", "%s", 0)';
+	  $result = db_query($query, $nid, $plugin, $batch_command);  
+	}
+}
+
+/**
+ * 
+ * Deletes row from CD table when a node is deleted entirely.
+ * @param string $plugin
+ * 		name of plugin to send data to
+ * @param int $nid
+ * 		biblio node to publish
+ */
+function _citation_distribute_removefrom_db($plugin, $nid) {
+	$query = 'DELETE FROM {citation_distribute} WHERE plugin = "%s" AND nid = %d';
+	$result = db_query($query, $plugin, $nid);
+}
+
+/**
+ * Marks that a node is not published to given repository.  Necessary to prevent autoflag from always flagging
+ * unselected nodes.
+ *   
+ * @param string $plugin
+ * 		name of plugin to send data to
+ * @param int $nid
+ * 		biblio node to publish
+ * @param string $batch_command
+ *  	(optional) Command to be run during next cron job.  See citation_distribute_cron for available commands
+ */
+function _citation_distribute_unlist_db($plugin, $nid, $batch_command = '') {
+  $nid = (int)$nid;
+  
+  if (db_result(db_query( 'SELECT nid FROM {citation_distribute} WHERE nid = %d AND plugin = "%s"', $nid, $plugin))) {
+    $query = "UPDATE {citation_distribute} SET  noauto = 1, batch_command = '%s' WHERE plugin = '%s' AND nid = %d "; 
+  } else {
+    $query = "INSERT INTO {citation_distribute} (batch_command, plugin, nid, noauto) VALUES ('%s', '%s', %d, 1)";
+  } 		          
+  $result = db_query($query, $batch_command, $plugin, $nid ); 
+}
+
+/**
+ * Implementation of hook flag_default_flags
+ * creates flags for each installed plugin with a title.
+ * plugins without titles are abstract and don't need to be listed.  
+ * @return 
+ *   Array of flag definition objects.
+ */
+function citation_distribute_flag_default_flags($flags = array(), $i = 0) {
+		
+	foreach (_citation_distribute_plugins() as $plugin) {
+		if ($plugin['title']) {
+			$flags[] = array (
+			  'content_type' => 'node', 
+			  'name' => $plugin['name'], 
+			  'title' => 'title:' . $plugin['title'], 
+			  'global' => false, 
+			  'types' => array ('biblio' ), 
+				'flag_short' => 'Send to ' . $plugin['title'], 
+				'flag_long' => 'Send to ' . $plugin['title'] . ' repository', 
+				'flag_message' => '', 
+				'unflag_short' => 'Remove from ' . $plugin['title'],
+			  'unflag_long' => 'Remove from ' . $plugin['title'] . ' repository', 
+			  'unflag_message' => '', 
+			  'unflag_denied_text' => '', 
+			  'link_type' => 'normal', //normal, toggle, confirm
+				'roles' => array (
+					'flag' => array (0 => '2' ),
+				  'unflag' => array (0 => '2' ) 
+				), //hiding these on page, teaser, and edit node
+				'show_on_page' => false, 
+				'show_on_teaser' => false, 
+				'show_on_form' => false, 
+				'access_author' => '',  //own or others.  should admin be allowed to flag?
+				'i18n' => 0, 
+				'status' => true, 
+				//locked flags properties do not show on config page and are only configurable here.
+				'locked' => array (
+				  'name' => 'name', 
+				  'show_on_page' => 'show_on_page', 
+				  'show_on_teaser' => 'show_on_teaser', 
+				  'show_on_form' => 'show_on_form', 
+				  'global' => 'global', 
+				  'link_type' => 'link_type', 
+				  'types' => 'types' 
+				), 
+				'api_version' => 2, 
+				'module' => 'citation_distribute' 
+			);
+		}
+	}
+	return $flags;
+}
+
+
+/**
+ * Implementation of hook_views_pre_render
+ * 
+ * marks node operations (above) for inclusion in bulk update operations
+ */
+function citation_distribute_views_pre_render(&$view) {
+	if ($view->name == 'vsite_content') {
+	  $plugins = _citation_distribute_plugins();
+	  
+		$plugin = $view->style_plugin->options;
+		foreach($view->style_plugin->all_operations as $op => $def) {
+			$flag_function = $def['callback arguments'][1];
+			
+			//add flags that use a CD plugin as a callback and that CD plugin has a title
+			if ( isset($plugins[$flag_function]['title'])) {
+        $plugin['operations'][$op]['selected'] = 1;
+			}
+		}
+	  $view->style_plugin->options = $plugin;
+	}
+}
+
+
+/**
+ * Shortcut for getting list of citation_distribute plugins
+ * 
+ * @return
+ *   List of all citation_distribute plugins
+ */
+function _citation_distribute_plugins() {
+	ctools_include('plugins');
+	$plugins = ctools_get_plugins('citation_distribute', 'plugins');
+	return $plugins;
+}
+/**
+ * Implementation of hook_cron()
+ * 
+ * In batch mode, process pending updates during cron jobs
+ * nodes have already been flagged, but not distributed yet
+ * for metadata nodes, this is meaningless, but updates their db status
+ */
+function citation_distribute_cron() {
+	$plugins = _citation_distribute_plugins();
+	
+	//filter out plugins with no title.  these are abstract plugins that won't have push methods
+	function has_title($p) {return (isset($p['title']) && count($p['title']) > 0); }
+	$plugins = array_filter($plugins, 'has_title');
+	
+	//wrap each str in quotes so we can implode them and pass them to mysql IN.
+	function enquote($s) {return '\'' . $s . '\'';}
+	$quoted = array_map( 'enquote', array_keys($plugins) );
+	
+	//List of commands we can run.  Enquote them for Mysql.IN() as well.
+	$commands = array('distribute', 'remove');
+	$commands = array_map('enquote', $commands);
+ 
+	$query = 'SELECT nid,plugin,batch_command FROM {citation_distribute} WHERE batch_command IN ( '.implode(',',$commands).' ) AND plugin IN ( ' . implode(',', $quoted) . ' ) LIMIT %d ';
+	$result = db_query($query, variable_get('citation_distribute_cron_limit', _CRON_LIMIT));  
+
+	while($res = db_fetch_object($result)) {
+	  
+  	if (!_citation_distribute_published($res->nid)) {
+      break;  	  // don't send unpublished nodes to repos. 
+    }
+		
+    if (in_array($res->plugin, array_keys($plugins))) {  //only attempt plugins we have.  old plugins could leave entries in db, but be unprocessableable.
+		  switch ($res->batch_command) {
+		    
+		    case 'distribute':
+		      $dist = _citation_distribute_distribute($res->nid, $res->plugin); //where to dump errors?  
+		      _citation_distribute_update_db($res->plugin, $res->nid); 
+		      break;
+		      
+		    case 'remove':
+		      if ($class = ctools_plugin_get_class($plugins[$res->plugin], 'handler', TRUE)) { //ctools breaks herer
+  				  $service = new $class();
+  					if (method_exists($service, 'remove')) {
+  				  	$removed = $service->remove($res->nid);
+  					}
+  				}
+				  _citation_distribute_unlist_db($res->plugin, $res->nid); 				  
+		      break;
+		      
+		    default:
+		      $query = NULL; //don't run a query on a command that isn't implemented.
+		      break;
+		    
+		      
+		  }
+
+		}
+	}
+}
+
+/**
+ * checks if node is published or not.  unpublished nodes shouldn't be distributed despite what CD options user selects.
+ * Enter description here ...
+ * @param $nid
+ */
+function _citation_distribute_published($nid) {  
+  $query = 'SELECT status FROM {node} WHERE nid = %d';
+  $result = db_query($query, $nid);
+  $r = db_fetch_object($result);
+  return $r->status;
+}
+
+

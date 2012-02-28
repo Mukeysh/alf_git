@@ -1,0 +1,8 @@
+name = vsite control panel
+description = main module for scholar Control Panel
+package = "OpenScholar Vsite"
+core = 6.x
+dependencies[] = "ctools"
+features[ctools][] = "context:context:3"
+features[context][] = "vsite-section-cp"
+version = "6.x-beta14"

@@ -1,0 +1,5 @@
+name = Comment radioactivity
+description = "Provides radioactivity support for comments. This is not useful by itself. Combine this with modules like radioactivity-votingapi."
+dependencies[] = radioactivity
+package = Radioactivity
+core = 6.x

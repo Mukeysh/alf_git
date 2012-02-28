@@ -1,0 +1,18 @@
+; $Id: scholar_collector.info,v 1.12 2008/09/21 22:43:32 swortis Exp $
+name        = Collector
+description = Whimsical Theme with old paper backgrounds and old research materials, etc.
+flavor_name = "Without Cards"
+plugins[vsite_design][flavor] = flavors
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-collector.css
+conditional-stylesheets[if lte IE 7][all][]   = scholar-collector-ie.css
+
+os[widgets][vsite_menus-features] = left
+os[widgets][boxes-shield_default] = header_right
+os[widgets][boxes-site_logo] = false
+
+os[theme_type]   = "vsite"
+os[theme_access] = "public"

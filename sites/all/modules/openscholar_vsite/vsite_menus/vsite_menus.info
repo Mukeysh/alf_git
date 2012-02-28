@@ -1,0 +1,8 @@
+name = vsite menu
+description = provide menu  control panel / utility functions for each site
+dependencies[] = "vsite"
+dependencies[] = cp
+dependencies[] = vsite_layout
+package = "vsite"
+core = 6.x
+version = "6.x-beta14"

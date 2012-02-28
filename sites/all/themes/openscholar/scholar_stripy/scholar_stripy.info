@@ -1,0 +1,13 @@
+; $Id: scholar_stripy.info,v 1.12 2008/09/21 22:43:32 swortis Exp $
+name        = Stripy
+description = A clean fixed layout design - white background with a single orange stripe for the menu area.
+flavor_name = "Orange"
+plugins[vsite_design][flavor] = flavors
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-stripy.css
+conditional-stylesheets[if lte IE 7][all][] = scholar-stripy-ie.css

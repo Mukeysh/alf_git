@@ -1,0 +1,269 @@
+<?php 
+
+//$id;
+
+/**
+ * Implementation of hook_cite_distribute_register()
+ * registers this module's repository information with the
+ * core cite distribute API database
+ */
+function sword_meta_cite_distribute_register(){
+  //unlike other cite_distribute meta modules, sword meta can
+  //contain several definitions of destinations.  look these up
+  // and generate arrays.  
+  	
+	$module_info = array();
+
+	foreach(_sword_meta_submodule_info() as $dest) {
+		$module_info[] = array(
+			'name'					=> $dest->name,   //Name of module to process publication
+			'repository'		=> $dest->title,   //Display name of this sword destination
+		  'module' 				=> 'sword_meta',           //indicates that sword_meta is responsible for providing hooks
+			'file'					=> 'none',
+			'dynamic_paths' => TRUE,
+		);
+		
+	}
+  return $module_info;
+}
+
+/**
+* Implementation of hook_menu()
+*/
+function sword_meta_menu() {
+  $items = array();
+   
+  $items['admin/settings/cite_distribute/sword_meta/config'] = array(
+	  'title' => t('SWORD Destinations'),
+	  'type' => MENU_LOCAL_TASK ,
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('sword_meta_config'),
+	  'file' => 'sword_meta.admin.inc',
+	  'file path' =>  $path_inc = drupal_get_path('module', 'sword_meta'),	
+	  'weight' => 3,
+	  'access callback' => user_access('administer cite distribute'),
+	  );  
+  
+  /*
+  $items['admin/settings/cite_distribute/sword_meta/config/defaults'] = array(
+  'title' => t('RePEc Template Mappings'),
+  'type' => MENU_LOCAL_TASK ,
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('repec_meta_templates'),
+  'file' => 'repec_meta.admin.inc',
+  'file path' =>  $path_inc = drupal_get_path('module', 'repec_meta'),
+  'weight' => -9,
+  'access callback' => user_access('administer cite distribute'),
+  ); 
+  */
+  /*
+  $items['admin/settings/cite_distribute/repec_meta/config/fields'] = array(
+  'type' => MENU_LOCAL_TASK ,
+  'title' => t('RePEc Manage Fields'),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('repec_meta_fields'),
+  'file' => 'repec_meta.admin.inc',
+  'file path' =>  $path_inc = drupal_get_path('module', 'repec_meta'),
+  'weight' => -8,
+  'access callback' => user_access('administer cite distribute')
+  );
+  */
+ return $items;
+}
+
+/**
+* Implementation of hook_perm()
+*/
+function sword_meta_perm(){
+  return array('submit sword widget');
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function sword_meta_nodeapi(&$node, $op, $a3){
+  switch ($op){
+    case 'validate':
+      //in validate, $a3 is $form
+      if($node -> type == "biblio" && $node->repec_meta ) {
+				foreach ($a3['#post']['biblio_contributors'] as $bc) {
+					foreach ($bc as $author) {
+						if ( isset($author['name']) && strlen($author['name'])>0 ) {
+							return; /* an author has been set */
+						}
+					}
+				}
+				form_set_error('biblio_contributors', t('At least one author is required for SWORD distribtuion'));
+      } 
+   	break;   
+  }
+}
+
+
+/**
+* Implementation of hook_cite_distribute_push()
+* 
+* new hook.  this is for modules that have data to send somewhere instead of dropping it in a file
+* note that google scholar does not work this way.  it uses a theme hook to change how the page is
+* rendered to give google some metadata.
+*/
+function sword_meta_cite_distribute_push($node, $submodule_name){
+	
+	$dest = _sword_meta_submodule_info($submodule_name);
+	
+	$obo = ""; //should we try for node's owner?  Has behalf ever worked?
+	
+	$service_url = $dest->location . 'sword/servicedocument';
+	$deposit_url = $dest->location . 'deposit/sword-user'; // ?!
+	
+	require_once(drupal_get_path('module', 'sword_meta') .	'/swordapp-php-library-1.0/swordappclient.php');
+	$sac = new SWORDAPPClient();
+	$sac_doc = $sac->servicedocument($service_url, $dest->username, $dest->password, $obo);
+	
+	if ($sac_doc->sac_status == 401) {
+		drupal_set_message('cite_distribute: Could not login on behalf of ' . $obo . ', trying IQSS.', 'warning');
+	  $obo = "";  //SWORD server did not have a user on whose behalf we could deposit this.  Use our own user instead.
+		$sac_doc = $sac->servicedocument($service_url, $dest->username, $dest->password, $obo);
+		
+		if ($sac_doc->sac_status == 401) {
+			drupal_set_message("cite_distribute: Could not login to SWORD server", 'error');
+			//couldn't log in.  should also error.
+			return false;
+		}
+	}
+
+	if ($sac_doc->sac_status != 200) {
+		drupal_set_message('Unable to connect to SWORD server', 'error');
+		return false;
+	}
+	
+	$file = _sword_meta_package_mets($node, $dest);
+	
+	if ($file) {
+		$deposit_url = $dest->location; //if we can't set a new url, get back a good error report.
+		foreach($sac_doc->sac_workspaces as $ws) {
+			foreach($ws->sac_collections as $collection) {
+
+				$href = $collection->sac_href;
+				$xml = serialize($href);			//TODO figure out why simplexml methods aren't working.  Use that instead of regex.
+				$deposit_url = preg_replace('/.*"(http.*)".*/', '$1', $xml);
+			}
+		}
+		
+		try {
+			$deposit = $sac->deposit($deposit_url, $dest->username, $dest->password, $obo, $file, '', 'application/zip');
+		} catch(Exception $e) {
+			drupal_set_message('Deposit error: ' . $e->getMessage, 'error');
+			return false;
+		}
+		
+		switch ($deposit->sac_status) {
+			default: 
+				drupal_set_message($deposit->sac_statusmessage);//(string:79) Unacceptable content type in deposit request: application/x-www-form-urlencoded
+				break;
+		}
+	// deposit(url, username, password, on-behalf-of-user, filename,
+    //               [format_namespace, package_type, noop, verbose]) 
+	}
+	
+	return $sac_doc;
+}
+
+/*
+ * Create a METS zip file for sword deposit
+ * returns path of file
+ */
+function _sword_meta_package_mets(&$node, $dest) {
+	require_once(drupal_get_path('module', 'sword_meta') .	'/swordapp-php-library-1.0/packager_mets_swap.php');
+	
+	/* ensure we have a working directory or at least print some errors if we don't */
+	$root_dir = $dest->root_in . '/' . $dest->subdir_in;
+	if (!is_dir($root_dir)) {
+		mkdir($root_dir, 0770, TRUE) || drupal_set_message('sword_meta: could not create deposit directory ' . $root_dir, 'error');
+	}	
+	
+  $packager = new PackagerMetsSwap($dest->root_in, $dest->subdir_in, $dest->root_out, $dest->file_out);
+	
+	$metadata = array(
+		'Type' => 'http://purl.org/eprint/entityType/ScholarlyWork',
+	  'Title' => $node->title,
+	  'Custodian' => $node->biblio_publisher,
+	  'Abstract' => $node->biblio_abst_e,
+	  'Creator' => array(),   //$node->biblio_contributors[1][*][firstname, lastname]
+	  'Identifier' => '',
+	  'DateAvailable' => '',
+	  'StatusStatement' => '',
+	  'CopyrightHolder' => '',
+	  'Citation' => '', 
+	  'File' => array(),      //$node->files[] is hidden by itweak upload.  {upload} isn't updated yet.  cahnge weight or do something clever.
+														//before itweak breaks things.  after upload mayhaps?  currently they're both 0, but c is before u.
+	);
+	//$citation = theme('biblio_style', $node, $base, $style);
+	
+	/* Creator metadata */
+	foreach($node->biblio_contributors as $delta => $cont) {
+		foreach($node->biblio_contributors[$delta] as $contributor) {
+			$metadata['Creator'][] = $contributor['firstname'] . ' ' . $contributor['lastname'];
+		}
+	}
+	
+	/* File metadata */
+	foreach($node->files as $file) {
+    $metadata['File'][] = array( 
+		 'filepath'=>url($file->filepath),  //TODO does mets want location or should file be included in teh zip?
+		 'filemime'=>$file->filemime, 
+		);
+	}
+	
+	/* Citation metadata */
+	$citation = 	theme('biblio_style', $node, variable_get('biblio_base', 'biblio'), biblio_get_style());
+	$citation = strip_tags($citation);
+  $citation = preg_replace('/&nbsp;/', ' ', $citation);
+	$metadata['Citation'] = $citation;
+	
+	/* add metadata to mets xml */
+	foreach ($metadata as $name => $data) {
+		// add to arrays
+		if (is_array($data)) {
+			$func = 'add' . $name;
+			foreach ($data as $delta => $d) {
+				if ($name == 'File') {
+					$packager->$func($d['filepath'], $d['filemime']);  //	addFile takes mime as well
+				} else {
+					$packager->$func($d);
+				}
+			}
+		} else {
+			//set scalars if they have content
+			if (strlen($data) > 0) {
+  			$func = 'set' . $name;
+	  		$packager->$func($data);
+			}
+		}
+	}
+
+	try {
+  	$packager->create();
+	} catch (Exception $e) {
+		drupal_set_message('sword_meta: ' . $e->getMessage(), 'error');
+		return false;	
+	}
+	
+	return $dest->root_out . '/' . $dest->file_out;
+}
+
+/*
+ * Gets sword destination info from database and hooks.  Returns array of object
+ * Optional submodule_name can specify a single submodule to return.
+ */
+function _sword_meta_submodule_info($submodule_name = NULL) {
+		//need to check at creation that names are unique
+	if ($submodule_name) {
+		/* single named submodule */
+		return module_invoke($submodule_name, 'sword_submodule');
+	} else {
+		/* select all submodules */
+		return module_invoke_all('sword_submodule');
+	}
+}
+

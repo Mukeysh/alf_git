@@ -1,0 +1,38 @@
+name        = OpenScholar Admin
+description = Admin Theme for OpenScholar, IQSS
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+
+;--- remove default styles
+stylesheets[all][]    = user.css
+
+;--- styles
+stylesheets[all][]   = css/cp-theme.css
+stylesheets[all][]   = css/cp-typography.css
+stylesheets[all][]   = css/modal.css
+stylesheets[all][]   = css/spaces.css
+;--- stylesheets[all][]   = css/forms.css
+stylesheets[all][]   = css/tabs.css
+stylesheets[all][]   = css/wysiwyg_imagefield.css
+
+;--- other styles
+conditional-stylesheets[if lte IE 7][all][] = ie.css
+
+scripts[]            = js/cp_theme.js
+
+;--- regions
+regions[header]         = header
+regions[footer]         = footer
+regions[closure_region] = closure
+regions[left]           = left sidebar
+regions[right]          = right sidebar
+regions[footer]         = footer
+regions[closure_region] = closure
+
+;--- features
+features[] = logo
+features[] = name
+features[] = search
+features[] = favicon
+features[] = primary_links

@@ -1,0 +1,104 @@
+/* $Id: views_gallery.css,v 1.5 2009/08/18 14:45:17 karens Exp $ */
+
+#content .node .view-scholar-image-gallery ul {
+  padding: 0;
+  }
+
+#content .node .content .view-scholar-image-gallery ul li,
+.node-type-gallery #content .node .content ul li,
+.block .view-scholar-image-gallery li.views-row {
+  list-style: none;
+  padding:0;
+  float:left;
+  clear: none;
+  margin: 0 5px 5px 0;
+  }
+
+body.node-type-gallery #content .node-type-gallery .view-content ul li,
+li.image_field_gallery {
+  height: 190px;
+  margin: 0 6px 1.5em 0;
+  font-size: 11px;
+  line-height: 14px;
+  }
+
+ul.image-upload li.image_field_gallery a,
+ul.image-upload li.image_field_gallery a:visited{
+  width: 122px;
+  height: 73px;
+  display:block;
+  text-align: center;
+  padding-top: 56px;
+  padding-right: 6px;
+  background: url(images/add-image.png) no-repeat #fff;
+  }
+
+ul.image-upload li.image_field_gallery a:hover {
+  text-decoration: none;
+  background-position: 0 -130px;
+  }
+
+.node-type-gallery .content ul.image-upload,
+.view-scholar-image-gallery .attachment-after {
+  float: left;
+  }
+
+.block .view-scholar-image-gallery .views-admin-links ul.links {
+  float:none;
+  }
+
+.view-scholar-image-gallery p {
+  margin-bottom: 0;
+  }
+
+div.views-field-field-gallery-image-fid img {
+  padding: 4px;
+  background-color: #fff;
+  border: 1px solid #adadad;
+  }
+
+div.views-field-field-gallery-image-fid img:hover {
+ background: #ffff66;
+  }
+
+
+body.node-type-gallery .view-scholar-image-gallery .attachment-after {
+  margin-top: 15px;
+  }
+
+/* Gallery Teaser */
+
+#content .node-type-gallery .view-display-id-node_content_2 .view-empty ul li,
+.view-display-id-node_content_2 li.image_field_gallery
+{
+  height: 71px;
+  padding: 4px !important;
+  border: 1px solid #adadad;
+  }
+
+.view-display-id-node_content_2 ul.image-upload li.image_field_gallery a,
+.view-display-id-node_content_2 ul.image-upload li.image_field_gallery a:visited {
+  background-position:50% -8px;
+  height: 24px;
+  width: 71px;
+  padding: 47px 0 0 0;
+  border: none;
+  }
+
+.view-display-id-node_content_2 ul.image-upload li.image_field_gallery a:hover {
+  background-position: 50% -138px;
+  }
+
+/* Force the table grid to equal column
+  widths no matter what is in them.*/
+div.view-gallery table.views-view-grid {
+  table-layout:fixed;
+}
+
+.inline-first {
+  display:inline;
+  }
+
+#block-boxes-image_gallery_recent_images {
+  overflow: auto;
+  }

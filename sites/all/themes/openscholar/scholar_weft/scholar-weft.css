@@ -1,0 +1,198 @@
+html,body, #page {
+  height:100%;
+  }
+
+body {
+  background:#3C240C;
+  color:#282828;
+  min-width: 960px;
+  }
+
+#content-area .wrap {
+  background: #FCF5E5;
+  padding-bottom: 30px;
+  }
+
+#extradiv {
+  background: url('images/fabric-strip.jpg') repeat-y 50% 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 134px;
+  left:50%;
+  margin-left:-609px;
+  -webkit-box-shadow: 0 0 20px #000;
+  -moz-box-shadow: 0 0 20px #000;
+  box-shadow: 0 0 20px #000;
+  }
+
+.wrap {
+    padding: 0 0 0 30px;
+    width: 943px;
+    margin: 0 auto;
+    }
+
+a, a:visited {
+    color:#B8690B;
+    text-decoration: none;
+    }
+
+a:hover {
+    color:#000;
+    }
+
+h1,
+.title,
+#navbar li {
+  font: 25px/normal georgia, serif;
+  text-transform:uppercase;
+  font-weight:normal;
+  }
+
+h1 a,
+h1 a:visited {
+  color: #FBF3E6;
+  }
+
+h2,
+h3,
+#sidebar-second a,
+#navbar,
+#header {
+    font-weight: normal;
+    }
+
+h3 a,
+#sidebar-second a {
+    font-style: bold;
+    }
+
+h2,
+h3,
+h4 {
+  margin-bottom: 0;
+  margin-top: 1em;
+  }
+
+h2.title,
+h3.title {
+  margin-bottom: 1em;
+  color: #444;
+  font-size: 1.2em;
+  letter-spacing:0;
+  }
+
+h3.title {
+  font-size: 1em;
+  }
+
+/* LAYOUT ELEMENTS */
+
+#sidebar-first {
+   width: 168px;
+   left: -208px;
+    }
+
+#header-left,
+#logo {
+  width: 120px;
+  }
+
+#header-left {
+  left: -160px;
+  }
+
+#header-right {
+  padding: 0;
+  width:70px;
+  margin-right: -90px;
+  }
+
+#content-area .hg-container {
+  padding-left: 188px;
+  padding-right: 241px;
+  padding-top: 15px;
+  }
+
+#header .hg-container {
+  padding-right: 90px;
+  padding-left: 140px;
+  }
+
+#sidebar-second {
+    border-left: 1px solid #ccc;
+    margin-right: -241px;
+    }
+
+#footer {
+    padding-top: 10px
+    }
+
+p.copy a.poweredby {
+  background-position: 0 -27px;
+  }
+
+/* HEADER ELEMENTS */
+
+#header .column {
+  padding-top: 10px;
+  }
+
+#header,
+#header h1,
+#header h2,
+#header h3,
+#header a,
+#header a:visited {
+  color:#fff;
+  text-transform: uppercase;
+  line-height: normal;
+  }
+
+#header p a,
+#header p a:visited {
+  text-decoration: none;
+  font-size: 12px;
+  }
+
+#header h2 {
+  font-size: 14px;
+  }
+
+#navbar {
+  min-height: 41px;
+  background: url('images/menu-strip.png') repeat-x 0 0 #D29E20;
+  padding:0;
+  }
+
+#scholar-shield {
+  width: 65px;
+  }
+
+#navbar .wrap {
+  padding:0;
+  }
+
+#navbar li {
+    font-size: 14px;
+    line-height: 24px;
+    float:left;
+    margin-top:13px;
+    }
+
+#navbar li a,
+#navbar li a:visited {
+    color: #523507;
+    border: none;
+    display: block;
+    padding: 3px 10px 0 10px;
+    font-weight: normal;
+    }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar .active-trail a {
+    color:#fff;
+    background: #b8690c;
+    text-decoration: none;
+    }

@@ -1,0 +1,427 @@
+<?php
+
+/**
+ * Implementaton of hook_enable().
+ */
+function vsite_enable() {
+  // Weight scholar to be after spaces_og
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'spaces_og'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'vsite'", ($weight + 1));
+  // all vsite* modules have weight higher than vsite // TODO
+
+  $query =  "SELECT * FROM {system} WHERE type = 'module' AND name LIKE 'vsite_%'";
+  $result = db_query($query);
+  while ($data = db_fetch_object($result)){
+    db_query("UPDATE {system} SET weight = %d WHERE name = '%s'", ($weight + 2), $data -> name);
+  }
+}
+
+
+function vsite_install() {
+  _install_vsite_menus();
+}
+
+function _install_vsite_menus() {
+  $return = array();
+  $t = get_t();
+
+  $return[] = db_query("UPDATE {menu_custom}  SET title='%s', description = '%s' WHERE menu_name='%s'", $t('Primary menu'), $t('Primary menu for each scholar site.'), 'features');
+
+  $return[] = db_query("INSERT INTO {menu_custom} (menu_name, title, description) VALUES ('%s', '%s', '%s')", 'scholar_secondary_menu', $t('Secondary menu'), $t('Side menu for each scholar site.'));
+
+  return $return;
+}
+
+function vsite_update_6001(&$sandbox){
+	return _install_vsite_menus();
+}
+
+function vsite_update_6002(&$sandbox){
+
+	$res = array();
+  module_rebuild_cache();
+
+  // Enable openscholar_front module if need
+  if(!module_exists('openscholar_front')){
+
+    include_once('includes/install.inc');
+
+    drupal_install_modules(array('openscholar_front'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed dialog module and enabled it',
+    );
+
+  }
+
+  db_query("UPDATE {system} SET status = 1 WHERE type = 'theme' and name = '%s'", 'openscholar_default');
+  variable_set('theme_default', 'openscholar_default');
+
+  //Set the home page to welcome
+  variable_set('site_frontpage', 'welcome');
+
+  return $res;
+
+}
+
+/**
+ * Activity2 requires Trigger's weight be greater then Pathauto's
+ * in order to produce proper aliased paths
+ */
+function vsite_update_6003(&$sandbox) {
+  $res = array();
+  $pathauto_weight = db_result(db_query("SELECT weight FROM {system} WHERE name = 'pathauto'"));
+  db_query("UPDATE {system} SET weight = 2 WHERE name = 'trigger'");
+  return $res;
+}
+
+/**
+ * Some installs had filefield path alias inadvertantly turned on for several fields that should not have it
+ * This will correct those image fields
+ */
+function vsite_update_6004(&$sandbox) {
+  $res = array();
+
+  $file_alias = array(
+    'value' => '[space-og-path-raw]/files/[filefield-onlyname-original].[filefield-extension-original]',
+    'tolower' => 0,
+    'pathauto' => 0,
+    'transliterate' => 0,
+    'display' => 0,
+  );
+
+  db_query("UPDATE {filefield_paths} SET filealias = '%s' WHERE field IN('%s','%s','%s') " , array(serialize($file_alias) ,'field_person_photo', 'field_gallery_image', 'field_vsite_logo'));
+
+  return $res;
+}
+
+function vsite_update_6005(&$sandbox) {
+  $res = array();
+
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  if (db_table_exists('spaces_settings')) {
+    $result = db_query("SELECT * FROM {spaces_settings} WHERE id = 'generic'");
+    while ($row = db_fetch_object($result)) {
+      $value = unserialize($row->value);
+
+      db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', 'vsite_private', '%s')", $row->type, $row->sid, serialize($value['private_vsite']));
+
+    }
+    $res[] = array(
+    	'success' => true,
+      'query' => 'VSite Settings Migrated.'
+    );
+  }
+
+  return $res;
+}
+
+function vsite_update_6006(&$sandbox) {
+  $res = array();
+
+  if (module_exists('strongarm')) {
+    //this will revert any inadvertant strongarm values that have been saved in the database, this is
+    //needed since the way strongarm works has changed
+
+    $vars = strongarm_vars_load(true,true);
+    foreach ($vars as $name => $variable) {
+      $default = ctools_get_default_object('variable', $name);
+      if($default && $variable->value != $default->value){
+        variable_del($name);
+      }
+    }
+    strongarm_flush_caches();
+
+    $res[] = array(
+      'success' => true,
+      'query' => 'Strongarm Settings Migrated'
+    );
+  }
+
+  return $res;
+}
+
+/**
+ * Switch from lightbox to shadowbox
+ */
+function vsite_update_6007(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  if(module_exists('lightbox2')){
+    module_disable(array('lightbox2'));
+  }
+
+  // Enable shadowbox module if need
+  if(!module_exists('shadowbox')){
+
+    include_once('includes/install.inc');
+
+    drupal_install_modules(array('shadowbox'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed shadowbox module and enabled it',
+    );
+
+  }
+
+  return $res;
+
+}
+
+/**
+ * Add the new OS module that holds global configuration and settings
+ * @param array $sandbox
+ */
+function vsite_update_6008(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  // Enable openscholar_front module if need
+  if(!module_exists('os')){
+
+    include_once('includes/install.inc');
+
+    drupal_install_modules(array('os'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed "Openscholar" module and enabled it',
+    );
+
+  }
+
+  return $res;
+
+}
+
+/**
+ * Update content types that had been overridden to use lightbox to now use shadowbox
+ * @param array $sandbox
+ */
+function vsite_update_6009(&$sandbox){
+
+  $res = array();
+
+  $result = db_query("SELECT name  FROM {variable} WHERE `name` LIKE 'itweak_upload_thumbnail_link%' AND value = 's:18:\"lightbox2slideshow\";'");
+
+  while ($var = db_result($result)){
+  	variable_set($var,'shadowboxgrouped');
+  }
+
+  $res[] = array(
+   'success' => true,
+   'query' => 'Transitioned content types from lightbox to shadowbox',
+  );
+
+  return $res;
+
+}
+
+/**
+ * Remove path aliases to vsite nodes, they mirror the homepage and will now trigger the node loading instead of a sites homepage
+ * @param array $sandbox
+ */
+function vsite_update_6010(&$sandbox){
+
+  $res = array();
+
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+  $result = db_query("SELECT n.nid as nid  FROM {node} n INNER JOIN {url_alias} ua ON ua.src = CONCAT('node/',n.nid) WHERE n.type = '%s' ",$scholar_content_type);
+
+  while ($nid = db_result($result)){
+    db_query("DELETE FROM {url_alias} WHERE src = 'node/%s' ",$nid);
+  }
+
+  $res[] = array(
+   'success' => true,
+   'query' => 'Removed aliases directly to og nodes',
+  );
+
+  return $res;
+
+}
+
+function vsite_update_6011(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  // Enable openscholar_front module if need
+  if(!module_exists('prepopulate')){
+
+    include_once('includes/install.inc');
+
+    drupal_install_modules(array('prepopulate'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed "prepopulate" module and enabled it',
+    );
+
+  }
+
+  return $res;
+
+}
+
+/*
+ * hook_update_N
+ * installs several modules.
+ */
+function vsite_update_6012(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  $modules = array( 'conditional_styles', 'nfcbiblio', 'confirm_popup', 'os_wysiwyg');
+
+  foreach ($modules as $mod) {
+	  if(!module_exists($mod)){
+	    include_once('includes/install.inc');
+	    drupal_install_modules(array($mod));
+	  }
+  }
+	$res[] = array(
+	  'success' => true,
+		'query' => 'Installed modules: ' . implode(', ', $modules),
+	);
+
+  return $res;
+
+}
+
+/*
+ * hook_update_N
+ * installs several modules.
+ */
+function vsite_update_6013(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  $modules = array( 'creativecommons', 'oembedcore', 'oembed', 'oembedembedly',);
+
+  foreach ($modules as $mod) {
+	  if(!module_exists($mod)){
+	    include_once('includes/install.inc');
+	    drupal_install_modules(array($mod));
+	  }
+  }
+	$res[] = array(
+	  'success' => true,
+		'query' => 'Installed modules: ' . implode(', ', $modules),
+	);
+
+  return $res;
+
+}
+
+/*
+ * hook_update_N
+ * installs several modules.
+ */
+function vsite_update_6014(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  $modules = array('shorten', 'formcolumns');
+
+  foreach ($modules as $mod) {
+	  if(!module_exists($mod)){
+	    include_once('includes/install.inc');
+	    drupal_install_modules(array($mod));
+	  }
+  }
+	$res[] = array(
+	  'success' => true,
+		'query' => 'Installed modules: ' . implode(', ', $modules),
+	);
+
+  return $res;
+
+}
+
+/*
+ * hook_update_N
+ * installs several modules.
+ */
+function vsite_update_6015(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  $modules = array('vsite_cc');
+
+  foreach ($modules as $mod) {
+	  if(!module_exists($mod)){
+	    include_once('includes/install.inc');
+	    drupal_install_modules(array($mod));
+	  }
+  }
+	$res[] = array(
+	  'success' => true,
+		'query' => 'Installed modules: ' . implode(', ', $modules),
+	);
+
+  return $res;
+
+}
+
+/*
+ * hook_update_N
+ * installs several modules.
+ */
+function vsite_update_6016(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  $modules = array('itweak_filefield');
+
+  foreach ($modules as $mod) {
+	  if(!module_exists($mod)){
+	    include_once('includes/install.inc');
+	    drupal_install_modules(array($mod));
+	  }
+  }
+	$res[] = array(
+	  'success' => true,
+		'query' => 'Installed modules: ' . implode(', ', $modules),
+	);
+
+  return $res;
+
+}
+
+/**
+ * Remove path aliases to vsite nodes, the node should be called and redirected correctly
+ * @param array $sandbox
+ */
+function vsite_update_6017(&$sandbox){
+
+  $res = array();
+
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+  $result = db_query("SELECT n.nid as nid  FROM {node} n INNER JOIN {url_alias} ua ON ua.src = CONCAT('node/',n.nid) WHERE n.type = '%s' ",$scholar_content_type);
+
+  while ($nid = db_result($result)){
+    db_query("DELETE FROM {url_alias} WHERE src = 'node/%s' ",$nid);
+  }
+  
+  //Delete the default node pattern
+  variable_del('pathauto_node_pattern');
+
+  $res[] = array(
+   'success' => true,
+   'query' => 'Removed aliases directly to og nodes',
+  );
+
+  return $res;
+
+}

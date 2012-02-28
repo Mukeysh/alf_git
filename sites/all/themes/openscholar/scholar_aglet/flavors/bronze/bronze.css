@@ -1,0 +1,27 @@
+#header .wrap {
+  background: #f0c78c;
+  }
+
+#navbar .wrap {
+  background: #dab03f;
+  }
+
+#sidebar-first {
+  background:#f0dc8e;
+  }
+
+#sidebar-second {
+  background:#f0c78c;
+  }
+
+#sidebar-first h3.title {
+  background: #f0ec81;
+  }
+
+#sidebar-second h3.title {
+  background: #ffd495;
+  }
+
+#footer .wrap {
+  background: #d8b37e;
+  }

@@ -1,0 +1,13 @@
+diff --git a/olark.js b/olark.js
+index 460bf58..4d816a2 100755
+--- a/olark.js
++++ b/olark.js
+@@ -1,7 +1,7 @@
+ // $Id:
+ 
+ Drupal.behaviors.olark = function() {
+-  if (typeof Drupal.settings.olark.uid != 'undefined') {
++  if ((typeof olark == 'function') && (typeof Drupal.settings.olark.uid != 'undefined')) {
+     olark.extend(function(api){
+       api.chat.updateVisitorNickname({
+         snippet: Drupal.settings.olark.name,

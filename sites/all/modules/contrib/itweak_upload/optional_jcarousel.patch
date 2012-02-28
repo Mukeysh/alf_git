@@ -1,0 +1,13 @@
+diff --git a/sites/all/modules/contrib/itweak_upload/itweak_upload.module b/sites/all/modules/contrib/itweak_upload/itweak_upload.module
+index b50a1b2..49afe16 100644
+--- a/sites/all/modules/contrib/itweak_upload/itweak_upload.module
++++ b/sites/all/modules/contrib/itweak_upload/itweak_upload.module
+@@ -44,7 +44,7 @@ END;
+     jcarousellite_add($js);
+   }
+   else
+-  if (module_exists('jcarousel')) {
++  if (variable_get('itweak_upload_use_jcarousel',false) && module_exists('jcarousel')) {
+     $selector = '.attachment-thumbs';
+     $options = array('scroll' => 1);
+     $skin = 0 ? 'ie7' : 'tango';

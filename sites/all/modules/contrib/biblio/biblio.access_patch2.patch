@@ -1,0 +1,17 @@
+--- ../biblio/biblio.module	2010-11-03 09:51:28.000000000 -0400
++++ biblio.module	2011-04-14 13:14:15.000000000 -0400
+@@ -379,7 +379,6 @@ function biblio_access($op, $node = '',
+     case 'update':
+       if (user_access('edit all biblio entries')) return TRUE;
+       if (user_access('edit own biblio entries') && $user->uid == $node->uid) return TRUE;
+-      if (user_access('edit own biblio entries') && $user->uid != $node->uid) return;
+       break;
+     case 'view':
+       if ((variable_get('biblio_view_only_own', 0)) && $user->uid != $node->uid) return FALSE;
+@@ -2428,4 +2427,4 @@ function biblio_get_title_url_info($node
+                   array('attributes' => $new_window,
+                         'html' => TRUE),
+                 );
+-}
+\ No newline at end of file
++}

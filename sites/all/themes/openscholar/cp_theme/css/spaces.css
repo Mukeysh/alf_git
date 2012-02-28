@@ -1,0 +1,96 @@
+/* SPACES FEATURES */
+
+table.spaces-features {
+  width: 968px;
+  }
+
+form#spaces-preset-default-form h3,
+form#spaces-preset-form h3,
+form.spaces-features-form h3 {
+  font-weight:bold;
+  margin:0px 0px 10px;
+  }
+
+table.spaces-admin,
+table.spaces-settings,
+table.spaces-features {
+  margin:0px 0px 20px;
+  }
+
+table.spaces-settings div.description {
+  white-space:normal;
+  }
+
+table.spaces-features tr.enabled td.name {
+  background: url('../images/check-mark.png') no-repeat 18px 50%;
+  }
+
+table.spaces-features tr.disabled td.action a {
+  display:none;
+  }
+
+table.spaces-admin td.actions {
+  padding-top:10px;
+  padding-bottom:10px;
+  text-align:center;
+  }
+
+table.spaces-admin tr.disabled {
+  color:#999;
+  }
+
+table.spaces-admin tr.hidden {
+  display:none;
+  }
+
+/* SPACES UI */
+div#spaces-feature-menu {
+  margin:10px 0px;
+  }
+
+div#spaces-feature-menu div.menu-item {
+  padding:5px 0px;
+  background:#eee;
+  border-bottom:1px solid #ccc;
+  }
+
+div#spaces-feature-menu div.menu-item div.path,
+div#spaces-feature-menu div.menu-item div.item {
+  float:left;
+  width:50%;
+  padding:0px; margin:0px;
+  }
+
+div#spaces-feature-menu div.menu-item div.path div.form-item,
+div#spaces-feature-menu div.menu-item div.item div.form-item {
+  margin:0px;
+  padding:5px 10px;
+  }
+
+div.spaces-block-customizer strong.region {
+  font-size:11px;
+  color:#666;
+  }
+
+/*Features */
+
+.spaces-features td.name,
+.spaces-features thead.tableHeader-processed th:first-child {
+  padding-left: 58px;
+  }
+
+
+form#spaces-features-form td.actions a {padding:2px;background:#268ce3;color:#FFF; -moz-border-radius: 4px;-webkit-border-radius:4px;}
+
+
+.spaces-features a.tabledrag-handle {
+  display:none;
+  }
+
+.spaces-features select.form-select {
+  float: right;
+  }
+
+.spaces-features a.advanced-help-link {
+  float: left;
+  }

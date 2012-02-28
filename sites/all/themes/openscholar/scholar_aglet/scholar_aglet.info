@@ -1,0 +1,17 @@
+name        = Aglet
+description = Colorful themes featuring overlapping blocks
+flavor_name = "Aluminum"
+plugins[vsite_design][flavor] = flavors
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-aglet.css
+conditional-stylesheets[if lte IE 7][all][] = scholar-aglet-ie7.css
+conditional-stylesheets[if lte IE 8][all][] = scholar-aglet-ie.css
+
+os[widgets][boxes-site_logo] = false
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
+
+os[cp_layout_css] = cp-layout-map.css

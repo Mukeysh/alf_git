@@ -1,0 +1,27 @@
+#extradiv {
+  background-image: url('images/fabric-strip-grungy-green.png');
+  }
+
+body {
+  background-color: #212519;
+  }
+
+#navbar {
+  background-image: url('images/menu-strip-grungy-green.png');
+  }
+
+a, a:visited {
+  color: #898F47;
+  }
+
+#navbar li a,
+#navbar li a:visited {
+  color: #fff;
+  }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar .active-trail a {
+  background: #dcdace;
+  color: #212519;
+  }

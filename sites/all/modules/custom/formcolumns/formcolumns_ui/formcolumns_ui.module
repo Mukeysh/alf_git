@@ -1,0 +1,85 @@
+<?php
+
+
+
+/**
+ * Implementation of hook_menu
+ */
+function formcolumns_ui_menu() {
+  $items = array();
+
+  // top level page:
+  // lists all applicable admin forms with ability to toggle them
+  $items['admin/settings/forms'] = array(
+    'title' => 'Form Columns',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('formcolumns_ui_front_form'),
+    'access arguments' => array('administer form columns'),
+    'file' => 'formcolumns_ui.admin.inc',
+  );
+
+  // shows the config form for individual forms
+  $items['admin/settings/forms/%'] = array(
+    'title' => 'Manage Form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('formcolumns_ui_config_form', 3),
+    'access arguments' => array('administer form columns'),
+    'file' => 'formcolumns_ui.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_formcolumns
+ */
+function formcolumns_ui_formcolumns($parameters) {
+  $form_id = $parameters[0];
+  $columns = array();
+  if ($form_id == 'formcolumns_ui_config_form') {
+    $columns['enabled'] = array(
+      'region' => 'right',
+    );
+    $columns['params'] = array(
+      'region' => 'right',
+    );
+    $columns['buttons'] = array(
+      'region' => 'footer',
+    );
+  }
+
+  return $columns;
+}
+
+/**
+ * Implementation of hook_features_api
+ */
+function formcolumns_ui_features_api() {
+  return array(
+    'formcolumns_config' => array(
+      'name' => 'Form Columns Configs',
+      'file' => drupal_get_path('module', 'formcolumns_ui').'/formcolumns_ui.features.inc',
+      'default_hook' => 'formcolumns_config_features_default_settings',
+      'feature_source' => TRUE,
+    ),
+  );
+}
+
+/**
+ *
+ * Implementation of hook_theme().
+ */
+function formcolumns_ui_theme() {
+  return array(
+    'formcolumns_ui_front_form_table' => array(
+      'arguments' => array('container' => array()),
+    ),
+    'formcolumns_ui_enable_checkbox' => array(
+      'arguments' => array('field' => array()),
+    ),
+    'formcolumns_ui_config_form_table' => array(
+      'arguments' => array('container' => array()),
+    ),
+  );
+}

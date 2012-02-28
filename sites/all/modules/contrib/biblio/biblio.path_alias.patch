@@ -1,0 +1,19 @@
+--- biblio_theme.inc	2010-10-19 21:48:59.000000000 -0400
++++ biblio_theme.inc	2011-04-11 11:50:40.000000000 -0400
+@@ -831,12 +831,15 @@ function theme_biblio_download_links($no
+     $file_count = 0;
+     foreach ($node->files as $file) {
+       if ($file->list) {
++        
+         if (variable_get('biblio_download_links_to_node', 0)) {
+           $href = 'biblio/view/'.$node->nid;
+         }
+         else {
+-          $href = file_create_url($file->filepath);
++          $alias = db_result(db_query("SELECT dst FROM {url_alias} WHERE src = '%s'",'filefield_paths/alias/' . $file -> fid));
++          $href = ($alias) ?  $alias : file_create_url($file->filepath);
+         }
++        
+         $text = $file->description ? $file->description : $file->filename;
+         if ($file_count) $files .= '; ';
+         $files .= l($text, $href) .'&nbsp;('. format_size($file->filesize).')';

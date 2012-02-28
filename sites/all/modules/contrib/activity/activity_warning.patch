@@ -1,0 +1,48 @@
+Index: activity.install
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/activity/activity.install,v
+retrieving revision 1.1.2.1.2.6.2.4.2.17
+diff -u -p -r1.1.2.1.2.6.2.4.2.17 activity.install
+--- activity.install	18 Jul 2010 21:17:20 -0000	1.1.2.1.2.6.2.4.2.17
++++ activity.install	24 Feb 2011 20:58:40 -0000
+@@ -6,7 +6,7 @@ function activity_install() {
+   // Set Trigger's weight to 2 so that it will fire AFTER pathauto. This makes
+   // pathauto alias' work.
+   if (activity_bad_trigger_weight()) {
+-    drupal_set_message(t('In order for proper Pathauto behavior with Activity module, the Trigger module\'s weight needs to be fixed up. !clickhere', array('!clickhere' => l(t('Click here to fix Trigger\'s weight'), 'admin/activity/weight', array('query' => drupal_get_destination())))), 'error');
++    drupal_set_message(t('In order for proper Pathauto behavior with Activity module, the Trigger module\'s weight needs to be fixed up. !clickhere', array('!clickhere' => l(t('Click here to fix Trigger\'s weight'), 'admin/activity/weight', array('query' => drupal_get_destination())))), 'warning');
+   }
+ }
+ 
+@@ -177,14 +177,16 @@ function activity_uninstall() {
+ function activity_requirements($phase) {
+   $requirements = array();
+   $t = get_t();
+-  $views_schema_version = db_result(db_query("SELECT schema_version FROM {system} WHERE name = 'views'"));
+-  if (intval($views_schema_version) < 6006) {
+-    $requirements['activity_views'] = array(
+-      'title' => $t('Activity Views'),
+-      'description' => $t('Activity2 requires Views >= 6.2. It can be downloaded !release. The change that is required by Activity2 is !issue', array('!release' => l('here', 'http://drupal.org/node/488082'), '!issue' => l('#419270', 'http://drupal.org/node/419270'))),
+-      // set the severity to warning on install because we don't want to stop the install...
+-      'severity' => ($phase == 'install') ? REQUIREMENT_WARNING : REQUIREMENT_ERROR,
+-    );
++  if ($phase == 'runtime') {
++	  $views_schema_version = db_result(db_query("SELECT schema_version FROM {system} WHERE name = 'views'"));
++	  if (intval($views_schema_version) < 6006) {
++	    $requirements['activity_views'] = array(
++	      'title' => $t('Activity Views'),
++	      'description' => $t('Activity2 requires Views >= 6.2. It can be downloaded <a href=\'!release\'>here</a>. The change that is required by Activity2 is <a href=\'!issue\'>#419270</a>', array('!release' => 'http://drupal.org/node/488082', '!issue' => 'http://drupal.org/node/419270')),
++	      // set the severity to warning on install because we don't want to stop the install...
++	      'severity' => ($phase == 'install') ? REQUIREMENT_WARNING : REQUIREMENT_ERROR,
++	    );
++	  }
+   }
+ 
+   if (activity_bad_trigger_weight()) {
+@@ -263,4 +265,4 @@ function activity_update_6203() {
+  );
+ 
+   return $ret;
+-}
+\ No newline at end of file
++}

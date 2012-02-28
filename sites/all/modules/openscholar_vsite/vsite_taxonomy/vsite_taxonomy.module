@@ -1,0 +1,794 @@
+<?php
+include_once('vsite_taxonomy.features.inc');
+
+/**
+ * @file
+ * vsite taxonomy manager
+ * @todo user should not be able to select parent when the vocab is free tagging
+ * @todo terms could be added to vsite_primary or vsite_secondary
+ * @todo Fix og_vocab permissions as feature items
+ * @todo user should be able to order vocabs
+ * @todo user should be able to order terms
+ * @todo provide update hook to rename current vocab names
+ * @todo justintime javascript
+ */
+function vsite_taxonomy_init(){
+  drupal_add_css(drupal_get_path('module', 'vsite_taxonomy') . '/theme/vsite_taxonomy.css');
+}
+
+/**
+ * common jquery ui .dialog() options
+ */
+function vsite_taxonomy_dialog_options(){
+  return array(
+    'width' => '600',
+    'position' => array(
+      'center',
+      'center'
+    ),
+    'show' => 'slide, {direction: "down"},1000',
+    'resizable' => FALSE,
+    'closeText' => 'Close',
+  );
+}
+
+/**
+ * Implementation of hook_enable
+ */
+function vsite_taxonomy_enable() {
+  // Weight scholar to be after og_vocab
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'og_vocab'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'vsite_taxonomy'", ($weight + 1));
+}
+
+
+
+/**
+ * Implementation of hook_theme
+ */
+function vsite_taxonomy_theme() {
+  return array(
+    'vsite_taxonomy_term' => array(
+      'arguments' => array('term' => NULL, 'b_description' => null, 'admin_links' => true, 'content_types' => array()),
+      'path' => drupal_get_path('module', 'vsite_taxonomy')."/theme",
+      'file' => 'vsite_taxonomy_term.inc',
+    ),
+    'vsite_taxonomy_term_list' => array(
+      'arguments' => array('index' => NULL, 'tree' => array(), $s_term_theme = 'vsite_taxonomy_term', $b_description = true, $b_show_empty = true, $b_show_admin_links = true, $s_term_feature = false, $b_feature_context = false),
+      'path' => drupal_get_path('module', 'vsite_taxonomy')."/theme",
+      'file' => 'vsite_taxonomy_term_list.inc',
+    ),
+    'vsite_taxonomy_form' => array(
+      'arguments' => array('form' => array()),
+      'path' => drupal_get_path('module', 'vsite_taxonomy'),
+      'file' => 'vsite_taxonomy.admin.inc',
+    ),
+  );
+}
+
+
+/**
+ * Common access callback function for different menu entries
+ */
+function vsite_taxonomy_determine_access($perm){
+  $vsite = vsite_get_vsite();
+  $node = $vsite -> group;
+  return og_vocab_determine_access($node, $perm);
+}
+
+/**
+ * hook menu
+ */
+function vsite_taxonomy_menu() {
+  $items = array ();
+
+  $items ['cp/build/taxonomy'] = array (
+    'title' => 'Taxonomy',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_taxonomy_form'),
+    'access callback' => 'cp_access_cp',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
+    'file' => 'vsite_taxonomy.admin.inc',
+    'file path' => drupal_get_path('module', 'vsite_taxonomy'),
+  );
+
+  // Create a new vocabulary to be associated with the vsite
+  $items['vsite/taxonomy/%ctools_js/add/vocabulary'] = array(
+    'title'            => 'Create vocabulary',
+    'page callback'    => 'vsite_taxonomy_form_add_vocabulary',
+    'page arguments'   => array(2),
+    'access callback'  => 'vsite_taxonomy_determine_access',
+    'access arguments' => array('add own group vocabulary'),
+    'type'             => MENU_CALLBACK,
+    'file' => 'vsite_taxonomy.admin.inc',
+    'file path' => drupal_get_path('module', 'vsite_taxonomy'),
+  );
+
+
+  // Edit an existing vocabulary currently associated with the vsite
+  $items['vsite/taxonomy/%ctools_js/edit/vocabulary/%taxonomy_vocabulary'] = array(
+    'title'            => 'Edit vocabulary',
+    'page callback'    => 'vsite_taxonomy_form_edit_vocabulary',
+    'page arguments'   => array(5,2),
+    'access callback'  => 'vsite_taxonomy_determine_access',
+    'access arguments' => array('edit own group vocabulary'),
+    'type'             => MENU_CALLBACK,
+    'file' => 'vsite_taxonomy.admin.inc',
+    'file path' => drupal_get_path('module', 'vsite_taxonomy'),
+  );
+
+  // Edit an existing vocabulary currently associated with the vsite
+  $items['vsite/taxonomy/%ctools_js/delete/vocabulary'] = array(
+    'title'            => 'delete vocabulary',
+    'page callback'    => 'vsite_taxonomy_delete_vocabulary',
+    'page arguments'   => array(5,2),
+    'access callback'  => 'vsite_taxonomy_determine_access',
+    'access arguments' => array('edit own group vocabulary'),
+    'type'             => MENU_CALLBACK,
+    'file' => 'vsite_taxonomy.admin.inc',
+    'file path' => drupal_get_path('module', 'vsite_taxonomy'),
+  );
+
+  // Create a new term and associate it with the vocabulary.
+  $items['vsite/taxonomy/%ctools_js/terms/%taxonomy_vocabulary/add_term'] = array(
+    'title'            => 'Add term to this vocabulary',
+    'page callback'    => 'vsite_taxonomy_add_term',
+    'page arguments'   => array(4,2,6),
+    'access callback'  => 'vsite_taxonomy_determine_access',
+    'access arguments' => array('edit own group term'),
+    'type'             => MENU_CALLBACK,
+    'file' => 'vsite_taxonomy.admin.inc',
+    'file path' => drupal_get_path('module', 'vsite_taxonomy'),
+  );
+
+  // Edit term.
+  $items['vsite/taxonomy/%ctools_js/terms/edit'] = array(
+    'title'            => 'Edit term',
+    'page callback'    => 'vsite_taxonomy_edit_term',
+    'page arguments'   => array(5, 2),
+    'access callback'  => 'vsite_taxonomy_determine_access',
+    'access arguments' => array('edit own group term'),
+    'type'             => MENU_CALLBACK,
+    'file' => 'vsite_taxonomy.admin.inc',
+    'file path' => drupal_get_path('module', 'vsite_taxonomy'),
+  );
+
+  $items['taxonomy/term/%/%'] = array(
+    'title' => 'Taxonomy term',
+    'page callback' => 'vsite_taxonomy_term_page',
+    'page arguments' => array(2,'all',3),
+    'access callback' => 'vsite_taxonomy_access_term',
+    'access arguments' => array(2,'access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  foreach (spaces_features('og') as $s_feature => $a_info) {
+  	$s_path = _vsite_taxonomy_get_term_path(1,$s_feature,true);
+  	if(strpos($s_path,"taxonomy") !== 0){
+  	  $s_path = str_replace("1","%",$s_path);
+  	  $items[$s_path] = array(
+		    'page callback' => 'vsite_taxonomy_term_page',
+		    'page arguments' => array(2,'all',$s_feature,true),
+		    'access callback' => 'vsite_taxonomy_access_term',
+        'access arguments' => array(2,'access content'),
+		    'type' => MENU_CALLBACK,
+		  );
+  	}
+  }
+
+  return $items;
+}
+
+
+
+/**
+ * Alter the menu items to use our code
+ * @param array $items
+ */
+function vsite_taxonomy_menu_alter(&$items) {
+  $items['taxonomy/term/%']['page callback'] = 'vsite_taxonomy_term_page';
+  $items['taxonomy/term/%']['access callback'] = 'vsite_taxonomy_access_term';
+  $items['taxonomy/term/%']['access arguments'] = array(2,'access content');
+}
+
+/**
+ * Check that a term is a member of the current site
+ *
+ * @param string $term
+ * @param access_string $string
+ */
+function vsite_taxonomy_access_term($term, $string = false){
+	
+	$vsite = vsite_get_vsite();
+	if($string === false){
+		//Called without term
+		$string = $term;
+	}elseif($vsite){
+		$terms = taxonomy_terms_parse_string($term);
+	  $tid = is_array($terms['tids'])?current($terms['tids']):false;
+	  
+	  $o_term = taxonomy_get_term($tid);
+	}
+	
+	return user_access($string) && (!$vsite || ($o_term && array_key_exists($o_term->vid,$vsite->group->og_vocabularies)));
+}
+
+
+/**
+ * Implementation of hook_vsite_admin_link
+ */
+function vsite_taxonomy_vsite_admin_link($type, $object){
+  $links = array();
+  // edit/delete links for vocabularies
+  if ($type == 'vocabulary') {
+
+    $links[] = array(
+      'title' => 'edit',
+      'href' => 'vsite/taxonomy/nojs/edit/vocabulary/' . $object -> vid,
+      'attributes' => array(
+        'class' => 'ctools-use-dialog edit-link'
+      )
+    );
+  }
+  elseif ($type == 'term') {
+
+    $links[] = array(
+      'title' => 'edit',
+      'href' => 'vsite/taxonomy/nojs/terms/edit/' . $object->tid,
+      'attributes' => array(
+        'class' => 'ctools-use-dialog edit-link'
+      )
+    );
+
+    $vocab = taxonomy_vocabulary_load($object->vid);
+    if(!$vocab->tags){
+	    $links[] = array(
+	      'title' => 'add child',
+	      'href' => 'vsite/taxonomy/nojs/terms/'.$object->vid.'/add_term/'.$object->tid,
+	      'attributes' => array(
+	        'class' => 'ctools-use-dialog edit-link'
+	      )
+	    );
+    }
+  }
+
+  return $links;
+}
+
+/**
+ * Implementation of hook block
+ */
+function vsite_taxonomy_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $blocks['filter_feature']['info'] = t('Filter Taxonomy by Features');
+      return $blocks;
+    case 'view':
+    	switch ($delta) {
+      	case 'filter_feature':
+      	  $block = vsite_taxonomy_category_by_feature_block();
+      	break;
+      }
+
+      return $block;
+  }
+}
+
+/**
+ * Links to Filter the active category by a feature
+ */
+function vsite_taxonomy_category_by_feature_block(){
+	//Are we viewing a taxonomy term?
+	if(!($term = vsite_taxonomy_active_term())) return array();
+
+	$vocab = taxonomy_vocabulary_load($term->vid);
+	$node_map = features_get_component_map('node');
+
+  $active_menu = menu_get_item();
+  $s_filtered_feature = false;
+  if($active_menu['path'] == 'taxonomy/term/%/%'){
+    $s_filtered_feature = $active_menu['page_arguments'][2];
+  }//Already Filtered by a feature?
+
+	$a_feature_nodes = array();
+  foreach ($vocab->nodes as $s_node) {
+    if(array_key_exists($s_node,$node_map)){
+    	foreach ($node_map[$s_node] as $s_feature) {
+    		if(!isset($a_feature_nodes[$s_feature])){
+    			$a_feature_nodes[$s_feature] = array();
+    		}
+    		$a_feature_nodes[$s_feature][] = $s_node;
+    	}
+    }
+  }//Make a list of features and the node types that are selected for this taxonomy
+
+  $items = array();
+  foreach ($a_feature_nodes as $s_feature => $a_nodes) {
+
+      $n_count = vsite_taxonomy_term_count_nodes($term->tid,false,$a_nodes);
+      if(!$n_count) continue;
+
+      $a_menu_item = vsite_menus_get_feature_menu_item($s_feature);
+      if(count($a_menu_item)){
+      	$a_menu_item = current($a_menu_item);
+      	$s_text = ucwords($a_menu_item['link_title']);
+      }else{
+      	$feature_info = features_get_info('feature', $s_feature);
+      	$s_text = ucwords( $feature_info->info['name'] );
+      }
+      $link = _vsite_taxonomy_get_term_path($term->tid,$s_feature);
+      $options = array();
+
+      if($s_feature == $s_filtered_feature){
+      	$s_text = "(-) ".$s_text;
+      	$link = "taxonomy/term/{$term->tid}";
+      	$options = array();
+      }
+
+      $s_text .= " ($n_count)";
+
+      $items[] = l($s_text,$link,$options);
+  }
+
+  if(count($items) < 2){
+  	return array();
+  }
+
+  return array(
+    'subject' => "Filter by Section",
+    'content' => theme('item_list', $items, NULL, 'ul'),
+  );
+}
+
+/**
+ *  hook nodeapi
+ *  When a vsite is created, create the og_vocabs for each feature content type
+ */
+function vsite_taxonomy_nodeapi(&$node, $op, $teaser = NULL, $page = NULL){
+
+	switch ($op){
+		case 'insert':
+			if($node->type == variable_get('scholar_content_type', 'vsite')) {
+		    // Features implement their own default taxonomies
+		    $taxs = module_invoke_all('vsite_vocabulary_default');
+
+		    // create vocabs
+		    vsite_taxonomy_taxonomy_import($node->nid, $taxs);
+		  }
+		break;
+	}
+}
+
+/**
+ * hook form_alter
+ * Renames the vocabs label in the input form
+ */
+function vsite_taxonomy_form_alter(&$form, $form_state, $form_id){
+  
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] . '_node_form' == $form_id) {
+    $vsite = vsite_get_vsite();
+    if ($vsite && og_is_group_post_type($form['#node']->type)) {
+      $v = $vsite->get_vocabs($form['#node']->type);
+      if(!is_array($v)) $v = array();
+        
+      foreach ( element_children($form['taxonomy']) as $s_child ) {
+        if ($s_child == 'tags' && count($form['taxonomy']['tags'])) {
+          $form['taxonomy']['tags'] = array_intersect_key($form['taxonomy']['tags'], $v);
+        }
+        elseif (! array_key_exists($s_child, $v)) {
+          unset($form['taxonomy'][$s_child]);
+        }
+      }
+    }//We are in a vsite and this is a group post type so restrict the avalible vocabs
+    
+    if (! $form['#vertical_tabs']) $form['#vertical_tabs'] = array();
+    $form['#vertical_tabs']['taxonomy'] = 0; //Disable vert. tabs
+  }
+  
+  switch ($form_id) {
+    case 'taxonomy_form_vocabulary' :
+      if ($form['settings']['context'])
+        $form['settings']['context']['#access'] = user_access('administer taxonomy'); //Hide from regular users
+      if ($form['settings']['orderable'])
+        $form['settings']['orderable']['#access'] = user_access('administer taxonomy'); //Hide from regular users
+      
+
+      $a_vocab_options = array(
+        1 => t('Tags (Free tagged comma-separated list of categories/tags)'),
+        0 => t('Predefined/Managed Taxonomy')
+      );
+      
+      //Change view to make creating new vocabs easier
+      $form['settings']['tags']['#type'] = 'select';
+      $form['settings']['tags']['#options'] = $a_vocab_options;
+      $form['settings']['tags']['#description'] = '';
+      $form['settings']['tags']['#title'] = 'Type';
+      break;
+    case "taxonomy_vocabulary_confirm_reset_alphabetical" :
+      $vsite = vsite_get_vsite();
+      if ($vsite && $form['actions']) {
+        $form['actions']['cancel']['#value'] = l("Cancel", "cp/build/taxonomy");
+      }
+      break;
+  }
+
+}
+
+
+
+/**
+ * proivdes some default terms
+ */
+function vsite_taxonomy_vsite_vocabulary_default(){
+  $types = array();
+  $content_types = og_get_types('group_post');
+  foreach($content_types as $type){
+    $types[$type] = 1;
+  }
+
+  drupal_alter('vsite_taxonomy_content_types', $types);
+
+  return array (
+    0 => array (
+    'name' => 'tags',
+    'content_types' => $types,
+    'properties' => array ('tags' => 1),
+
+  )
+ );
+
+}
+
+/** API functions **/
+
+/**
+ * Creates a series of taxonomy vocabularies and terms from the passed
+ * definition.
+ *
+ * Sample Definition:
+ *   array(
+ *   0 => array(
+ *     'name' => 'vocab name',
+ *     'content_types' => array(),
+ *     'properties' => array(),
+ *     'terms' => array(
+ *       0 => array(
+ *         'name' => 'Term Name',
+ *         'desription' => '',
+ *         'properties' => array(),
+ *       )
+ *     ),
+ *   ),
+ * );
+ *
+ * NOTE: This function does not currently do any error or duplicate checking.
+ *
+ * @param $definition
+ *   Definintion of the taxonomy structure.
+ */
+function vsite_taxonomy_taxonomy_import($gid, $definition){
+
+  foreach ( $definition as $vocab_index => $vocab_definition ) {
+
+	 // Default properties so you don't have to pass anything.
+	  $defaults = array(
+	    'name' => $vocab_definition['name'],
+	    'tags' => 0,
+	    'multiple' => 0,
+	    'required' => 0,
+	    'hierarchy' => 0,
+	    'relations' => 0,
+	    'module' => 'taxonomy',
+	    'weight' => 0,
+	    'nodes' => $vocab_definition['content_types'],
+	    'help' => '',
+	  );
+	  $vocabulary = array_merge($defaults, $vocab_definition['properties']);
+	  taxonomy_save_vocabulary($vocabulary);
+	  $vid = db_result(db_query("SELECT MAX(vid) FROM {vocabulary} "));
+
+    // make this a group taxonomy
+    og_vocab_write_record($gid, $vid);
+    if (count($vocab_definition['terms'])) {
+      foreach ( $vocab_definition['terms'] as $term_index => $term_definition ) {
+			  $term = array_merge(array('name' => $term_definition['name'],'description' => $term_definition['description'],'parent' => array(),'relations' => array(),'weight' => 0,'vid' => $vid,), $term_definition['properties']);
+        taxonomy_save_term($term);
+      }
+    }
+  }
+}
+
+/**
+ * Retrieve the active taxonomy term (if any)
+ *
+ * @param object $term //Term to set
+ * @param bool $reset //Clear the value?
+ */
+function vsite_taxonomy_active_term($term = false, $reset = false){
+	static $active_term;
+
+	if($term || $reset){
+		$active_term = $term;
+	}
+
+	return $active_term;
+}
+
+/**
+ * Menu callback; displays all nodes associated with a term.
+ */
+function vsite_taxonomy_term_page($str_tids = '', $depth = 'all', $s_feature = false, $b_feature_context = false){
+
+	$terms = taxonomy_terms_parse_string($str_tids);
+	$tid = is_array($terms['tids'])?current($terms['tids']):false;
+
+	$term = taxonomy_get_term($tid);
+	if(!$term) return MENU_NOT_FOUND;
+
+	//Set the active taxonomy term
+	vsite_taxonomy_active_term($term);
+
+  if($s_feature && $b_feature_context){
+    //Maintain the context
+    $s_feature_context = 'openscholar-feature-'.str_replace('scholar_','',$s_feature);
+    context_set('context',$s_feature_context,context_load($s_feature_context));
+  }
+
+  //Load the vocab for this term
+	$vocab = taxonomy_vocabulary_load($term->vid);
+	
+	//If there is only one feature for this vocab show the feature's view
+	$s_one_feature = vsite_taxonomy_get_feature_for_vocab($vocab);
+	
+  if ($b_feature_context && !$s_one_feature){
+    $a_menu_item = vsite_menus_get_feature_menu_item($s_feature);
+    if(count($a_menu_item)){
+      $a_menu_item = current($a_menu_item);
+      $s_fname = ucwords($a_menu_item['link_title']);
+    }else{
+      $feature_info = features_get_info('feature', $s_feature);
+      $s_fname = ucwords( $feature_info->info['name'] );
+    }
+    $s_header_extra = "Showing results in '{$s_fname}'. ".l("Show all posts",_vsite_taxonomy_get_term_path($term->tid));
+  }elseif (!$s_feature){
+  	$s_feature = $s_one_feature;
+  }
+
+	$output = "";
+	if(!$s_feature || !($output = vsite_taxonomy_term_by_feature($term, $s_feature))){
+	  //Render Default Taxonomy View
+		$view = views_get_view('vsite_taxonomy_view');
+	  $view->init();
+	  $view->set_display('default');
+
+	  if ($tid) {
+	    $view->set_arguments(array( $tid ));
+	  }
+
+	  if($s_feature){
+		  $a_node_types = vsite_taxonomy_get_nodes_in_feature($s_feature);
+
+	    if(count($a_node_types)){
+	      $filter = $view->get_item('default','filter','type');
+	      $filter['value'] = $a_node_types;
+	      $view->set_item('default','filter','type',$filter);
+	    }
+	  }//Retrieve nodes that the list should be filtered by if a feature is passed
+
+	  // pager
+	  $view->pager['use_pager'] = 1;
+
+	  $view->execute();
+    $output = $view->render();
+	}
+
+	$header = "";
+  if(strlen($term->description) || isset($s_header_extra)){
+    $header .= '<div class="taxonomy-term-description">';
+    if(isset($s_header_extra)) $header .= $s_header_extra;
+    if(isset($s_header_extra) && strlen($term->description)) $header .= "<br />";
+    if(strlen($term->description)) $header .= filter_xss_admin($term->description);
+    $header .= '</div>';
+  }
+
+  if ($term->name) drupal_set_title(check_plain($term->name));
+
+  return $header . $output;
+
+}
+
+/**
+ * Display a taxonomy result set filtered by feature type
+ *
+ * @param term $term
+ * @param string $s_type (A feature ex. "scholar_publications")
+ * @deprecated to be replaced by view
+ */
+function vsite_taxonomy_term_by_feature($term, $s_feature){
+
+	$a_view_info = vsite_get_default_feature_view($s_feature);
+
+	if(!$a_view_info || !strlen($a_view_info['view'])) return false;
+
+  $view = views_get_view($a_view_info['view']);
+  $view->init();
+  $view->set_display( $a_view_info['display']?$a_view_info['display']:'default' );
+
+  //Filter def to filter view by provided tid
+  $a_tid_filter = array(
+    'operator' => 'and',
+    'value' => array(0 => $term->tid),
+    'group' => 0,
+    'exposed' => false,
+    'limit' => TRUE,
+    'vid' => $term->vid,
+    'id' => 'tid',
+    'table' => 'term_node',
+    'field' => 'tid',
+    'hierarchy' => 0,
+    'relationship' => 'none',
+    'reduce_duplicates' => 0,
+  );
+
+  if(is_array($view->display_handler->options['filters'])){
+    $view->display_handler->options['filters']['tid'] = $a_tid_filter;
+  }else{
+    $view->display_handler->default_display->options['filters']['tid'] = $a_tid_filter;
+  }
+  
+  $current_page = menu_get_item();
+  
+  //Pass on any additional arguments to the view
+  $s_args = trim(str_replace($current_page['href'],"",$_GET['q'])," /");
+  if(strlen($s_args)) $arguments = explode('/',$s_args);
+  if (count($arguments)) {
+    $view->set_arguments($arguments);
+  }
+
+  $current_page = menu_get_item();
+  $view->display_handler->options['path'] = $current_page['href'];
+  
+  // pager
+  $view->pager['use_pager'] = 1;
+
+  $view->execute();
+  $output = $view->render();
+
+  return $output;
+}
+
+/**
+ * Count the number of published nodes classified by a term.
+ *
+ * @param $tid
+ *   The term's ID
+ *
+ * @param $cnt_childeren
+ *   Boolean - Should the children be included in the node count
+ *
+ * @param $a_content_types
+ *   The array( $node->type ). If given, vsite_taxonomy_term_count_nodes only counts
+ *   nodes of $type that are classified with the term $tid.
+ *
+ * @return int
+ *   An integer representing a number of nodes.
+ *   Results are statically cached.
+ */
+function vsite_taxonomy_term_count_nodes($tid, $cnt_childeren = true, $a_content_types = array()) {
+  static $count;
+  static $count_by_type;
+  $vsite = vsite_get_vsite();
+
+  if (!count($a_content_types) && !isset($count)) {
+    $result = db_query('SELECT t.tid, COUNT(n.nid) AS c FROM {term_node} t INNER JOIN {node} n ON t.vid = n.vid INNER JOIN {og_ancestry} og ON n.nid = og.nid WHERE n.status <> 0 AND og.group_nid = %d GROUP BY t.tid',$vsite->group->nid);
+
+    $count = array();
+    while ($term = db_fetch_object($result)) {
+      $count[$term->tid] = $term->c;
+    }
+  }elseif (count($a_content_types) && !isset($count_by_type[implode(":",$a_content_types)])){
+  	$result = db_query("SELECT t.tid, COUNT(n.nid) AS c FROM {term_node} t INNER JOIN {node} n ON t.vid = n.vid INNER JOIN {og_ancestry} og ON n.nid = og.nid WHERE n.status <> 0 AND n.type IN(".db_placeholders($a_content_types,'varchar').") AND og.group_nid = %d GROUP BY t.tid", array_merge($a_content_types, array($vsite->group->nid)));
+
+  	if(!is_array($count_by_type)) $count_by_type = array();
+    $count_by_type[implode(":",$a_content_types)] = array();
+    while ($term = db_fetch_object($result)) {
+      $count_by_type[implode(":",$a_content_types)][$term->tid] = $term->c;
+    }
+  }
+
+  $children_count = 0;
+  if($cnt_childeren){
+    foreach (_taxonomy_term_children($tid) as $c) {
+      $children_count += vsite_taxonomy_term_count_nodes($c,$cnt_childeren,$a_content_types);
+    }
+  }//Should the childeren be counted?
+
+  if (count($a_content_types)){
+  	return $children_count + (isset($count_by_type[implode(":",$a_content_types)][$tid]) ? $count_by_type[implode(":",$a_content_types)][$tid] : 0);
+  }else{
+    return $children_count + (isset($count[$tid]) ? $count[$tid] : 0);
+  }
+}
+
+/**
+ * Return the link path for a term to it's category page
+ *
+ * @param number $tid
+ */
+function _vsite_taxonomy_get_term_path($tid, $s_term_feature= false, $b_feature_context = false){
+  $s_link_path = "taxonomy/term/".$tid;
+
+  if($s_term_feature && !$b_feature_context) $s_link_path .= "/{$s_term_feature}";
+
+  if($s_term_feature && $b_feature_context){
+    $a_menu_item = vsite_menus_get_feature_menu_item($s_term_feature);
+    if(is_array($a_menu_item)) $a_menu_item = current($a_menu_item);
+    $s_path = is_array($a_menu_item)?$a_menu_item['link_path']:false;
+
+    if(!$s_path){
+      $a_view_info = vsite_get_default_feature_view($s_term_feature);
+      $o_view = views_get_view($a_view_info['view']);
+
+      if($o_view){
+        $s_path = $o_view->get_url();
+        if($n_pos = strpos($s_path,"/")) $s_path = substr($s_path,0,$n_pos);
+      }
+    }
+
+    if($s_path) $s_link_path = "{$s_path}/term/".$tid;
+  }//Within a Feature Context
+
+  return $s_link_path;
+}
+
+/**
+ * Return the nodes that apply to a feature
+ * @param string $s_term_feature
+ */
+function vsite_taxonomy_get_nodes_in_feature($s_term_feature){
+    $a_nodes = array();
+    $node_map = features_get_component_map('node');
+    foreach ($node_map as $s_node => $a_features) {
+      if(in_array($s_term_feature,$a_features)) $a_nodes[] = $s_node;
+    }
+    
+    return $a_nodes;
+}
+
+/**
+ * This returns the feature that is associated with a vocab if it only contanins
+ * node types for one feature, false otherwise
+ *
+ * @param vocabulary $vocab
+ */
+function vsite_taxonomy_get_feature_for_vocab($vocab){
+	
+  $node_map = features_get_component_map('node');
+  $s_one_feature = false;//If there is only one feature represented for this vocab
+  
+  foreach ($vocab->nodes as $s_node) {
+    if(array_key_exists($s_node,$node_map) && !$s_one_feature){
+      $s_one_feature =  current($node_map[$s_node]);
+    }elseif (array_key_exists($s_node,$node_map) && $s_one_feature != current($node_map[$s_node])){
+     //Found a second feature represented
+     $s_one_feature = false;
+     break;
+    }
+  }//If there is only one type for this vocab return that feature
+  
+  return $s_one_feature;
+}
+
+/**
+ * Alter the node template
+ * @param array $variables
+ */
+function vsite_taxonomy_preprocess_node(&$variables){
+	
+	//Put taxonomy terms in collapsed div if the list of terms grows to large
+	if(count($variables['taxonomy']) > 3){
+		$variables['terms'] = l("terms", "node/{$variables['nid']}",array('attributes'=>array('class' => 'toggle'))).
+		                      '<div class="slider">'. theme('links', $variables['taxonomy'], array('class' => 'inline')) ."\n</div>";
+	}
+}

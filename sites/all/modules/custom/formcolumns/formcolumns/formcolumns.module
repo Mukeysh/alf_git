@@ -1,0 +1,215 @@
+<?php
+// $Id;
+
+/**
+ * @file
+ * Contains the hooks and their helpers for Form Columns.
+ *
+ * Form Columns allows one to define which of 3 regions they want a top level field element
+ * to be in. They may choose from Main, Right, and Footer.
+ *
+ * Users may build Form Columns directly into their forms by setting the #columns attribute on
+ * the form itself, and then the #region attribute on any top level elements they wish to position.
+ * Any element without a #region defined will be placed into the Main region by default. Setting a
+ * #region of 'none' will take the element out of the columns completely.
+ * Note that this will work on any form, not just admin forms.
+ *
+ *  Form Columns is based on Node Form Columns.
+ *
+ *  TODO:
+ *    Columns in non-root field elements?
+ *    Different column configurations?
+ */
+
+/**
+ * hook_formcolumns
+ * ----------------
+ * takes $form['#parameters'] as an argument
+ * returns an array of affected columns with their placements
+ */
+
+function hook_formcolumns($parameters) {
+  $form_id = $parameters[0];
+  $form_state = $parameters[1];
+  $form_parameters = $parameters[2];
+
+  $columns = array();
+  if ($form_id == "your_form" && $form_parameters[0] == "your_parameter") {
+    $columns['field_name'] = 'region';
+  }
+
+  return $columns;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function formcolumns_form_alter(&$form, &$form_state, $form_id) {
+  //$q = db_query("SELECT name, region, weight, collapsed, hidden, enabled FROM {formcolumns_ui_fields} INNER JOIN {formcolumns_ui_enabled} USING(form_id) WHERE form_id = '%s'", $form_id);
+  $columns = array();
+
+  $q = variable_get('formcolumns_settings_'.$form_id, array('columns'=>array()));
+  // we found it in the _fields table, so we populate it with data from the table
+  //while ($r = db_fetch_array($q)) {
+  foreach ($q['columns'] as $name =>$r) {
+    if ($q['enabled']) {
+      $columns[$name] = $r;
+      //unset($columns[$r['name']]['name']);
+    }
+  }
+
+  $columns = array_merge_recursive(module_invoke_all('formcolumns', $form['#parameters']), $columns);
+
+  foreach ($columns as $field => $data) {
+    $form['#columns'] = TRUE;
+    foreach ($data as &$d) {
+      if (is_array($d)) {
+        $d = end($d);
+      }
+    }
+    if (isset($form[$field])) {
+        if (isset($data['region'])) $form[$field]['#region'] = $data['region'];
+        if (isset($data['collapsed']) && $form[$field]['#type'] == 'fieldset' && $form[$field]['#collapsible']) {
+          $form[$field]['#collapsed'] = $data['collapsed'];
+        }
+        if (isset($data['hidden'])) $form[$field]['#access'] = !$data['hidden'];
+        if (isset($data['weight'])) $form[$field]['#weight'] = $data['weight'];
+    }
+    else {
+      $form['#unfound'][$field] = $data;
+    }
+  }
+
+  // make sure the theme is on the form so it gets formatted properly
+  if ($form['#columns']) {
+    $form['#theme'] = 'formcolumns_form';
+  }
+}
+
+function template_preprocess_formcolumns_form(&$aVars) {
+  if (!isset($aVars['form'])) return;
+  $form = &$aVars['form'];
+  // we aren't adding columns to this form, so exit out now
+  if (!$form['#columns']) return $aVars;
+
+  drupal_add_css(drupal_get_path('module', 'formcolumns') . '/formcolumns.css');
+
+  $default_region = variable_get('nodeformcols_default_region', NODEFORMCOLS_DEFAULT_REGION);
+  $classes = array('node-form');
+
+  $regions = array();
+  $weight = 0;
+  // set up the region elements
+  foreach (_formcolumns_regions() as $name => $title) {
+    $regions[$name] = array(
+        '#prefix' => '<div class="form-region-' . $name . '">',
+        '#suffix' => '</div>',
+        '#weight' => $weight,
+      );
+    $weight++;
+  }
+
+  foreach ($form as $key => $field) {
+    // run through the list of fields
+    // if they have a #region set, put them in that region
+    // then remove them from the form
+    // we'll put the regions, with their form element children, in at the end
+    if (substr($key, 0, 1)=='#' ||
+        $field['#type']=='value' || $field['#type']=='hidden'|| $field['#type']=='token') {
+      continue;
+    }
+
+    if (isset($form['#unfound'][$key])) {
+      $f = $form['#unfound'][$key];
+      if (isset($f['region'])) $field['#region'] = $f['region'];
+      if (isset($f['weight'])) $field['#weight'] = $f['weight'];
+      if (isset($f['hidden'])) $field['#hidden'] = $f['hidden'];
+      if (isset($f['collapsed']) && $field['#collapsible']) {
+        $field['#collapsed'] = $f['collapsed'];
+      }
+    }
+
+    if (isset($field['#region'])) {
+        if (isset($regions[$field['#region']])) {
+          $regions[$field['#region']][$key] = $field;
+          unset($form[$key]);
+        }
+    }
+    else {
+      $regions[$default_region][$key] = $field;
+      unset($form[$key]);
+    }
+  }
+
+  // add the necessary classes
+  foreach ($regions as $name => $reg) {
+    if (count($reg) > 3) {
+      $classes[] = 'node-form-has-region-' . $name;
+      $form['formcolumns_region_'.$name] = $reg;
+    }
+  }
+
+  $aVars['class'] = implode(' ', $classes);
+}
+
+/**
+ *
+ * Implementation of hook_theme().
+ */
+function formcolumns_theme() {
+  return array(
+    'formcolumns_form' => array(
+      'template' => 'node-form',
+      'path' => drupal_get_path('module', 'nodeformcols'),
+      'arguments' => array('form' => array()),
+    ),
+  );
+}
+
+/**
+ * Returns an array of accepted fields
+ * TODO:
+ *   get regions for current column config
+ */
+function _formcolumns_regions() {
+  return array('none' => 'None', 'main' => 'Main', 'right' => 'Right', 'footer' => 'Footer');
+}
+
+
+/* NOTES
+ *
+ * How Node Form Columns works:
+ * ----------------------------
+ * 1. creates menu entries by getting a list of all node types from drupal itself
+ *      It doesn't use variable paths at all, just makes a crapload of static ones
+ * 2. grabs the form array by following the known node form id template ($type_node_form)
+ * 3. runs through all of the form's fields, sticking them into an array of regions (placements), then adding a #region key
+ * 4. For each placement key, it adds an entry in the form array. the form path is $form['conf'][$region][$key]
+ * 5. Submission puts all of this data into a single variable, which has the content type and a variant in the name.
+ *
+ * 6. The actual work is done in a preprocess function. It specifically aims for node_form.
+ * 7. Grabs the placement for each field.
+ * 8. Sorts the fields into arrays by their region. Ex. $region['main'] will have all the fields that go in main in it.
+ * 9. Unsets the field from the form.
+ * 10. Adds the regions back into the form data
+
+
+ * How Admin Form Columns will have to work:
+ * -----------------------------------------
+ * 1. creates menu entries. the only absolutely unique thing about these forms is their path, which I don't think can be used in another path
+ *      Each form will have to be given a id I can use to tell them and their overloads apart from
+ * 2. Try to fake some arguments for the form function and get the form table from them
+ * 3. Same as NFC
+ * 4. Same as NFC
+ * 5. On submit, put all the data in a table.
+
+ * 6. The actual work will be done in a preprocess function. It'll have to be general (hook_form()) and then exclude based on enabled forms
+ * 7. See NFC. Just, from a table instead of a global variable.
+ * 8. See NFC
+ * 9. See NFC
+ * 10. See NFC
+
+ Note that except for very few cases, I will have to write my own functions that essentially do what NFC does. I can't just outright use them
+ since NFC has node-specific implementation details in almost every function.
+
+ */

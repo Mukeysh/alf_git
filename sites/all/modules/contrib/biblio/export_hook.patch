@@ -1,0 +1,66 @@
+? .svn
+? richard.patch
+? bibtexParse/.svn
+? marcParse/.svn
+? translations/.svn
+? views/.svn
+Index: biblio.import.export.inc
+===================================================================
+RCS file: /cvs/drupal/contributions/modules/biblio/biblio.import.export.inc,v
+retrieving revision 1.7.2.64
+diff -r1.7.2.64 biblio.import.export.inc
+617a618,628
+>     
+>     // Allow other modules to adjust the bibtex entries. Functions must
+>     // be named modulename_biblio_bibtex_export.
+>     // We don't use module_invoke_all to enable passing by reference.
+>     foreach (module_implements('biblio_bibtex_export_pre') as $module) {
+>       $function = $module . '_biblio_bibtex_export_pre';
+>       // Pass all values that are already set.
+>       $function ($pub, $type, $journal, $booktitle, $organization, $series, $school);
+>     }
+>     
+>     
+659a671,677
+>     // Another hook to add fields which are not defined above.
+>     foreach (module_implements('biblio_bibtex_export_post') as $module) {
+>       $function = $module . '_biblio_bibtex_export_post';
+>       // Pass all values that are already set.
+>       $function ($pub, $bibtex);
+>     }
+>     
+Index: biblio.pages.inc
+===================================================================
+RCS file: /cvs/drupal/contributions/modules/biblio/biblio.pages.inc,v
+retrieving revision 1.1.2.93
+diff -r1.1.2.93 biblio.pages.inc
+479c479,480
+<   if ($inline === true) print '<div class="biblio-inline">';
+---
+>   if ($inline === true) $content .= '<div class="biblio-inline">';
+>  
+Index: bibtexParse/PARSEENTRIES.php
+===================================================================
+RCS file: /cvs/drupal/contributions/modules/biblio/bibtexParse/PARSEENTRIES.php,v
+retrieving revision 1.1.4.29
+diff -r1.1.4.29 PARSEENTRIES.php
+562a563,571
+>       
+>      // hook_biblio_bibtex_import_pre. Allows to define new or change
+> 		 // types, e.g. split @incollection from @book and put in a custom type.
+> 		 // We don't use module_invoke_all to enable passing by reference.
+> 		 foreach (module_implements('biblio_bibtex_import_pre') as $module) {
+> 		   $function = $module . '_biblio_bibtex_import_pre';
+> 		   $function ($entry, $node);
+> 		 }
+>       
+623a633,641
+>       
+>       // Allow other modules to adjust the bibtex entries. Functions must
+> 			// be named modulename_biblio_bibtex_import.
+> 			foreach (module_implements('biblio_bibtex_import') as $module) {
+> 			  $function = $module . '_biblio_bibtex_import';
+> 			  $function ($entry, $node);
+> 			}
+>       
+>       

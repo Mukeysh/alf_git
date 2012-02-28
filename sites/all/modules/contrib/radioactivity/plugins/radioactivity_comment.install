@@ -1,0 +1,15 @@
+<?php
+/**
+ * @file
+ * Comment radioactivity install hooks
+ */
+
+function radioactivity_comment_install() {
+  // no install actions required
+}
+
+function radioactivity_comment_uninstall() {
+  if (db_table_exists('radioactivity')) {
+    db_query("DELETE FROM {radioactivity} WHERE class='comment'");
+  }
+}

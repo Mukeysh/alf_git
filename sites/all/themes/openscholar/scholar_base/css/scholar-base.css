@@ -1,0 +1,391 @@
+body {
+  background: #FFF;
+  }
+  
+.section-help ul li {
+	margin-left: 20px;
+}
+
+ /* Firebug bug */
+
+body.admin-menu {
+  position:static !important;
+  }
+
+.admin-menu div#admin-toolbar.vertical {
+  top:20px;
+  }
+
+.flL {
+  float:left;
+  margin: 0 1.5em .5em 0;
+  }
+
+.flR {
+  float: right;
+  margin: 0 0 .5em 1.5em;
+  }
+
+/* IMAGES */
+
+img {
+  border:none;
+  }
+
+.img-flL {
+  float: left;
+  margin: 0 1em .9em 0;
+  }
+
+.img-flR {
+  float: right;
+  margin: 0 0 .9em 1em;
+  }
+
+.img-center {
+  margin: 1.5em auto;
+  text-align: center;
+  }
+
+#scholar-shield {
+  width: 75px;
+  margin: 0 auto;
+  text-align: center;
+  }
+
+#scholar-shield img,
+#logo img {
+  /* themers can change the size of the shields and logo without uploading new images */
+  max-width: 100%;
+}
+
+/* JCAROUSEL OVERRIDE STYLES */
+.itu-attachment-images {border:none;padding-left: 12px;}
+
+.jcarousel-skin-tango .jcarousel-container-horizontal {
+    width: 90%;
+    padding: 10px 15px 0 15px;
+}
+
+.jcarousel-skin-tango .jcarousel-container {
+background:#efefef;
+border:1px solid #CCC;
+}
+
+.jcarousel-skin-tango .jcarousel-clip-horizontal {
+  width: auto;
+}
+
+.jcarousel-skin-tango .jcarousel-container {
+  -moz-border-radius:0;
+  -webkit-border-radius:0;
+  border-radius: 0;
+}
+
+.jcarousel-skin-tango .jcarousel-next-horizontal {background-image: url('../images/jcarou-next-horizontal.png'); right: -14px; top: 32px;width:22px;height:22px;background-position: -3px -3px;}
+.jcarousel-skin-tango .jcarousel-prev-horizontal {background-image: url('../images/jcarou-prev-horizontal.png');left: -15px; top: 32px;width:22px;height:22px;background-position: -1px -3px;}
+
+.jcarousel-skin-tango .jcarousel-next-horizontal:hover {
+    background-position: -30px -3px;
+}
+.jcarousel-skin-tango .jcarousel-next-horizontal:active {
+    background-position: -59px -3px;
+}
+
+.jcarousel-skin-tango .jcarousel-prev-horizontal:hover {
+     background-position: -28px -3px;
+}
+
+.jcarousel-skin-tango .jcarousel-prev-horizontal:active {
+     background-position: -55px -3px;
+}
+
+.jcarousel-skin-tango .jcarousel-prev-disabled-horizontal, .jcarousel-skin-tango .jcarousel-prev-disabled-horizontal:hover, .jcarousel-skin-tango .jcarousel-prev-disabled-horizontal:active {
+    background-position: -82px -3px;
+    cursor: default;
+}
+
+.jcarousel-skin-tango .jcarousel-next-disabled-horizontal, .jcarousel-skin-tango .jcarousel-next-disabled-horizontal:hover, .jcarousel-skin-tango .jcarousel-next-disabled-horizontal:active {
+    background-position: -86px -3px;
+    cursor: default;
+}
+
+/* TOP OPENSCHOLAR ADMIN BAR */
+
+.cp-toolbar-full #top {
+  height: 36px;
+  background:url('../images/top-bottom-bg.png') repeat-x #000 0 -9px;
+  position:relative;
+  z-index: 996;
+  }
+
+.cp-toolbar-mini #top {
+  height: 20px;
+  padding: 0;
+  line-height: normal;
+  background: transparent;
+  left: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+  }
+
+/* Remove when .mini class is added to #top, rather than body */
+
+.admin-menu.cp-toolbar-mini #top {
+  top: 22px;
+  }
+
+.cp-toolbar-mini #top ul.links {
+  background: url('../images/toolbar-mini-tab.png') no-repeat 0 0;
+  height: 22px;
+  z-index:100;
+  padding-right: 6px;
+  }
+
+/* LAYOUT */
+
+/* The following is the scheme for flexible one, two, or three column layouts
+  Read more about this method at http://www.alistapart.com/articles/holygrail/
+*/
+
+.column {
+  float: left;
+  position: relative;
+  padding: 10px;
+  }
+
+#header-left,
+#header-right,
+#sidebar-first,
+#sidebar-second {
+  width: 200px;
+  }
+
+.hg-container {
+  padding-left: 220px; /* left width incl. padding */
+  padding-right: 240px; /*right width incl. padding plus center padding */
+  }
+
+#content-main,
+#header-main {
+  width: 100%;
+  }
+
+
+#content-main {
+  min-height: 330px;
+  }
+
+body.no-sidebars #content-main,
+body.header-main #header-main {
+  width: auto;
+  float:none;
+  }
+
+#header-left,
+#sidebar-first {
+  left: -240px; /* left width incl. padding plus center padding */
+  margin-left: -100%;
+  }
+
+#header-right,
+#sidebar-second {
+  margin-right: -100%;
+  }
+
+body.sidebar-second #content-area .hg-container,
+body.header-main #header .hg-container,
+body.header-main-right #header .hg-container {
+   padding-left: 0;
+   }
+
+body.sidebar-first #content-area .hg-container,
+body.header-left-main #header .hg-container {
+  padding-right: 40px; /* Only the padding of center div */
+  }
+
+body.no-sidebars #content-area .hg-container {
+  padding: 0;
+  }
+
+body.header-left-main #header .hg-container {
+  padding-right: 20px; /* Only the padding of header main */
+  }
+
+body.header-left-right #header .hg-container,
+body.header-main #header .hg-container,
+body.header-right #header .hg-container,
+body.header-left #header .hg-container{
+  padding: 0;
+  }
+
+body.header-left-right #header-left,
+body.header-left-right #header-right,
+body.header-left #header-left,
+body.header-right #header-right {
+  width: 45%;
+  right: auto;
+  }
+
+body.header-left-right #header-left,
+body.header-left-right #header-right {
+  margin:0;
+  }
+
+body.header-left-right #header-right {
+  float:right;
+  }
+  
+.content-left.content-right #content-left, 
+.content-left.content-right #content-right {
+	float:left;clear:none;display:inline;
+    width: 49%;
+    margin:15px 0;
+	}
+	
+.content-left.content-right #content-left {margin-right:2%;border-right:1px solid #CCC;width: 48%;}	
+
+#sidebar-first .block,
+#sidebar-second .block {
+  margin-bottom: 1.5em;
+  clear:both;
+  }
+
+#navbar {
+  padding: 5px;
+  }
+
+#header,
+#navbar,
+#content-area,
+#footer {
+  clear:both;
+  }
+
+/* FOOTER */
+
+#footer {
+  padding: 10px 0;
+  }
+
+#footer .block,
+#footer-message {
+  display:inline-block;
+  }
+  
+#content-bottom {
+	clear: both;
+}
+
+/* NODE */
+
+
+.node, .biblio-entry {
+  padding-top: .5em;
+  padding-bottom: 0.938em;
+  margin-bottom: .9em;
+  padding-left:0.188em;
+  padding-right:0.188em;
+  clear:both;
+  position: relative;
+  }
+  
+ body.front .node {
+ 	padding: 0;
+ }
+
+.node-unpublished {
+  background-color:#feffcd;
+  padding: 4px;
+  }
+
+div.unpublished {
+  font-weight: bold;
+  color: #adaf01;
+  }
+
+.node-type-link {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  padding-top: 0;
+  }
+
+div.terms {
+  clear: left !important;
+  }
+  
+div.terms ul.links li a {
+ text-decoration:underline;
+  }  
+  
+div.terms ul.links li a:hover {
+ text-decoration:none;
+  }    
+
+.teaser-extra {
+  margin-left: 1em;
+  }
+
+.node-teaser {
+  position: relative;
+  }
+
+/* VIEWS */
+
+.views-row {
+  margin-bottom: 1em;
+  clear:both;
+  }
+
+/* CLEAR FIX */
+
+/* As some Drupal themers use clear-block, we add both classes */
+
+.clearfix:after,
+.clear-block:after {
+  content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+  }
+
+.clearfix,.clear-block {
+	display: inline-block;
+  }
+
+html[xmlns] .clearfix, html[xmlns] .clear-block {
+	display: block;
+  }
+  
+.oembed {
+	float: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+
+.oembed a.oembed-title {
+	display: none;
+}
+
+/* EXTERNAL LINK MODULE
+#content span.ext {
+  background: url(extlink.png) right center no-repeat;
+  padding-right: 12px;
+}
+#content span.mailto {
+  background: url(mailto.png) right center no-repeat;
+  padding-right: 12px;
+}
+/* Hide the extra spans when printing. 
+@media print {
+#content span.ext, #content span.mailto {
+    display: none;
+    padding: 0;
+  }
+}*/

@@ -1,0 +1,41 @@
+<?php
+// $Id: dyntextfield.install,v 1.2 2010/07/08 15:12:14 rbrandon Exp $
+// Notify CCK when this module is enabled, disabled, installed,
+// and uninstalled so CCK can do any necessary preparation or cleanup.
+/**
+* @file
+* Implementation of hook_install().
+*/
+function dyntextfield_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'dyntextfield');
+}
+
+/**
+* Implementation of hook_uninstall().
+*/
+function dyntextfield_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'dyntextfield');
+}
+
+/**
+* Implementation of hook_enable().
+*
+* Notify content module when this module is enabled.
+*/
+function dyntextfield_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'dyntextfield');
+}
+
+/**
+* Implementation of hook_disable().
+*
+* Notify content module when this module is disabled.
+*/
+function dyntextfield_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'dyntextfield');
+}
+?>

@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * Transition from the complicated 'spaces_settings' menu controls to the new menu controller
+ * @param array $sandbox
+ */
+function vsite_menus_update_6001(&$sandbox){
+  
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+  
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "menus" ');
+  
+  require_once( drupal_get_path('module','spaces')."/plugins/spaces_controller.inc");
+  require_once( drupal_get_path('module','vsite_menus')."/plugins/spaces_controller_vsite_menu.inc");
+  $menu_controller = new spaces_controller_vsite_menu('vsite_menu', 'og', 0);
+  
+  while ($row = db_fetch_object($result)) {
+  	$a_default_features = $menu_controller->get('features','original');
+  	if(!$a_default_features) $a_default_features = array();
+  	
+  	$a_setting = unserialize($row->value);
+  	
+  	//Mark all the defaults hidden for now
+  	if(is_array($a_setting['primary'])){
+	  	foreach ($a_default_features as $key => $val) $a_default_features[$key]['hidden'] = '1';
+	  	
+	  	foreach ($a_setting['primary'] as $n_key => $mlid){
+	      if (!is_int($mlid) || !($o_link = db_fetch_array(db_query("SELECT m.*, ml.* FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = %d", $mlid)))) continue;
+	    	
+	      $new_link = isset($a_default_features['features:'.$o_link['link_path']])?
+	        $a_default_features['features:'.$o_link['link_path']]:
+		      array(
+			      'link_path' => $o_link['link_path'],
+			      'router_path' => $o_link['router_path'],
+			      'link_title' => $o_link['link_title'],
+			      'options' => array(),'module' => 'system','hidden' => '0','has_children' => '0','expanded' => '0'
+			    );
+	      
+			  //Menu
+	      $new_link['menu_name'] = 'features';
+	        
+	      //Weight
+	      $new_link['weight'] = isset($a_setting['menu_items'][$mlid]['weight'])?$a_setting['menu_items'][$mlid]['weight']:0;
+	      
+	      //Show
+	      $new_link['hidden'] = '0';
+	      
+	      //Title
+	      if(isset($a_setting['menu_items'][$mlid]['customizer'][$o_link['link_path']]['title'])){
+	        $new_link['link_title'] = $a_setting['menu_items'][$mlid]['customizer'][$o_link['link_path']]['title'];
+	      }
+	      
+	      $a_default_features['features:'.$o_link['link_path']] = $new_link;
+	    }
+	    
+	    if(count($a_default_features)) db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('og', '%s', 'vsite_menu', '%s', '%s')", $row->sid, 'features', serialize($a_default_features));
+  	}
+    
+  	$a_default_secondary = $menu_controller->get('scholar_secondary_menu','original');
+    if(!$a_default_secondary) $a_default_secondary = array();
+  	
+    if(is_array($a_setting['secondary'])){
+	    foreach ($a_default_secondary as $key => $val) $a_default_secondary[$key]['hidden'] = '1';
+	    
+	    foreach ($a_setting['secondary'] as $n_key => $mlid){
+	      if (!is_int($mlid) || !($o_link = db_fetch_array(db_query("SELECT m.*, ml.* FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = %d", $mlid)))) continue;
+	      
+	      $new_link = isset($a_default_secondary['scholar_secondary_menu:'.$o_link['link_path']])?
+	        $a_default_secondary['scholar_secondary_menu:'.$o_link['link_path']]:
+	        array(
+	          'link_path' => $o_link['link_path'],
+	          'router_path' => $o_link['router_path'],
+	          'link_title' => $o_link['link_title'],
+	          'options' => array(),'module' => 'system','has_children' => '0','expanded' => '0'
+	        );
+	      
+	      //Menu
+	      $new_link['menu_name'] = 'features';
+	        
+	      //Weight
+	      $new_link['weight'] = isset($a_setting['menu_items'][$mlid]['weight'])?$a_setting['menu_items'][$mlid]['weight']:0;
+	      
+	      //Show
+	      $new_link['hidden'] = '0';
+	      
+	      //Title
+	      if(isset($a_setting['menu_items'][$mlid]['customizer'][$o_link['link_path']]['title'])){
+	        $new_link['link_title'] = $a_setting['menu_items'][$mlid]['customizer'][$o_link['link_path']]['title'];
+	      }
+	      
+	      $a_default_secondary['scholar_secondary_menu:'.$o_link['link_path']] = $new_link;
+	    }
+    
+  	  if(count($a_default_secondary)) db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('og', '%s', 'vsite_menu', '%s', '%s')", $row->sid, 'scholar_secondary_menu', serialize($a_default_secondary));
+    }
+    
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Menu Settings',
+    );
+  
+  return $res;
+  
+}
+
+function vsite_menus_update_6002(&$sandbox){
+  
+  $res = array();
+  module_rebuild_cache();
+  
+  // Uninstall blog module if need
+  if(module_exists('menu_node')){
+    
+    module_disable(array('menu_node')); //Disables but does not uninstall
+    
+    $res[] = array(
+      'success' => true,
+      'query' => 'Disabled menu_node module',
+    );
+    
+  }
+  
+  return $res;
+  
+}

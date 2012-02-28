@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * Implementation of hook_install()
+ */
+function scholar_presentations_install(){
+  //_scholar_presentations_setup_filefields();
+}
+
+/**
+ * Implementation of hook_enable()
+ */
+function scholar_presentations_enable(){
+   
+}
+
+/**
+ * Update filefiled path tokens
+ * @param $sandbox
+ */
+function scholar_presentations_update_6001(&$sandbox){
+  return _scholar_presentations_setup_filefields();
+}
+
+/**
+ * Setup the filefields for presentataions
+ */
+function _scholar_presentations_setup_filefields(){
+  //'presentation'
+  $file_name = array(
+    'value' => '[filefield-onlyname-original].[filefield-extension-original]',
+    'tolower' => 0,
+    'pathauto' => 0,
+    'transliterate' => 0
+  );
+  
+  $file_path = array(
+    'value' => '[space-og-path-raw]/files',
+    'tolower' => 0,
+    'pathauto' => 0,
+    'transliterate' => 0
+  );
+  
+  $file_alias = array(
+    'value' => '[space-og-path-raw]/files/[filefield-onlyname-original].[filefield-extension-original]',
+    'tolower' => 0,
+    'pathauto' => 0,
+    'transliterate' => 0,
+    'display' => 1,
+  );
+  
+  //UPLOAD
+  $field_exists = db_result(db_query("SELECT field FROM {filefield_paths} WHERE type = '%s' AND field = '%s' ",  'presentation', 'upload'));
+  if(!$field_exists){
+    //'presentation'
+    db_query("INSERT INTO {filefield_paths} (type, field, filename, filepath, filealias) VALUES ('%s', '%s', '%s', '%s', '%s')", 'presentation', 'upload',serialize($file_name), serialize($file_path), serialize($file_alias));
+  }//If it exists the settings have already been set and we should not modify them
+
+  //field_presentation_file
+  $field_exists = db_result(db_query("SELECT field FROM {filefield_paths} WHERE type = '%s' AND field = '%s' ",  'presentation', 'field_presentation_file'));
+  if(!$field_exists){
+    //'presentation'
+    db_query("INSERT INTO {filefield_paths} (type, field, filename, filepath, filealias) VALUES ('%s', '%s', '%s', '%s', '%s')", 'presentation', 'field_presentation_file',serialize($file_name), serialize($file_path), serialize($file_alias));
+  }//If it exists the settings have already been set and we should not modify them
+}

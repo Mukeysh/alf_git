@@ -1,0 +1,34 @@
+diff --git a/sites/all/modules/contrib/boxes/boxes.module b/sites/all/modules/contrib/boxes/boxes.module
+index 4040a32..0766f90 100644
+--- a/sites/all/modules/contrib/boxes/boxes.module
++++ b/sites/all/modules/contrib/boxes/boxes.module
+@@ -245,11 +245,29 @@ function boxes_load($delta = NULL) {
+   }
+   ctools_include('export');
+   $boxes = array();
++  
++  if(module_exists('spaces') && $space = spaces_get_space()) {
++    foreach ($space->controllers->boxes->get() as $space_box) {
++      // Some older overrides may be stored as an array, check for these and convert them to objects.
++      if (is_array($space_box)) {
++        $space_box = (object)$space_box;
++      }
++      $box = boxes_factory($space_box->plugin_key, $space_box);
++      $box->new = FALSE;
++      
++      drupal_alter('boxes_load', $box, $box->delta);
++      $boxes[$box->delta] = $box;
++    }
++    
++    return $boxes;
++  }
++  
+   foreach (ctools_export_load_object('box') as $box) {
+     $box = boxes_box::load($box->delta);
+     drupal_alter('boxes_load', $box, $box->delta);
+     $boxes[$box->delta] = $box;
+   }
++  
+   return $boxes;
+ }
+ 

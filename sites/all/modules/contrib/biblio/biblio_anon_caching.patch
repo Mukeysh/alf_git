@@ -1,0 +1,13 @@
+diff --git a/sites/all/modules/contrib/biblio/biblio.module b/sites/all/modules/contrib/biblio/biblio.module
+index 552e750..c4884d9 100644
+--- a/sites/all/modules/contrib/biblio/biblio.module
++++ b/sites/all/modules/contrib/biblio/biblio.module
+@@ -157,7 +157,7 @@ function biblio_init() {
+   global $user, $conf;
+   drupal_add_css(drupal_get_path('module', 'biblio') .'/biblio.css');
+ 
+-  if ($user->uid === 0) { // Prevent caching of biblio pages for anonymous users so session variables work and thus filering works
++  if (variable_get('biblio_search', 0) && $user->uid === 0) { // Prevent caching of biblio pages for anonymous users so session variables work and thus filering works
+     $base = variable_get('biblio_base', 'biblio');
+     if (drupal_match_path($_GET['q'], "$base\n$base/*"))
+       $conf['cache'] = FALSE;

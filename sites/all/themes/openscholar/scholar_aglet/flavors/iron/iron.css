@@ -1,0 +1,44 @@
+#header .wrap {
+  background: #898989;
+  }
+
+#header a,
+#header a:visited,
+#header h1 a,
+#header h1 a:visited,
+#header h2,
+#header p,
+#navbar li a,
+#navbar li a:visited {
+  color: #fff;
+  }
+
+#navbar .wrap {
+  background: #8a5a57;
+  }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar li.active-trail a {
+  background: #000;
+  }
+
+#sidebar-first {
+  background:#ededed;
+  }
+
+#sidebar-second {
+  background:#cecece;
+  }
+
+#sidebar-first h3.title {
+  background: #dfdfdf;
+  }
+
+#sidebar-second h3.title {
+  background: #bebebe;
+  }
+
+#footer .wrap {
+  background: #807e7e;
+  }

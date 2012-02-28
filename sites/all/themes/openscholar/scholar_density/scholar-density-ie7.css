@@ -1,0 +1,13 @@
+#sidebar-first li,
+#sidebar-first li a {
+  width: 164px;
+  }
+
+#footer {
+  _position: absolute;
+  display:block;
+  }
+
+#footer {
+   _width:expression(document.body.clientWidth-0); »
+  }

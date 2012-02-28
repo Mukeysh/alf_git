@@ -1,0 +1,11 @@
+name = Shorten URLs Custom Services
+description = "Allows administrators to specify custom URL shortening services. <strong>Advanced users only.</strong>"
+core = 6.x
+package = Shorten URLs
+dependencies[] = shorten
+; Information added by drupal.org packaging script on 2011-11-05
+version = "6.x-1.12"
+core = "6.x"
+project = "shorten"
+datestamp = "1320472235"
+

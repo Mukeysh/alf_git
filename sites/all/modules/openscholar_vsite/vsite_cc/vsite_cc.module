@@ -1,0 +1,35 @@
+<?php
+
+include_once('vsite_cc.features.inc');
+
+function vsite_cc_user($op, &$edit, &$account, $category = NULL) {
+  if ($op == 'view') {
+    unset($account->content['creativecommons']);
+  }
+}
+
+function vsite_cc_form_alter(&$form, &$form_state, $form_id) {
+  if (strpos($form_id, '_node_form') !== FALSE) {
+    unset($form['creativecommons']);
+  }
+  elseif ($form_id == 'user_profile_form') {
+    unset($form['creativecommons_user_defaults']);
+  }
+}
+
+function vsite_cc_block_enabled($name, $vsite = null) {
+  if (!$vsite) $vsite = vsite_get_vsite();
+  if (!$vsite) return false;
+
+  $contexts = $vsite->controllers->context->get();
+
+  foreach ($contexts as $cont_name => $data) {
+    if (strpos($cont_name, 'block') !== FALSE && strpos($cont_name, $vsite->group->og_theme) !== FALSE) {
+      if ($data['blocks'][$name]['region'] != FALSE) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}

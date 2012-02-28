@@ -1,0 +1,95 @@
+--- ../twitter_pull-bak/twitter_pull.module	2011-04-11 16:56:23.000000000 -0400
++++ twitter_pull.module	2011-04-14 10:21:13.000000000 -0400
+@@ -9,7 +9,8 @@
+ require_once (dirname(__FILE__) . '/twitter_pull.class.inc');
+ 
+ define ('TWITTER_PULL_NUM_ITEMS', 5);
+-define ('TWITTER_PULL_CACHE_LENGTH', 20); //-- cache for 20 minutes
++define ('TWITTER_PULL_CACHE_LENGTH', 0); //-- cache for x minutes
++define ('TWITTER_PULL_REFRESH_DELAY', 20); //-- Refresh every 20 mins
+ define ('TWITTER_PULL_EMPTY_MESSAGE', 'No Tweets');
+ define ('TWITTER_PULL_CACHE_TABLE', 'cache_pulled_tweets');
+ 
+@@ -25,11 +26,15 @@ function twitter_pull_empty_message() {
+   return variable_get('twitter_pull_empty_message', TWITTER_PULL_EMPTY_MESSAGE);
+ }
+ 
++function twitter_pull_refresh_delay() {
++  return variable_get('twitter_pull_refresh_delay', TWITTER_PULL_REFRESH_DELAY);
++}
++
+ /**
+  * Implementation of hook_flush_caches().
+  */
+ function twitter_pull_flush_caches() {
+-  return array(TWITTER_PULL_CACHE_TABLE);
++  return cache_clear_all(NULL, TWITTER_PULL_CACHE_TABLE);
+ }
+ 
+ /**
+@@ -97,29 +102,59 @@ function twitter_pull_retrieve($twitkey,
+ 
+   $tweets = array();
+ 
+-  if (!empty($cache) && !empty($cache->data)) {
+-    $tweets =  $cache->data;
+-  }
+-  else {
++  $refresh_delay = twitter_pull_refresh_delay();
++  $refresh = $refresh_delay && ($cache->created < (time() - ($refresh_delay * 60)));
++  if (empty($cache) || empty($cache->data) || $refresh) {
++
+     try {
+       $puller = new twitter_puller($twitkey, $num_items);
+       $puller->get_items();
+       $tweets = $puller->tweets;
++      // Pad out tweets with items from the cache
++      if (($count = ($num_items - count($tweets))) && $cache->data) {
++        $i = 0;
++        $tweet_ids = array_map('twitter_pull_map_ids', $tweets);
++        while ($count > 0 && $i < count($cache->data)) {
++          if (!in_array($cache->data[$i]->id, $tweet_ids)) {
++            $tweets[] = $cache->data[$i];
++            $count--;
++          }
++          $i++;
++        }
++      }
++
+     }
+     catch (Exception $e) {
+-      watchdog('Twitter Pull', $e->getMessage(), array(), WATCHDOG_WARNING);
+-      return twitter_pull_empty_message();
++      if (!empty($cache) && !empty($cache->data)) {
++        $tweets =  $cache->data;
++      } else {                                                                                                                                                                                               
++        watchdog('Twitter Pull', $e->getMessage(), array(), WATCHDOG_WARNING);
++        return twitter_pull_empty_message();
++      }
+     }
+ 
+     if (!empty($tweets) && is_array($tweets)) {
+       $cache_length = twitter_pull_cache_length() * 60; //-- in the settings we indicate length in minutes, here we need seconds.
+       cache_set($cache_key, $tweets, TWITTER_PULL_CACHE_TABLE, time() + $cache_length);
+     }
++      
++    if ($cache_length = twitter_pull_cache_length()) {
++      $cache_length = ($cache_length * 60) + time();
++    }
++                      
++    cache_set($cache_key, $tweets, TWITTER_PULL_CACHE_TABLE, $cache_length);
++                 
++  } else {
++    $tweets = $cache->data;   
+   }
+ 
+   return $tweets;
+ }
+ 
++function twitter_pull_map_ids($cached_data) {
++  return $cached_data->id;                                                                                                                                                                                 
++}
++
+ /**
+  * Automatically add links to URLs and Twitter usernames in a tweet.
+  */

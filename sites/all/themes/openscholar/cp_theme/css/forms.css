@@ -1,0 +1,619 @@
+/* Forms */
+
+.section-node-add #cp-content,
+.section-node-edit #cp-content,
+.view-og-members {
+  padding:10px 30px;
+  }
+
+.section-node-add #cp-content,
+.section-node-edit #cp-content {
+  background:#DFE1E3;
+  }
+
+fieldset {
+  clear: both;
+  background:#fff;
+  border: none;
+  margin-bottom: .5em;
+  padding: 9px 0 12px 0;
+  }
+
+.page-cp-appearance #cp-settings-form fieldset {
+  padding-top: 0;
+  }
+
+td fieldset, fieldset fieldset {
+  padding: 0;
+  background: transparent;
+  }
+
+.form-item {
+  margin-top: 0;
+  }
+
+.fieldset-wrapper {
+  padding: 0 9px;
+  }
+
+.fieldset-wrapper .fieldset-wrapper,
+fieldset fieldset .fieldset-wrapper{
+  padding: 0;
+  }
+
+.vertical-tabs fieldset {
+  clear:none;
+  }
+
+div.vertical-tabs {
+  margin-top: 0;
+  margin-right: 7px;
+  margin-left: 191px;
+  background: #fff;
+  }
+
+div.vertical-tabs ul.vertical-tabs-list {
+  left: -195px;
+  width: 195px;
+  }
+
+div.vertical-tabs ul.vertical-tabs-list li a {
+  color: #3399CC;
+  font-size: 0.9em;
+  font-weight: 300;
+  }
+
+div.vertical-tabs .vertical-tabs-panes fieldset.vertical-tabs-pane {
+  padding-top: 1em;
+  }
+
+div.vertical-tabs-panes .description,
+.vertical-tabs-pane div.form-item label, div.form-item label {
+  font-weight: bold;
+  color: #666;
+  font-size:13px;
+  display:block;
+  }
+  
+.form-item label.option {font-weight: normal;}
+
+#cp-settings-layout div.form-item label {font-size: 1.2em; color:#000;}
+
+.container-inline-date {
+  margin-right: 0;
+  }
+
+.container-inline-date label {
+  width: 100%;
+  float:none;
+  display:block;
+  }
+
+div.vertical-tabs-panes .form-item .description {
+  color: #888;
+  font-weight: normal;
+  }
+
+fieldset legend {
+  overflow: hidden;
+  white-space: nowrap;
+  background:#F3F3F3;
+  width:100%;
+  border-top: 1px solid #D9D9D9;
+  border-bottom: none;
+  }
+
+legend, legend a {
+  color: #333;
+  font-weight: bold;
+  }
+
+legend a {
+  display:block;
+  }
+
+body.page-cp-settings fieldset legend, body.page-cp-build-taxonomy fieldset legend {
+	font-size:1.2em;
+	 background:none;
+	 border-top: none;
+}
+
+body.page-cp-settings fieldset, 
+body.page-cp-build-taxonomy fieldset,
+body.page-cp-build-menus fieldset
+  {
+	background:url('../images/fieldsetBg.png') repeat-x;
+	background-position: center bottom;
+	width:100%;
+	 border-bottom: 1px solid #D9D9D9;
+	 margin-bottom:15px;
+}
+
+
+legend,
+.collapsible .fieldset-title a.item-list h3,
+.block .block-title,
+.admin-panel h3,
+.fieldset-title,
+.collapsible .fieldset-title a  {
+  font-size: 11px;
+  }
+
+#edit-upload-wrapper {
+  min-height: 22px;
+  }
+
+html.js fieldset.collapsed {
+  height: 20px;
+  }
+
+#modal-content fieldset {
+	width:61%;
+	clear:none;
+}
+
+#modal-content #edit-body-wrapper {
+	width:61%;
+	clear:none;
+}
+
+
+html.js fieldset.collapsible legend a {
+  background: url('../images/open-close.png')no-repeat 0 -20px transparent;
+  padding-left: 26px;
+  color: #000;
+  }
+
+html.js fieldset.collapsed legend a {
+  background-position: 0 0;
+  color:#999;
+  }
+
+.collapsible {
+  background-color: #F3F3F3;;
+  }
+
+
+.collapsed {
+  background-color: #fff;
+  }
+
+.form-region-main .resizable-textarea {
+  width:100%;
+  }
+
+/*
+.node-form .form-region-right {
+  margin-top: 14px;
+  }
+*/
+
+/*
+.section-cp .fieldset-wrapper .fieldset-wrapper,
+.section-cp .og-vocab-taxonomy .fieldset-wrapper,  {
+	margin: 0;
+	}
+
+.section-cp .og-vocab-taxonomy {
+  margin: 10px -3px;
+  padding: 10px 3px 10px 10px;
+  border: 1px solid #dfe5e6;
+  background: #f2f5f5;
+  }
+
+.section-cp .og-vocab-taxonomy legend {
+  font-size: 1em;
+  }
+
+.section-cp div.form-item {
+	margin: 0 1em 0 0;
+	border: none;
+  }
+
+.section-cp #dialog-main div.form-item {
+  margin:0;
+  }
+*/
+.views-exposed-form .views-exposed-widget {
+  padding: 0 2em 0 0;
+  }
+
+#views-bulk-operations-submit {
+  padding: 0;
+  }
+
+select,
+select option {
+  max-width:99%;
+  }
+  
+#modal-content select,
+#modal-content select option {
+ width: 185px;
+ margin-bottom: 12px;
+  }
+  
+.form-region-right select option {
+  max-width: 236px;
+  }
+
+select option {
+  padding: 2px 5px;
+  }
+
+.form-region-right .og-vocab-taxonomy select {
+  max-width: 100%;
+  }
+
+.form-radios {
+  margin: 0 0 1em 0;
+  }
+
+/*
+.section-cp .form-radios input {
+  margin: 3px 3px 3px 0;
+  }
+*/
+.node-form .form-text {
+  font-size: 1.3em;
+  width: 60%;
+  }
+
+textarea,
+input,
+select {
+  background: #fff;
+  color:#666;
+  border-bottom: 1px solid #CECECE;
+  border-left: 1px solid #ABABAB;
+  border-right: 1px solid #ABABAB;
+  border-top: 1px solid #707070;
+  -webkit-box-shadow: rgba(255,255,255,.65) 0px 1px 1px;
+  -moz-border-bottom: 2px solid #F9F9F9 #CECECE;
+  -moz-border-left:  2px solid #F9F9F9 #ABABAB;
+  -moz-border-right:  2px solid #F9F9F9 #ABABAB;
+  -moz-border-top:  2px solid #F9F9F9 #707070;
+  }
+
+select {
+  border-color: #E8E8E8 #F0F0F0 #F8F8F8;
+  border-style: solid;
+  border-width: 2px;
+  -moz-border-bottom: 2px solid #E8E8E8;
+  -moz-border-left:  2px solid #F0F0F0;
+  -moz-border-right:  2px solid #F8F8F8;
+  -moz-border-top:  2px solid #F0F0F0;
+  }
+
+input.form-autocomplete,
+input.form-text,
+textarea.form-textarea {
+  margin-top: -2px;
+  padding: 4px 3px 2px;
+  width: 60%;
+  background: url('../images/form-input-bg.gif') repeat-x scroll left top #FFFFFF;
+    border: 1px solid #CDCDCD;
+    color: #333333;
+  }
+
+.resizable-textarea {
+  width: 100%;
+  }
+
+#edit-settings-generic-google-analytics-id {
+  width: 175px;
+  }
+
+select.form-select {
+  }
+
+textarea.form-textarea {
+  background: #fff;
+  }
+
+input.form-autocomplete:hover,
+input.form-text:hover,
+textarea.form-textarea:hover,
+select.form-select:hover,
+input.form-autocomplete:focus,
+input.form-text:focus,
+textarea.form-textarea:focus,
+select.form-select:focus {
+  -moz-border-bottom-colors: #aaccee;
+  -moz-border-left-colors: #aaccee;
+  -moz-border-right-colors: #aaccee;
+  -moz-border-top-colors: #aaccee;
+  /*background-position: 0 -26px;*/
+  -moz-background-color: #FFFEEB;
+  }
+
+/*Creation forms that use horizontal radio buttons */
+
+.page-node-add-class .form-radios .form-item {
+  display:inline;
+  margin-right: 10px;
+  }
+
+.fieldset-wrapper input.form-submit,
+.content-add-more input.form-submit {
+  float:right;
+  margin-right: 12px;
+  }
+
+#edit-field-biblio-image-0-filefield-upload, .vsite_content_bulk_update input.form-submit {
+  float: none;
+  }
+
+/* End horizontal radios */
+
+
+/*
+.section-cp fieldset table tr {
+  border: none;
+  }
+
+.section-cp label, .section-cp div.form-item label, .section-cp .description, div.spaces-block-customizer, th {
+	font-weight: bold;
+	color:#333;
+	font-size: .9em;
+	margin-bottom: 3px;
+	}
+
+
+.section-cp label, .section-cp div.form-item label, .section-cp .description, div.spaces-block-customizer {
+	display:block;
+	text-transform:none;
+	}
+
+.section-cp label.option, .section-cp div.form-item label.option {
+  font-weight: normal;
+  }
+
+
+.section-cp div.description {
+	color:#777;
+	font-weight: normal;
+	line-height: 127%;
+	}
+
+.section-cp .fieldset-wrapper div.description, .section-cp table div.description, .section-cp .form-item div.description {
+  margin-left: 0;
+  padding: 0;
+  margin-top: 3px;
+  margin-bottom: 3px;
+  }
+
+*/
+
+table.features div.feature div.description {
+  font-size:11px;
+  line-height:18px;
+  margin:0;
+  }
+
+#modal-content table {
+  width:auto;
+  }
+
+
+
+h3#modal-title {
+  float: none;
+  margin-bottom: 1.5em;
+  }
+
+.ctools-use-modal-processed .buttons	{
+  margin-top: 30px;
+  }
+
+a.close-this {
+  display:block;
+  float:right;
+  }
+
+fieldset.group-account-basics {
+  padding: 0;
+  }
+
+/* DRAGGABLE AREAS */
+
+#menu_sort_table {
+  margin-bottom: 1em;
+  }
+
+#node-form .draggable td {
+  vertical-align: middle;
+  font-weight: bold;
+  }
+
+#node-form .draggable td {
+    padding: 0 4px;
+    }
+
+.draggable a.tabledrag-handle {
+  cursor:move;
+  float:left;
+  height:1.7em;
+  margin:-0.4em 0 -0.4em -0.5em;
+  padding:0.42em 1.5em 0.42em 0.5em;
+  text-decoration:none;
+  }
+
+.draggable fieldset {
+  clear: none;
+  margin: 0;
+  }
+
+.draggable input.form-text {
+  font-weight: bold;
+  color: #666;
+  font-size:1em;
+  }
+
+.draggable select {
+  font-size: 10px;
+  height: auto;
+  padding-top: 1px;
+  }
+
+.tabledrag-changed {
+  float: right;
+  margin:-19px -6px 0 0;
+  padding:0;
+  }
+
+.node-form .content-multiple-table td.content-multiple-drag {
+  width: 18px;
+  }
+  
+#field_biblio_extra_values .form-item {
+	display: inline-block;
+  width: 49%;
+}
+
+/* Various Views */
+
+/*
+#views-bulk-operations-select {
+  left:555px;
+  position:absolute;
+  top:12px;
+  }*/
+
+
+/* These really should have a standard class "top-marg" or something */
+
+#user-profile-form .description,
+#edit-pass-pass1,
+#edit-vsite-users-first-name-0-value,
+#edit-vsite-users-last-name-0-value {
+  margin-bottom: 14px;
+  }
+
+/* Biblio Settings View */
+
+.modal_col {
+  float: left;
+  width: 40%;
+  margin-right: 46px;
+  }
+
+/* USER CREATION */
+
+form div.buttons {
+  text-align: left;
+  margin-left: 200px;
+  }
+
+/* CONTENT PAGES FILTERING AND UPDATING OPTIONS */
+  
+div.view-vsite-content fieldset.vsite_content_filter_box, div#views-bulk-operations-select fieldset.vsite_content_bulk_update {
+	margin-right: 0px;
+}
+
+.vsite_content_filter_box .fieldset-wrapper, #views-bulk-operations-select .fieldset-wrapper {
+  margin-left: 0;
+  margin-top: 0;
+  font-size:0.8em;
+  padding:1.5em 1.5em 1em;
+  background: #EAEBE9;
+  }
+
+.view-vsite-content .vsite_content_filter_box legend, #views-bulk-operations-select legend {
+  padding-top: 4px;
+  font-size: 1em;
+  }
+
+.view-vsite-content .vsite_content_filter_box legend.collapse-processed, #views-bulk-operations-select legend.collapse-processed {
+  background: #EAEBE9;
+  }
+
+.view-vsite-content fieldset.collapsed legend.collapse-processed, #views-bulk-operations-select fieldset.collapsed legend.collapse-processed {
+  background: transparent;
+  }
+
+/* CREATION FORM SPECIFIC FIELDS */
+
+#edit-biblio-type {
+  width: 100%;
+  }
+
+#edit-biblio-type-wrapper,
+#edit-biblio-year-wrapper,
+#edit-biblio-publisher-wrapper,
+#edit-biblio-place-published-wrapper,
+#edit-biblio-pages-wrapper,
+#edit-biblio-secondary-title-wrapper,
+#edit-biblio-volume-wrapper,
+#edit-biblio-issue-wrapper,
+#edit-biblio-section-wrapper,
+#edit-biblio-date-wrapper,
+#edit-biblio-type-of-work-wrapper,
+#edit-biblio-date-wrapper,
+#edit-biblio-edition-wrapper,
+#edit-biblio-tertiary-title-wrapper,
+#edit-biblio-number-of-volumes-wrapper,
+#edit-biblio-number-wrapper,
+#edit-biblio-issn-wrapper,
+#edit-biblio-doi-wrapper,
+#edit-biblio-url-wrapper,
+#edit-biblio-url-title-wrapper,
+.page-node-add-presentation .container-inline-date,
+#edit-field-presentation-location-0-value-wrapper,
+.page-node-add-event .date-clear-block,
+#edit-field-scholar-software-method-value-wrapper,
+#edit-field-scholar-software-name-0-value-wrapper,
+#edit-vsite-users-first-name-0-value-wrapper,
+#edit-vsite-users-last-name-0-value-wrapper,
+#edit-settings-generic-admin-menu-wrapper,
+#edit-settings-generic-vsite-domain-value-wrapper,
+#edit-settings-generic-private-vsite-wrapper,
+#contact-mail-page #edit-name-wrapper,
+#contact-mail-page #edit-mail-wrapper,
+#contact-mail-page #edit-subject-wrapper,
+#contact-mail-page #edit-cid-wrapper,
+.page-node-add-event .date-clear-block,
+.page-node-edit-event .date-clear-block{
+  display:inline-block;
+  vertical-align: top;
+  width: 49.5%;
+  }
+
+#field-biblio-extra-items .description {
+  float: left;
+  }
+
+#field-biblio-extra-items,
+#edit-field-biblio-image-0-upload-wrapper .description {
+  padding-bottom: 1em;
+  clear:both;
+  }
+
+#edit-field-biblio-image-0-upload-wrapper .description {
+  padding-bottom: 0;
+  }
+
+#edit-field-biblio-image-0-upload-wrapper,
+#edit-field-biblio-image-0-upload-wrapper .filefield-element {
+  margin:0;
+  }
+
+#contact-mail-page #edit-cid-wrapper select.form-select {
+  width: 100%;
+  }
+  
+table.mceListBox {
+	clear: none;
+}
+
+ul.tips li {
+	margin-bottom: 0.5em;
+}
+
+/*
+ * Optional class for long lists of checkboxes that adds a scrollbar
+ */ 
+div.form-checkboxes-scrolling {
+  max-height: 200px;
+  overflow:auto;
+  }

@@ -1,0 +1,21 @@
+html,body {
+  background: #fff;
+  color: #000;
+  }
+
+#header h1, #header h3, #header a, #header a:visited, #header h1 a, #header h1 a:visited, #header,h2, h2.title {
+  color: #555;
+  }
+
+a, a:visited, #sidebar-left a, #sidebar-left a:visited, #sidebar-right a, #sidebar-right a:visited {
+  color: #7ca7c6;
+  }
+
+a:hover, #sidebar-left a:hover, #sidebar-right a:hover, #sidebar-left a.active, #sidebar-right a.active, #header a:hover, #header h1 a:hover {
+  background:#e6e8e9;
+  color: #000;
+  }
+
+#sidebar-left a.active, #sidebar-right a.active {
+  color: #fff;
+  }

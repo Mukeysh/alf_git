@@ -1,0 +1,70 @@
+<?php
+include_once('scholar_dvn.features.inc');
+
+/**
+ * Implementation of hook_init().
+ */
+function scholar_dvn_init() {
+  drupal_add_css(drupal_get_path('module', 'scholar_dvn') .'/scholar_dvn.css');
+}
+
+function scholar_dvn_menu(){
+  $items = array();
+  $items['data'] = array(
+    'title' => 'data',
+    'page callback' => 'scholar_dvn_data',
+    'access callback' => 'spaces_access_feature',
+    'access arguments' => array('view','scholar_dvn'),
+    'menu_name' => 'features',
+  );
+
+ $items['features/scholar_dvn'] = array(
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('scholar_dvn_settings'),
+    'access callback' => module_exists('spaces') ? 'spaces_access_admin' : 'user_access',
+    'access arguments' => module_exists('spaces') ? array() : array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'scholar_dvn.pages.inc',
+  );
+
+  return $items;
+}
+
+function scholar_dvn_data(){
+  drupal_add_js(drupal_get_path('module', 'scholar_dvn') .'/scholar_dvn.js');
+  $vsite = vsite_get_vsite();
+  $dvn_alias = variable_get('scholar_dvn_dvn_alias', '');
+
+  if ($vsite && $dvn_alias) {
+    // Show DVN in iframe
+    $path = $dvn_alias;
+    if(strlen($_REQUEST['dvn_subpage'])) $path .= "/".ltrim($_REQUEST['dvn_subpage'],"/");
+    return "<div id=\"feature-dataverse\"><iframe name=\"res\" scrolling=\"auto\" src =\"" . $path . "\"></iframe></div>";
+  }
+  elseif ($vsite && $vsite->access_admin()) {
+    $l1 = l('feature', "cp/build/features");
+    $l2 = l('http://dvn.iq.harvard.edu', 'http://dvn.iq.harvard.edu', array('absolute' => TRUE));
+    $result = "<p>No dataverse alias was found. Please set up your dataverse alias in your \"scholar dvn\" " . $l1 . " settings </p>";
+    $result .= "<p> If you don't have a dataverse, go to " .$l2.  " to create your own dataverse to upload your data </p>";
+    return $result;
+  }
+  else {
+    return t('no dataverse available yet');
+  }
+
+}
+
+/**
+ * Preprocess page hook
+ *
+ * @param $vars
+ * @return unknown_type
+ */
+function scholar_dvn_preprocess_page(&$vars){
+  $active_menu = menu_get_item();
+  if($active_menu['path'] == 'data'){
+    $vars['title'] = '';
+  }
+}
+

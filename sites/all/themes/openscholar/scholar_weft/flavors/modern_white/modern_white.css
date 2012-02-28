@@ -1,0 +1,40 @@
+#extradiv {
+  background-image: url('images/fabric-strip-modern-white.png');
+  }
+
+body {
+  background-color: #414141;
+  }
+
+#navbar {
+  background-image: url('images/menu-strip-modern-white.png');
+  }
+
+a, a:visited {
+  color: #57737F;
+  }
+
+#content-area .wrap {
+  background:#f3f3f3;
+  }
+
+#navbar li {
+  margin-top: 0;
+  height: 41px;
+  line-height: 41px;
+  }
+
+#navbar li a,
+#navbar li a:visited {
+  color: #fff;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: #464441;
+  }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar .active-trail a {
+  background: #e5e5e5;
+  color: #464441;
+  }

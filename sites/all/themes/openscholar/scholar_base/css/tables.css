@@ -1,0 +1,83 @@
+table {
+  width: 100%;
+  margin-bottom: 1em;
+  }
+
+th, td {
+  padding: .6em;
+  vertical-align: top;
+  color:#4a4a4a;
+  }
+
+td:first-child {
+  text-align: left;
+  }
+
+th {
+  font-weight: bold;
+  font-size: 1.1em;
+  border-bottom: 3px solid #d9d9d9;
+  }
+
+tbody, tbody th {
+  border: none;
+  }
+
+th.checkbox, td.checkbox {
+  text-align: center;
+  }
+
+tr.even, tr.odd {
+  background-color: transparent;
+  border-bottom: 1px solid #d9d9d9;
+  }
+
+td {
+  color: #666;
+  }
+
+th, th a {
+  color: #425e69;
+  }
+
+td.active {
+  background: #eaebe9;
+  }
+
+tr.selected td, tr.selected td a {
+  background: #a7afaf;
+  color: #fff;
+  }
+
+#content table {
+  clear: both;
+  }
+
+.draggable a.tabledrag-handle {
+  height:1.1em;
+  margin:-.1em 0 0 0;
+  padding:0 .5em 0 0;
+  }
+
+table.itu-attachment-list {
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+  }
+
+table.itu-attachment-list td.file,
+table.itu-attachment-list td.size {
+  padding-right: 5px;
+  vertical-align: middle;
+  }
+
+/* MODULES LIST */
+
+table.package .version {
+  direction: ltr;
+  }
+
+table.package .description {
+  width: 100%;
+  }
+

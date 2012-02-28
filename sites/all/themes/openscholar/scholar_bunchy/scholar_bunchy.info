@@ -1,0 +1,17 @@
+; $Id: scholar_bunchy.info,v 1.12 2008/09/21 22:43:32 swortis Exp $
+name        = Bunchy
+description = Dark theme with heavy header in the sidebars
+plugins[vsite_design][flavor] = flavors
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-bunchy.css
+conditional-stylesheets[if lte IE 7][all][] = scholar-bunchy-ie.css
+
+;os[widgets][vsite-site_search] = left
+;os[widgets][vsite_menus-features] = header_main
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
+
+os[cp_layout_css] = cp-layout-map.css

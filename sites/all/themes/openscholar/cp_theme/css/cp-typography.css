@@ -1,0 +1,146 @@
+body {
+  color:#5a5959;
+  font: 12px/18px 'Helvetica Neue',helvetica, Arial,Verdana,sans-serif
+  }
+
+.description {
+  font-size: 1em;
+  }
+
+/* First Column */
+
+#cp-sidemenu li {
+  padding: 0;
+  list-style: none !important;
+  }
+
+#cp-sidemenu li a,
+#cp-sidemenu li a:visited {
+  color: #626161;
+  font-weight: bold;
+  padding: 6px 23px;
+  border-bottom: 1px solid #bfc6c6;
+  display:block;
+  font-size: 13px;
+  }
+
+#cp-sidemenu li a:hover {
+  background: #fff;
+  text-decoration: none;
+  }
+
+#cp-sidemenu li.active a,
+#cp-sidemenu li.active-trail a {
+  background: #b8c0c0;
+  color: #000;
+  text-decoration: none;
+  text-shadow:0 1px 0 #e6e8ea;
+  border-color:#a4abab;
+  }
+
+/* Main Content */
+
+.pad,
+h2.title {
+  margin: 12px 0 12px 30px;
+  }
+
+.pad h2.title,
+#cp-content .innerframe form#views-exposed-form-vsite-content-default h2.title {
+  margin:0;
+  }
+
+.page-cp-features h2.title {
+  margin-left: 88px;
+  }
+
+table#spaces-features thead,
+.page-cp-appearance-theme h2.title,
+.page-cp-appearance h2.title {
+  display:none;
+  }
+
+/* FOOTER */
+
+#footer h3 {
+  float: left;
+  width: 553px;
+  height: 23px;
+  text-indent: -999em;
+  background: url('../images/footer-logo.png') no-repeat transparent;
+  margin-left: 33px;
+  margin-top: 11px;
+  }
+
+#footer ul {
+  float: right;
+  color: #ddd;
+  font-size: 12px;
+  margin-top: 13px;
+  margin-right: 10px;
+  }
+
+#footer a, #foot a:visited {
+  color: #ddd;
+  text-decoration: underline;
+  }
+
+#footer li {
+  display:inline;
+  margin-left: 8px;
+  border-right: 1px solid #ddd;
+  padding-right: 8px;
+  text-align: right;
+  }
+
+#footer li.last {
+  border: none;
+  }
+
+.submitted {
+  color: #657a7a;
+  }
+
+p {
+  margin-bottom: 1em;
+  }
+
+table {
+  font-size: 1em;
+  }
+
+table th {
+  text-shadow: none !important;
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #666;
+  border-bottom: 1px solid #DDDDDD;
+  }
+
+/* Activity Area */
+
+.view-vsite-activity .views-field-message, .view-vsite-activity .views-field-title {
+  font-weight: bold;
+  }
+
+.view-vsite-activity .views-field-title a {
+  text-decoration: underline;
+  }
+
+.view-vsite-activity .views-field-created span:after {
+  content: '.';
+  }
+
+.view-vsite-activity .views-field-message span:after {
+  content: ':';
+  }
+
+/*TINYMCE TYPOGRAPHY */
+
+body#tinymce {
+	background: #fff;
+	margin: 10px;
+	font-size: .9em;
+	overflow: auto;
+	}
+

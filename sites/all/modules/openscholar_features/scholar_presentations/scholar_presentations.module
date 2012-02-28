@@ -1,0 +1,26 @@
+<?php
+
+include_once('scholar_presentations.features.inc');
+
+/**
+ * Implementation of hook_init().
+ */
+function scholar_presentations_init() {
+  drupal_add_css(drupal_get_path('module', 'scholar_presentations') .'/theme/scholar_presentations.css');
+}
+
+function scholar_presentations_menu() {
+  $menu = array();
+  if (module_exists('slideshareapi')) {
+    $menu['features/scholar_presentations'] = array(
+      'title' => 'Settings',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('scholar_presentations_settings'),
+      'access callback' => module_exists('spaces') ? 'spaces_access_admin' : 'user_access',
+      'access arguments' => module_exists('spaces') ? array() : array('administer site configuration'),
+      'type' => MENU_CALLBACK,
+      'file' => 'scholar_presentations.pages.inc',
+    );
+  }
+  return $menu;
+}

@@ -1,0 +1,13 @@
+name = Apache Solr search attachments
+description = Searching file attachments with Solr
+dependencies[] = apachesolr
+dependencies[] = apachesolr_search
+package = Apache Solr
+core = "6.x"
+
+; Information added by drupal.org packaging script on 2010-09-07
+version = "6.x-2.0-alpha2"
+core = "6.x"
+project = "apachesolr_attachments"
+datestamp = "1283895403"
+

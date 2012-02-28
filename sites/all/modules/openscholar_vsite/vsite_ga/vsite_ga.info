@@ -1,0 +1,12 @@
+name = VSite Google Analytics
+description = generates js output for google analytics globally and on a per site basis
+package = "vsite"
+dependencies[] = "vsite"
+dependencies[] = "vsite_generic_settings"
+core = 6.x
+; Information added by drupal.org packaging script on 2010-11-23
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "openscholar_vsite"
+datestamp = "1290471480"
+

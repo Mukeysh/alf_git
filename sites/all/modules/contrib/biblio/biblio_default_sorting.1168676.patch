@@ -1,0 +1,22 @@
+diff --git a/sites/all/modules/contrib/biblio/biblio.pages.inc b/sites/all/modules/contrib/biblio/biblio.pages.inc
+index 5563f7b..569498e 100644
+--- a/sites/all/modules/contrib/biblio/biblio.pages.inc
++++ b/sites/all/modules/contrib/biblio/biblio.pages.inc
+@@ -491,7 +491,7 @@ function biblio_show_results($nodes, $query_info, $inline=false) {
+   }
+ 
+   if ($inline === true) $content .= '<div class="biblio-inline">';
+- 
++
+ 
+   if ($_GET['sort'] == 'title' ||
+       $_GET['sort'] == 'author' ||
+@@ -569,7 +569,7 @@ function _biblio_sort_tabs($attrib, $options = NULL) {
+ 
+     }
+     elseif ($key === $title ) {
+-      $tab['query'] = array('sort' => $title, 'order' => $order);
++      $tab['query'] = array('sort' => $title, 'order' => ($key=='year')?'desc':'asc');
+       $tab['active'] = FALSE;
+       $tab['pfx'] = ' ';
+       $tab['sfx'] = ' ';

@@ -1,0 +1,57 @@
+/* Green version */
+
+
+
+body.navbar-off {
+  background-image: url('images/body-bg-green.png');
+  }
+
+body.navbar-on #wrapper {
+  background-image: url('images/body-bg-horiz-green.png');
+  }
+
+a, a:visited {
+  color: #7aab4a;
+  }
+
+a:hover {
+  color: #000;
+  text-decoration: underline;
+  }
+
+/*Navbar & sidebar shared */
+
+#sidebar-first a,
+#sidebar-first a:visited {
+  color: #6D8258;
+  }
+
+#navbar a,
+#navbar a:visited,
+#sidebar-first ul.menu li a,
+#sidebar-first ul.menu li a:visited {
+  color: #282828;
+  }
+  
+  #navbar {
+    background: none repeat scroll 0 0 #e4eddb;
+    border-bottom: 1px solid #E6EAED;
+    border-top: 1px solid #E6EAED;
+}
+
+#navbar a:hover,
+#sidebar-first ul.menu li a:hover,
+#navbar a.active,
+#sidebar-first  ul.menu li a.active,
+#navbar li.active-trail,
+#sidebar-first  ul.menu li.active-trail {
+  background:#e4eddb;
+  }
+
+/*Navbar Specific */
+
+#navbar li,
+#navbar li.first,
+#sidebar-first li a {
+ border-color: #A6B598;
+  }

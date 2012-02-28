@@ -1,0 +1,45 @@
+html,
+body {
+  background:#6D4E4E;
+  }
+
+#content a, #content a:visited {
+  color:#5e4343;
+  }
+
+#content a:hover {
+  color: #000;
+  text-decoration: underline;
+  }
+
+#footer {
+  background: rgba(63, 23, 23, 0.76);
+  }
+
+#sidebar-first {
+  background: rgba(221, 223, 174, 0.50);
+  }
+
+#block-vsite_menus-features ul.menu li a:hover {
+  background: #f8fad1;
+  }
+
+#block-vsite_menus-features ul.menu li.active-trail {
+  background:rgba(63, 23, 23, 0.86);
+  }
+
+#sidebar-first ul.menu li a.active,
+#sidebar-first ul.menu li.active-trail a,
+#sidebar-first ul.menu li a.active:hover,
+#sidebar-first ul.menu li.active-trail a:hover {
+  background-color: #93776D;
+  color: #fff;
+  }
+
+.node-teaser {
+  background: rgba(248, 250, 209, 0.61);
+  }
+
+#extradiv {
+  background: rgba(63, 23, 23, 0.5);
+  }

@@ -1,0 +1,37 @@
+; $Id: openscholar_default.info,v 1.12 2008/09/21 22:43:32 swortis Exp $
+name        = OpenScholar Default
+description = Theme for default installation of OpenScholar
+screenshot  = screenshot.png
+core        = 6.x
+base theme  = scholar_base
+
+;------ styles ------
+stylesheets[all][]   = css/openscholar_default.css
+
+;------ styles, additional ------
+conditional-stylesheets[if lte IE 7][all][] = css/openscholar_default-ie.css
+
+;------ regions ------
+regions[header_top]    	= header top
+regions[header_left]    = header left
+regions[header_main]    = header main
+regions[header_right]   = header right
+regions[navbar]         = navigation bar
+regions[left]           = left sidebar
+regions[right]          = right sidebar
+regions[content_top]    = content top
+regions[content_bottom] = content bottom
+regions[footer]         = footer
+regions[closure_region] = closure
+
+;------ features ------
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = mission
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+features[] = secondary_links

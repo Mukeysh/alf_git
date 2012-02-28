@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function cp_install() {
+  // creates the cp custom menu
+  db_query("INSERT INTO {menu_custom} (menu_name, title, description) VALUES ('%s', '%s', '%s')", 'cp', 'Scholar CP', 'Scholar CP links');
+}
+
+function cp_update_6001(&$sandbox){
+  $res = array();
+  module_rebuild_cache();
+
+  // Enable nodeformcols module if needed
+  if(!module_exists('nodeformcols')){
+
+    include_once('includes/install.inc');
+
+    drupal_install_modules(array('nodeformcols'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed nodeformcols module and enabled it',
+    );
+
+  }
+
+  return $res;
+}
+
+function cp_update_6002(&$sandbox){
+
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "messages_confirmed" ');
+  while ($row = db_fetch_object($result)) {
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'vsite_setting_messages_confirmed', '%s')", $row->type, $row->sid, $row->value);
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Messages Settings',
+    );
+
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "site" ');
+  while ($row = db_fetch_object($result)) {
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'vsite_setting_site', '%s')", $row->type, $row->sid, $row->value);
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the "Site" Settings',
+    );
+
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "contact" ');
+  while ($row = db_fetch_object($result)) {
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'vsite_setting_contact', '%s')", $row->type, $row->sid, $row->value);
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Contact Settings',
+    );
+
+  return $res;
+
+}
+
+function cp_update_6003(&$sandbox) {
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  if (db_table_exists('spaces_settings')) {
+    $result = db_query("SELECT * FROM {spaces_settings} WHERE id = 'generic'");
+    while ($row = db_fetch_object($result)) {
+      $value = unserialize($row->value);
+
+      db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', 'cp_admin_menu', '%s')", $row->type, $row->sid, serialize($value['admin_menu']));
+
+    }
+    $res[] = array(
+      'success' => true,
+    	'query' => 'CP Settings Migrated.'
+    );
+  }
+
+  return $res;
+}
+
+
+
+

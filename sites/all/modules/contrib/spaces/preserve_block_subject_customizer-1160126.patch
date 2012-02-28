@@ -1,0 +1,17 @@
+diff --git a/sites/all/modules/contrib/spaces/spaces.install b/sites/all/modules/contrib/spaces/spaces.install
+index 7a4bd0d..440e132 100644
+--- a/sites/all/modules/contrib/spaces/spaces.install
++++ b/sites/all/modules/contrib/spaces/spaces.install
+@@ -299,6 +299,12 @@ function spaces_update_6301() {
+       // spaces_overrides.object_id = "spaces_preset_{spaces2.spaces.type}"
+       $preset = isset($known_presets[$type][$space->preset]) ? $known_presets[$type][$space->preset] : $space->preset;
+       db_query("INSERT INTO {spaces_overrides}(type, id, object_type, object_id, value) VALUES('%s', '%s', 'variable', '%s', '%s')", $type, $sid, "spaces_preset_$type", serialize($preset));
++      
++      //Preserve Block Subject customizers in a variable
++      $customizer_info = unserialize($space->customizer);
++      if(isset($customizer_info['block']['subject']) && count($customizer_info['block']['subject'])){
++        db_query("INSERT INTO {spaces_overrides}(type, id, object_type, object_id, value) VALUES('%s', '%s', 'variable', '%s', '%s')", $type, $sid, "block_subject_customizer", serialize($customizer_info['block']['subject']));
++      }
+     }
+   }
+ 

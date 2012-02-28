@@ -1,0 +1,24 @@
+<?php
+
+function os_modalframe_install() {
+  db_query("UPDATE {system} SET weight = 100 WHERE name = 'os_modalframe'");
+}
+
+/**
+ * hook_update
+ * The tabbed box depends on 'quicktabs' this update enables it
+ */
+function os_modalframe_update_6001(&$sandbox){
+	
+	$res = array();
+  include_once('includes/install.inc');
+  drupal_install_modules(array('quicktabs'));
+
+  if (!module_exists('quicktabs')) {
+     $res = array('#abort' => array('success' => FALSE, 'query' => 'Failed to install module: "quicktabs" '));
+  } else {
+    $res[] = array('success' => TRUE, 'query' => 'Installed module: "quicktabs" ');
+  }
+
+  return $res;
+}

@@ -1,0 +1,29 @@
+diff --git a/sites/all/modules/contrib/biblio/biblio.pages.inc b/sites/all/modules/contrib/biblio/biblio.pages.inc
+index bce9708..78614ee 100644
+--- a/sites/all/modules/contrib/biblio/biblio.pages.inc
++++ b/sites/all/modules/contrib/biblio/biblio.pages.inc
+@@ -335,11 +335,19 @@ function biblio_build_query($arg_list) {
+           $operator = NULL;
+           break;
+         case 'type':
+-          $term = db_escape_string(array_shift($arg_list));
+-          $where[] = "b.biblio_type=%d ";
+-          //$limit .= $operator. "b.biblio_type=%d ";
+-          $terms[] = (int)$term;
+-          array_push($args, $type, (int)$term);
++        	$term = array_shift($arg_list);
++        	if(is_array($term) && count($term)){
++        		$where[] = "b.biblio_type IN(". db_placeholders($term,'int').") ";
++        		foreach ($term as $value) {
++        			$terms[] = (int)$value;
++        		}
++        		//Don't display multi-filter
++        		//array_push($args, $type, $term);
++        	}else{
++        		$where[] = "b.biblio_type=%d ";
++        		$terms[] = (int)$term;
++            array_push($args, $type, (int)$term);
++        	}
+           $operator = NULL;
+           break;
+         case 'order':

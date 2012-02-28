@@ -1,0 +1,5 @@
+name = Dark Brown
+description = A Dark Brown Version of the scholor_quinn theme
+screenshot = screenshot.png
+
+css[] = dark_brown.css

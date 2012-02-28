@@ -1,0 +1,20 @@
+<?php 
+
+/**
+ * Add Updates Here
+ */
+
+
+/**
+ * Enable newly needed module
+ */
+function scholar_software_update_1() {
+  if(!module_exists('numbers')){
+  	module_enable(array('numbers'));
+  }
+  
+  //For Rbuild Functionality
+  if(!module_exists('iqss_rbuild')){
+    module_enable(array('iqss_rbuild'));
+  }
+}

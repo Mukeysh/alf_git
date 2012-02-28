@@ -1,0 +1,9 @@
+;$Id: cite_distribute.info,v 1.1.1.1 2008/11/21 20:42:34 jweiner Exp $
+name = Cite Distribute
+description = "Module for distributing citations for research articles and working papers to various online repositories from Drupal biblio nodes."
+dependencies[] = biblio
+dependencies[] = flag
+package = Cite Distribute
+core = 6.x
+
+version = "6.x-beta14"

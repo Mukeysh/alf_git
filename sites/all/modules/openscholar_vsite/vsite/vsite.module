@@ -1,0 +1,1302 @@
+<?php
+
+include_once ('vsite.features.inc');
+
+/**
+ * Core API ===========================================================
+ */
+
+/**
+ * API function for getting the active site or a vsite specified by ID
+ *
+ * @param $sid (optional) retrieve a non-active vsite
+ */
+function vsite_get_vsite($sid = false){
+  static $inactive_vsites;
+  if (! isset($inactive_vsites))
+    $inactive_vsites = array();
+
+  if (! $sid || ! intval($sid)) {
+    $space = spaces_get_space();
+  }
+  else {
+    if (! array_key_exists($sid, $inactive_vsites)) $inactive_vsites[$sid] = spaces_load('og', $sid, FALSE);
+    $space = $inactive_vsites[$sid];
+  }
+
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+  if ($space && $space->type == 'og' && $space->group->type == $scholar_content_type) {
+    return $space;
+  }
+  else {
+    return NULL;
+  }
+}
+
+/**
+ * API function for returning the vsite object(s) if the user is owns site(s). If user owns:
+ * vsite - returns array of vsite object(s)
+ * none - returns NULL
+ * @param  $uid
+ */
+function vsite_get_vsite_by_owner($uid = NULL){
+  if ($uid == NULL)
+    return NULL;
+
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+  $sites = array();
+  $sql = db_query("SELECT nid FROM {node} WHERE type = '%s' AND uid = %d", $scholar_content_type, ( int ) $uid);
+
+  while ( $res = db_fetch_array($sql) ) {
+    $sites[] = $res['nid'];
+  }
+
+  switch (count($sites)) {
+    case 0 :
+      return NULL;
+      break;
+
+    //assumes that user owns multiple sites
+    default :
+      if (! empty($sites)) {
+        foreach ( $sites as $site ) {
+          $space = vsite_get_vsite($site);
+          if ($space) {
+            $spaces[] = $space;
+          }
+        }
+        return $spaces;
+        break;
+      }
+  }
+}
+
+/**
+ * Lookup the correct vsite given a node
+ */
+function vsite_get_vsite_by_node($node){
+  if (is_object($node))
+    $node = $node->nid;
+
+  if (! $node)
+    return false;
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+
+  $sites = array();
+  $sql = db_query("SELECT oa.group_nid as group_nid FROM {og_ancestry} oa INNER JOIN {node} n ON n.nid = oa.group_nid WHERE n.type = '%s' AND oa.nid = %d", $scholar_content_type, ( int ) $node);
+
+  while ( $res = db_fetch_array($sql) ) {
+    $sites[] = $res['group_nid'];
+  }
+
+  switch (count($sites)) {
+    case 0 :
+      return false;
+      break;
+    //assumes that node could be in multiple sites
+    default :
+      if (! empty($sites)) {
+        foreach ( $sites as $site ) {
+          $space = spaces_load('og', $site);
+          if ($space && $space->type == 'og' && $space->group->type == $scholar_content_type) {
+            $spaces[] = $space;
+          }
+        }
+        return $spaces;
+        break;
+      }
+  }
+}
+
+/**
+ * Return the empty message for a given node type and vsite
+ *
+ * @param $node_type string
+ * @param $space vsite
+ * @return string
+ */
+function vsite_empty_view_message($s_node_type, $space){
+  global $user;
+
+  if (! empty($s_node_type) && node_access('create', $s_node_type) && ($space->type == 'og') && $space->menu_access('node')) {
+    $types = node_get_types();
+    if ($type = $types[$s_node_type]) {
+      $output .= '<p class="empty-content">' . t('Add your first <span class="show-content-type">!type</span> to get started', array(
+        '!type' => $type->name
+      )) . '</p>';
+      //$output .=  theme('links', context_links()) ."</div>";
+    }
+  }
+  else {
+    $output .= t('There is currently no content to view in this section.');
+  }
+
+  return $output;
+}
+
+/**
+ * Includes different inc files
+ */
+function vsite_include($inc_files){
+  $inc_files = is_array($inc_files) ? $inc_files : array(
+    $inc_files
+  );
+
+  $path = dirname(__FILE__);
+
+  foreach ( $inc_files as $inc ) {
+    if (file_exists("$path/includes/$inc.inc")) {
+      include_once "$path/includes/$inc.inc";
+    }
+  }
+}
+
+/**
+ * Set the default view for a feature
+ * @param string $s_view
+ */
+function vsite_set_default_feature_view($s_view = NULL){
+  static $cached_view;
+
+  if ($s_view !== NULL)
+    $cached_view = $s_view;
+
+  return isset($cached_view) ? $cached_view : false;
+}
+
+/**
+ * Returns the default view (if any) associated with the current active feature
+ *
+ * If set get the view for the given feature instead of the active view
+ * @param string $feature
+ */
+function vsite_get_default_feature_view($feature){
+
+	if($feature){
+		return _vsite_feature_default_view($feature);
+	}
+
+  return vsite_set_default_feature_view();
+}
+
+/**
+ * Given a form id determine if it is for a vsite features settings form
+ * @param array $form
+ * @param array $form_state
+ *
+ * @return $feature_name
+ */
+function vsite_is_feature_settings_form($form, $form_state){
+	$form_id = isset($form_state['values']['form_id'])?$form_state['values']['form_id']:$form['form_id']['#value'];
+	
+	if($form_id == "vsite_default_feature_customize"){
+		//The generic feature settings form
+		$feature_name = $form['#feature_name'];
+	}elseif (substr_compare($form_id,"_settings",-9) == 0){
+  	//Does formid ends in _settings, parse out the feature name
+    $feature_name = substr($form_id,0,-9);
+  }else{
+  	//not a feature form
+  	return false;
+  }
+  
+  $site_features = array_keys(variable_get('spaces_features', array()));
+  
+    
+  if(!in_array($feature_name,$site_features)){
+    return false;
+  }
+  
+  //This is a feature settings form, return the feature name
+  return $feature_name;
+}
+
+///////// REVIEW THESE API FUNCTIONS /////// -RB 8/12
+
+/**
+ * Returns the group node given the id in a url
+ * @param $n_vsite_id integer (VSITE ID)
+ * @return object node
+ */
+function vsite_group_load($n_vsite_id = false){
+  if ($n_vsite_id === false)
+    $n_vsite_id = vsite_group_to_arg();
+
+  //Same as Site ID
+  $o_group_node = node_load($n_vsite_id);
+  $vsite = vsite_get_vsite();
+
+  if ($o_group_node->type == variable_get('scholar_content_type', 'vsite') && //Make sure that they have update permissions or they are accessing the node withing the context of thier own site
+($o_group_node->nid == $vsite->group->nid || node_access('update', $o_group_node))) { //Does not replace the functonality of 'access callback' but provides a stopgap
+    return $o_group_node;
+  }
+
+  return false;
+}
+
+/**
+ * Default the param to the current site, used when making a link
+ *
+ * @return number sid
+ */
+function vsite_group_to_arg(){
+  $vsite = vsite_get_vsite();
+  return $vsite->group->nid;
+}
+
+/**
+ * Render the private site login page
+ */
+function vsite_private_site_login(){
+  if (! user_is_logged_in()) {
+    $s_html = drupal_get_form('user_login');
+  }
+
+  return "This site is private, you must be logged in and be a site member to view." . $s_html;
+}
+
+/**
+ * Implemented hooks ==================================================
+ */
+
+/**
+ * Implementation of hook menu
+ */
+function vsite_menu(){
+  $items = array();
+
+  // nodeautocomplete callback for scholar
+  $items['vsite/node/autocomplete'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'something',
+    'page callback' => 'vsite_node_autocomplete',
+    'file' => 'nodeautocomplete.inc',
+    'access arguments' => array(
+      'access content'
+    ),
+    'file path' => drupal_get_path('module', 'vsite') . '/includes'
+  );
+
+  $items['private_site'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Private Site',
+    'page callback' => 'vsite_private_site_login',
+    'access arguments' => array(
+      'access content'
+    )
+  );
+
+  $items['cp/modal/%node/%'] = array(
+    'title' => 'Block Edit Forms',
+    'page callback' => 'vsite_info_block_form',
+    'page arguments' => array(2, 3),
+    'type' => MENU_CALLBACK,
+    'menu_name' => 'cp',
+    'access callback' => 'cp_access_cp',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook block
+ */
+function vsite_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks['site_search']['info'] = t('Scholar site search');
+    $blocks['google_translate']['info'] = t('Google Translate');
+    $blocks['site_rss']['info'] = t("Your site's RSS feed");
+    return $blocks;
+  }
+  elseif ($op == 'view') {
+  	require_once ( drupal_get_path('module', 'vsite') .'/includes/vsite.blocks.inc');
+    switch ($delta) {
+      case 1:
+      case 'site_search':
+       return vsite_search_block();
+      case 3:
+      case 'google_translate':
+        return vsite_googletranslate_block();
+    }
+  }
+}
+
+/**
+ * Implementation of hook vsite_widgets
+ */
+function vsite_vsite_widgets(){
+
+  return array(
+   'vsite-site_search' => array(
+      'module' => 'vsite',
+      'delta' => 'site_search',
+      'weight' => -5,
+      'region' => 'right',
+      'label' => 'Site Search',
+    ),
+
+    'vsite-google_translate' => array(
+      'module' => 'vsite',
+      'delta' => 'google_translate',
+      'weight' => 40,
+      'region' => false,
+      'label' => 'Google Translate',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function vsite_menu_alter(&$items) {
+  $router_items = array(
+    'node/%node/edit',
+  );
+  foreach (node_get_types('types', NULL, TRUE) as $type) {
+    $type_url_str = str_replace('_', '-', $type->type);
+    $router_items[] = 'node/add/'. $type_url_str;
+  }
+  foreach ($router_items as $path) {
+    if (isset($items[$path])) {
+      $arguments = isset($items[$path]['access arguments']) ? $items[$path]['access arguments'] : array();
+      $arguments[] = isset($items[$path]['access callback']) ? $items[$path]['access callback'] : NULL;
+      $items[$path]['access callback'] = 'vsite_node_menu_access';
+      $items[$path]['access arguments'] = $arguments;
+    }
+  }
+  
+  //Add feature settings forms for those features that do not have them
+  $site_features = spaces_features('og');
+  foreach ($site_features as $fname => $finfo){
+  	if(!isset($items['features/'. $fname])){
+  		if(isset($finfo->info['features']['node']) && count($finfo->info['features']['node'])){
+	  		//Add a default form for this feature
+	  		$items['features/'. $fname] = array(
+			    'title' => 'Settings',
+			    'page callback' => 'drupal_get_form',
+			    'page arguments' => array('vsite_default_feature_customize',$fname),
+			    'access callback' => module_exists('spaces') ? 'spaces_access_admin' : 'user_access',
+			    'access arguments' => module_exists('spaces') ? array() : array('administer site configuration'),
+			    'type' => MENU_CALLBACK,
+			  );
+  		}//Does this feature implement a node?
+  	}//Does this feature already have a menu entry
+  }
+  
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function vsite_theme($cache, $type, $theme, $path){
+  $path = drupal_get_path('module', 'vsite');
+
+  $items['vsite_logo'] = array(
+    'arguments' => array(
+      'scholar' => NULL,
+      's_logo_field' => NULL,
+      'preset' => NULL,
+      'alt' => NULL,
+      'title' => NULL,
+      'attributes' => NULL
+    ),
+    'path' => $path . "/includes/",
+    'file' => 'vsiteapi.inc'
+  );
+
+  $items['vsite_login_link'] = array(
+    'arguments' => array(
+      'link_text' => NULL,
+      'a_attributes' => NULL
+    ),
+    'path' => $path . "/includes/",
+    'file' => 'vsiteapi.inc'
+  );
+
+  return $items;
+}
+
+/**
+ * hook views_pre_build
+ */
+function vsite_views_pre_build(&$view){
+  // the vsite_feed view should only display node from
+  // public features
+  if ($view->name == 'vsite_feed') {
+    _vsite_feed_content_types_filter($view);
+  }
+}
+
+/**
+ * Implementation of preprocess_views_view().
+ */
+function vsite_preprocess_views_view(&$vars){
+  vsite_include('vsiteapi');
+  if ($feature = vsite_active_feature()) {
+    $contexts = context_enabled_contexts();
+    $context = isset($contexts["openscholar-feature-{$feature}"]) ? $contexts["openscholar-feature-{$feature}"] : NULL;
+    $view = $vars['view'];
+    $space = spaces_get_space();
+
+    if ($space && $context && strpos($view->current_display, 'page') !== FALSE && empty($view->result) && empty($vars['empty'])) {
+      static $once;
+      if (! $once) {
+        $once = TRUE;
+
+        $output = '';
+        global $user;
+
+        // Get the first nodetype
+        if (! empty($context->node)) {
+          reset($context->node);
+          $nodetype = current($context->node);
+        }
+
+        $vars['empty'] = vsite_empty_view_message($nodetype, $space);
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_preprocess_node()
+ */
+function vsite_preprocess_node(&$vars){
+  $node = $vars['node'];
+
+  // we dont print "submitted" info unless the feature explicitely asks
+  if (! variable_get('node_submitted_info_' . $node->type, FALSE)) {
+    $vars['submitted'] = '';
+  }
+}
+
+/**
+ * hook preprocess page
+ */
+function vsite_preprocess_page(&$vars){
+  // Each feature can provide its own specific css file
+  // with this naming convention scholar_[feature name].css
+  if ($feature = vsite_active_feature()) {
+    drupal_add_css(drupal_get_path('module', 'scholar_' . $feature) . '/scholar_' . $feature . '.css');
+    $vars['css'] = drupal_add_css();
+    $vars['styles'] = drupal_get_css();
+  }
+
+  // need to know if there is anything in the navbar for css theming
+  $body_class_extra = $vars['navbar'] ? ' navbar-on' : ' navbar-off';
+  $vars['body_classes'] .= $body_class_extra;
+
+  // alter $head_title for SEO purposes
+  // set the basics here. Let specific installation (scholar / project)
+  // do the rest (see scholar_preprocess_page)
+  $vsite = vsite_get_vsite();
+  if ($vsite) {
+    $vsite_title = $vsite->group->title;
+    if (drupal_is_front_page()) {
+      $head_title = array(
+        $vsite_title
+      );
+    }
+    else {
+      $head_title = array(
+        strip_tags(drupal_get_title()),
+        $vsite_title
+      );
+    }
+    $head_title = implode(' | ', $head_title);
+    $vars['head_title'] = $head_title;
+  }
+
+  //REPLACE THE Default Jquery UI CSS (if Needed)
+  if (array_key_exists(JQUERY_UI_PATH . '/themes/base/ui.all.css', $vars['css']['all']['module'])) {
+    //Override
+    drupal_add_css(drupal_get_path('module', 'vsite') . '/theme/jquery_ui/jquery.ui/themes/openscholar/ui.all.css');
+    $vars['css'] = drupal_add_css();
+
+    //Remove invalid
+    unset($vars['css']['all']['module'][JQUERY_UI_PATH . '/themes/base/ui.all.css']);
+
+    $vars['styles'] = drupal_get_css($vars['css']);
+  }
+
+  //Include the Package version info for use in the template
+  vsite_include('vsiteapi');
+  $version_info = vsite_get_version_information();
+  $vars['openscholar_version_info'] = $version_info;
+
+  //Add a div around the messages block
+  if (strlen($vars['messages'])) $vars['messages'] = "<div id= \"messages\">" . $vars['messages'] . "</div>";
+
+  if (($context_links = context_links()) && count($context_links) > 1 && context_isset('context', 'vsite-section-public')) {
+    $vars['context_links'] = theme('ctools_dropdown', t('add new'), $context_links, FALSE, 'context-links');
+  }elseif(strlen($vars['context_links'])){
+  	$vars['context_links'] = '<div class="context-links">'.$vars['context_links'].'</div>';
+  }
+
+  $vars['vsite_section_admin_links'] = theme('ctools_dropdown', t('Admin'), _vsite_section_admin_links(), FALSE, 'context-links vsite-section-admin-links');
+
+  if (module_exists('modalframe')) {
+    if (!isset($_GET['modal'])) {
+      modalframe_parent_js();
+    }
+    else {
+      modalframe_child_js();
+    }
+  }
+}
+
+/**
+ * Return the admin links for each feature (customize / layout)
+ * @todo this should probably go in vsite_contextual
+ */
+function _vsite_section_admin_links(){
+  vsite_include('vsiteapi');
+  $active_feature = vsite_active_feature();
+  $active_feature_title = ucfirst($active_feature);
+
+  $links = array();
+  $links[] = array(
+      'title' => t('@section Layout', array('@section' => $active_feature_title)),
+      'href' => 'cp/build/layout',
+      'query' => array(
+          'page_type' => $active_feature,
+          'destination' => $_GET['q']
+      ),
+      'attributes' => array(
+          'title' => t("Customize the layout of @section section", array('@section' => $active_feature_title))
+      )
+  );
+
+  // is this feature customizable ?
+  // by convenction feature settings form is at features/feature_name
+  $item = menu_get_item('features/scholar_' . $active_feature);
+  if ($item && $item['href'] != 'features' && $item['access']) {
+    $links[] = array(
+        'title' => t('Customize @active_feature', array('@active_feature' => $active_feature_title)),
+        'href' => 'features/nojs/scholar_' . $active_feature,
+        'query' => array(
+          'refresh' => 'yes',
+        ),
+        'attributes' => array(
+            'class' => "ctools-use-modal",
+            'title' => t('"@active_feature" feature settings', array('@active_feature' => $active_feature_title)),
+        )
+    );
+  }
+
+  return $links;
+}
+
+/**
+ * hook theme_registry_alter
+ */
+function vsite_theme_registry_alter(&$theme_registry){
+  /*
+   * Each module can provide the node template for the node types
+   * it "owns"
+   */
+  $original_path = array_shift($theme_registry['node']['theme paths']);
+  $features = spaces_features('og');
+  $new_paths = array();
+  foreach ( $features as $feature ) {
+    $this_module_path = drupal_get_path('module', $feature->name);
+    $new_paths[] = $this_module_path;
+  }
+  array_unshift($new_paths, $original_path);
+  $theme_registry['node']['theme paths'] = array_merge($new_paths, $theme_registry['node']['theme paths']);
+
+  // Add a page preprocess function to the very top of the theme_page()
+  // stack so that we can add page elements based on contexts *before* the page theming
+  // is executed.
+  if (!in_array('vsite_page_alter', $theme_registry['page']['preprocess functions'])) {
+    array_unshift($theme_registry['page']['preprocess functions'], 'vsite_page_alter');
+    //If context alter is already in the preprocess function move it back to the front
+    if($n_key = array_search('context_page_alter',$theme_registry['page']['preprocess functions'])){
+    	unset($theme_registry['page']['preprocess functions'][$n_key]);
+    	array_unshift($theme_registry['page']['preprocess functions'], 'context_page_alter');
+    }
+  }
+}
+
+/**
+ * Implementation of hook_form_alter()
+ * @todo a lot going on here. refactor the code in smaller functions
+ **/
+function vsite_form_alter(&$form, $form_state, $form_id){
+  if ($form['#id'] == 'node-form') {
+    // Hiding the  body splitting checkbox in the node forms
+    if (! empty($form['body_field'])) {
+      $form['body_field']['teaser_include'] = array(
+        '#type' => 'value',
+        '#value' => 1
+      );
+    }
+
+    if (isset($form['buttons']['preview'])) {
+      $form['buttons']['preview']['#access'] = user_access('vsite_node_form_preview');
+    }
+
+    if (isset($_GET['modal']) && $button = &$form['buttons']['submit']) {
+      modalframe_child_js();
+      //      $button['#submit'][] = 'vsite_modal_submit';
+    }
+  }
+
+  if ($form['#id'] == 'node-form' && (arg(0) . '/' . arg(1) != 'admin/content')) {
+    // GROUP ENABLED CONTENT TYPES
+    if (array_key_exists('spaces_og', $form)) {
+      // Recurse into spaces_og hiding the site select form
+      _spaces_og_make_hidden($form['spaces_og']);
+    }
+
+    if (array_key_exists('spaces', $form)) {
+      //Get rid of the incorect description
+      _spaces_og_make_hidden($form['spaces']);
+    }
+  }
+
+  if (isset($form['type']) && isset($form['#node']) && ($form_id == $form['type']['#value'] . '_node_form') && ! is_content_profile($form['type']['#value'])) {
+    //Node Form (Not Content Profile Nodes)
+
+
+    if (module_exists('override_node_options') && array_key_exists('revision_information', $form) && array_key_exists('options', $form)) {
+      $form['options']['#access'] = true;
+
+      ctools_include('dependent');
+      if (array_key_exists('log', $form['revision_information'])) {
+        $form['options']['log'] = $form['revision_information']['log'];
+        $form['options']['log']['#weight'] = 5;
+        $form['options']['log']['#process'] = array(
+          'ctools_dependent_process'
+        );
+        $form['options']['log']['#dependency'] = array(
+          'edit-revision-1' => array(
+            1
+          )
+        );
+        if (! is_array($form['#validate']))
+          $form['#validate'] = array();
+        if (! in_array('cp_validate_node_flags', $form['#validate']))
+          $form['#validate'][] = 'vsite_validate_node_flags';
+      } //Add the description box for new revision
+
+
+      if (array_key_exists('revision', $form['revision_information'])) {
+        $form['options']['revision'] = $form['revision_information']['revision'];
+        $form['options']['revision']['#weight'] = 4;
+        $form['options']['revision']['#default_value'] = false;
+        $form['options']['revision']['#description'] = "Create a new revision and your existing version will be saved in case you need it for reference or you need to revert to it.";
+        $form['options']['revision']['#access'] = user_access('view revisions');
+        if (! is_array($form['#validate']))
+          $form['#validate'] = array();
+      } //Add the "new revision" checkbox
+
+
+      $form['options']['sticky']['#description'] = "Sticky posts stay at the top of lists with non-sticky items ordered below them";
+
+      module_load_include('inc', 'spaces_og', 'spaces_og.pages');
+      _spaces_og_make_hidden($form['revision_information']);
+    } //Move the revision information under the options tab
+
+
+    $nid = ! empty($form['nid']['#value']) ? $form['nid']['#value'] : NULL;
+    if (module_exists('override_node_options') && array_key_exists('options', $form)) {
+      $vsite = vsite_get_vsite();
+      if (array_key_exists('promote', $form['options'])) {
+        _spaces_og_make_hidden($form['options']['promote']);
+      }
+    } //Overide the default promote functionality in favor of ours
+  }
+  
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+  if($form_id == $scholar_content_type . '_node_form'){
+  	//Do not allow regular users to change the space type
+  	$form['spaces_preset']['#access'] = user_access('administer spaces');
+  	//Do not allow regular users to change purl information
+  	$form['purl']['#access'] = user_access('administer spaces');
+  	//Path information should not be set for group types
+    $form['path']['#access'] = user_access('administer spaces');
+  }//Set access permissions for group type form elements
+  
+}
+
+/**
+ * Implementation of hook nodeapi
+ *
+ * Submit our custom arranged flags
+ * @param $form_id string
+ * @param $form_values array
+ */
+function vsite_nodeapi(&$node, $op, $teaser = NULL, $page = NULL){
+  switch ($op) {
+    case 'validate' :
+    	//Check to see if this path is already a menu entry
+    	if(strlen($node->path)){
+    		$node->path = trim($node->path);
+	    	$menu = menu_get_item($node->path);
+			  if (isset($menu['path']) && $menu['path'] == $node->path) {
+			    form_set_error('path', t('The path ['.$node->path.'] is already in use.'));
+			  }
+    	}
+    	
+    	//Alter the path for validation if needed
+      _vsite_alter_node_path_settings($node);
+      
+      //Re-Run path validation
+      if(function_exists('path_nodeapi')){
+        path_nodeapi($node, $op, $teaser, $page);
+      }
+    break;
+    case 'presave' :
+    	// -- Take Care of the Issues present when pathauto and purl coexist --.
+      _vsite_alter_node_path_settings($node);
+      
+      $vsite = vsite_get_vsite();
+      //Have this node avalible to the public and we will hide private using the vsite->menu_access function
+      $map = features_get_component_map('node');
+      $feature_name = $map[$node->type][0];
+      if ($vsite && $vsite->access_feature($op = 'view', $feature_name)) {
+        $node->og_public = OG_VISIBLE_BOTH;
+      } //Does this person have the ability to create public nodes on this vsite?
+      break;
+  }
+}
+
+/**
+ * A preprocess_page() function that is called *before* all other
+ * preprocessors (including template_preprocess_page()). This allows
+ * any final context reactions to be triggered
+ */
+function vsite_page_alter(&$vars) {
+
+  if (context_isset('context', 'vsite-section-public')) {
+    drupal_add_css(drupal_get_path('module', 'vsite') . '/theme/vsite-admin-links.css');
+    drupal_add_js(drupal_get_path('module', 'vsite') . '/theme/vsite.js');
+  }
+  elseif (context_isset('context', 'vsite-section-cp')) {
+  }
+
+}
+
+/**
+ * Implementation of hook perm
+ *
+ * Define permissions
+ */
+function vsite_perm(){
+  return array(
+    "create own openscholar site",
+    "create openscholar site on behalf of others"
+  );
+}
+
+/**
+ * Implemetation of hook_system_info_alter
+ *
+ * Used to set the default regions used in scholar themes
+ *
+ * @param $info
+ * @param $file
+ */
+function vsite_system_info_alter(&$info, $file){
+  if ($file->type == 'module')
+    return;
+
+  //Maintain backwards compatibility
+  if (!array_key_exists('os', $info) && array_key_exists('scholar', $info)){
+  	$info['os'] = $info['scholar'];
+  	if($info['os']['theme_type'] == "scholar") $info['os']['theme_type'] = "vsite";
+  }//Keep theme type and namespace for legacy themes
+
+  //If this is a scholar theme then add the correct regions
+  if (array_key_exists('os', $info) && array_key_exists('theme_type', $info['os']) && $info['os']['theme_type'] == 'vsite') {
+    if (! is_array($info['regions']))
+      $info['regions'] = array();
+
+    $info['regions']['header_top'] = "header top";
+    $info['regions']['header_left'] = "header left";
+    $info['regions']['header_main'] = "header main";
+    $info['regions']['header_right'] = "header right";
+    $info['regions']['navbar'] = "navigation bar";
+    $info['regions']['left'] = "left sidebar";
+    $info['regions']['right'] = "right sidebar";
+    $info['regions']['content_top'] = "content top";
+    $info['regions']['content_bottom'] = "content bottom";
+    $info['regions']['content_left'] = "content left";
+    $info['regions']['content_right'] = "content right";
+    $info['regions']['footer'] = "footer";
+    $info['regions']['closure_region'] = "closure";
+    $info['regions']['closure_region'] = "closure";
+    $info['regions']['admin_area'] = "Administrative";
+
+  }
+}
+
+/**
+ * Implement Hook vsite_generic_settings
+ * @return array
+ */
+function vsite_vsite_generic_settings(){
+  $a_settings = array();
+
+  $a_settings['vsite_private'] = array(
+    'group' => array(
+      '#id' => 'privacy',
+      '#title' => t('Privacy'),
+      '#weight' => 0,
+    ),
+    'form' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Make your site Private'),
+      '#default_value' => variable_get('vsite_private', 0),
+      '#description' => "If private your vsite will only be avalible when you are logged in, regular users will see a message and be giving the choice to login.",
+    )
+  );
+
+  return $a_settings;
+}
+
+/**
+ * Implementation hook_context_page_reaction()
+ */
+function vsite_context_page_reaction(){
+
+  vsite_include('vsiteapi');
+  $active_feature = vsite_active_feature();
+  if (! $active_feature)
+    return;
+  $a_active_contexts = context_active_contexts();
+
+  $feature_context = $a_active_contexts['openscholar-feature-' . $active_feature];
+  if (! $feature_context) return;
+
+  $view_info = _vsite_feature_default_view('scholar_'.$active_feature);
+
+  if(is_array($view_info)){
+  	vsite_set_default_feature_view($view_info['view']);
+  }
+}
+
+/**
+ * Lookup the correct purl provider given a node to create a absolute deep link.
+ *
+ * This is a higher cost function than $vsite->get_absolute(), but is useful if you have
+ * a view that is outside a vsite and you wish to link correctly to the vsite.
+ */
+function vsite_add_purl_provider($node, &$options){
+
+  $a_vsites = vsite_get_vsite_by_node($node);
+
+  if (! $a_vsites || ! count($a_vsites))
+    return;
+
+  while ( $vsite = array_shift($a_vsites) ) {
+
+    if ($vsite && $vsite->purl_provider) {
+      $options['purl'] = array(
+        'provider' => $vsite->purl_provider,
+        'id' => $vsite->id
+      );
+      $options['absolute'] = true;
+      return; //Found a provider
+    }
+  }
+
+  //If there were no purl options for the vsite
+  $options['purl'] = array(
+    'disabled' => TRUE
+  );
+}
+
+/**
+ * Implementation of hook_token_values().
+ **/
+function vsite_token_values($type, $object = NULL, $options = array()) {
+  if ($type == 'node' && (property_exists($object, 'og_groups') || property_exists($object, 'spaces_og'))) {
+    $node = $object;
+    if (property_exists($node, 'spaces_og')) {
+      $gid = $node->spaces_og['gid'];
+    }
+    elseif (property_exists($object, 'og_groups')) {
+      $gid = current($node->og_groups);
+    }
+    $space = spaces_load('og', $gid);
+    $tokens['space-og-path'] = check_plain($space->group->purl);
+    $tokens['space-og-path-raw'] = $space->group->purl;
+    return $tokens;
+  }
+  elseif ($type == 'taxonomy' && $object->vid && ($a_vocab_groups = og_vocab_get_group($object->vid))){
+  	$space = spaces_load('og', current($a_vocab_groups));
+
+  	if($space){
+	  	$tokens['space-og-path'] = check_plain($space->group->purl);
+	    $tokens['space-og-path-raw'] = $space->group->purl;
+	    return $tokens;
+  	}
+  }
+
+  return array(
+    'space-og-path' => '',
+    'space-og-path-raw' => '',
+  );
+}
+
+/**
+ * Implementation of hook_token_list().
+ **/
+function vsite_token_list($type = 'all') {
+  if ($type == 'node' || $type == 'all') {
+    $tokens['node']['space-og-path'] = t("The filtered value of the vsite prefix path");
+    $tokens['node']['space-og-path-raw'] = t("The raw value of the vsite prefix path");
+    return $tokens;
+  }
+}
+
+/**
+ * Implementation of hook flag_default_flags
+ * @return array - default flag
+ */
+function vsite_flag_alter(&$flag){
+  if (!($viste = vsite_get_vsite()) || $flag -> name !== 'featuredposts'){
+    return;
+  }
+  vsite_include('vsiteapi');
+
+  $types = vsite_content_types();
+
+  if (count($types)){
+    $flag -> types = array_keys($types);
+  }
+}
+
+/**
+ * Add vsite content type to default spaces_features
+ */
+function vsite_strongarm_alter(&$vars){
+
+	if(isset($vars['spaces_features']) && is_object($vars['spaces_features'])){
+		if(isset($vars['scholar_content_type'])){
+			$scholar_content_type = $vars['scholar_content_type']->value;
+		}
+		if(!$scholar_content_type) $scholar_content_type = variable_get('scholar_content_type', false);
+
+		if($scholar_content_type && !isset($vars['spaces_features']->value[$scholar_content_type])){
+			$vars['spaces_features']->value[$scholar_content_type] = 1;
+		}
+	}//Allow access to og content type by default
+
+}
+
+/**
+ * Implementation of hook_vsite_admin_link
+ */
+function vsite_vsite_admin_link($type, $object) {
+  $links = array();
+
+  if(!($vsite = vsite_get_vsite()) || !is_object($vsite)){
+    return $links;
+  }//Do nothing if we are not in a site
+
+  if ($type == 'block' && $object->module == 'scholar') {
+    $vsite = vsite_get_vsite();
+    if ($object->delta == 0) {
+      $links[] = array(
+        'title' => t('Configure'),
+        'href' => 'cp/modal/'.$vsite->group->nid.'/logo',
+        'attributes' => array(
+          'class' => 'vsite-modal-link',
+        ),
+      );
+    }
+    elseif ($object->delta == 1) {
+      $links[] = array(
+        'title' => t('Configure'),
+        'href' => 'cp/modal/'.$vsite->group->nid.'/info',
+        'attributes' => array(
+          'class' => 'vsite-modal-link',
+        ),
+      );
+    }
+  }
+
+  return $links;
+}
+
+/**
+ * Callback Functions  ===========================================================
+ */
+
+/**
+ * Vsite Node menu access callback. Allows vsite to restrict access
+ * to nodes outside a space before it allows space types to manage access as
+ * related to their space workflow inside a space. See hook_menu_alter() for how
+ * menu access callbacks / arguments get passed.
+ */
+function vsite_node_menu_access(){
+  // Run the standard spaces access check.
+  $args = func_get_args();
+  $access_callback = array_pop($args);
+
+  if (empty($access_callback) || call_user_func_array($access_callback, $args)) {
+
+    $access_param = array_pop($args);
+    if ($access_param == 'node_access' && $args[0] == 'create') {
+      $node_type = str_replace('-', '_', $args[1]);
+    }elseif ($access_callback == "og_menu_access_node_edit" && is_object($access_param) && $access_param->type){
+      $node_type = $access_param->type;
+    }
+
+    //If this is a group post type only allow editing within a site
+    if($node_type && og_is_group_post_type($node_type)){
+    	//Spaces permits access, now lets make sure we are in a site
+      $vsite = vsite_get_vsite();
+
+      return $vsite?TRUE:FALSE;
+    }
+
+    //We are not in a vsite all is good
+    return true;
+
+  }//Passed standard access functions?
+
+  return FALSE;
+}
+
+/**
+ * Takes a node and sets a property on it so form_alter knows how much of the form to build
+ */
+function vsite_info_block_form($node, $field) {
+  module_load_include('inc', 'node', 'node.pages');
+  $node->field_show = $field;
+  return drupal_get_form($node->type .'_node_form', $node);
+}
+
+/**
+ * Calls some functions common for any modal frame form
+ * For nodes, this needs to be attached to the button's #submit
+ * For most everyone else, form[#submit] is fine
+ */
+function vsite_modal_submit($form, &$form_state) {
+  modalframe_close_dialog();
+  modalframe_form_submit($form, $form_state);
+}
+
+/**
+ * Spaces Integration  ===========================================================
+ */
+
+/**
+ * Implementation of hook spaces_plugins
+ */
+function vsite_spaces_plugins(){
+  $plugins = array();
+  $plugins['vsite'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'vsite') . '/plugins',
+      'file' => 'vsite.inc',
+      'class' => 'vsite',
+      'parent' => 'space_og'
+    )
+  );
+  return $plugins;
+}
+
+/**
+ * Alter the registry to extend spaces_og with vsite
+ */
+function vsite_spaces_registry_alter(&$registry){
+
+  if (isset($registry['types']['og'])) {
+    $registry['types']['og']['plugin'] = 'vsite';
+  }
+}
+
+/**
+ * Form Functions  ===========================================================
+ */
+
+/**
+ * Validate our custom arranged flags
+ * @param $form array
+ * @param $form_state array
+ */
+function vsite_validate_node_flags($form, &$form_state){
+  //Reassign back to revision info for submission
+  if (isset($form_state['values']['options']['log']))
+    $form_state['values']['log'] = $form_state['values']['options']['log'];
+}
+
+/**
+ * Features settings (customize) form
+ */
+function vsite_default_feature_customize($form_state, $feature_name){
+  $form = array('#feature_name' => $feature_name);
+  
+  //Empty form for features that do not have thier own
+  
+  return system_settings_form($form);
+}
+
+/**
+ * Private Util Functions  ===========================================================
+ */
+
+/**
+ * adds a "type" filter to a given view
+ */
+function _vsite_feed_content_types_filter(&$view){
+  $vsite = vsite_get_vsite();
+  if (! $vsite) {
+    return;
+  }
+  vsite_include('vsiteapi');
+  $node_options = vsite_content_types();
+
+  // add a filter for "node types" in the view
+  $options = array();
+  foreach ( $node_options as $type => $value ) {
+    if ($value) {
+      $options[$type] = $type; // that's how views wants it
+    }
+  }
+
+  $v = array(
+    'operator' => 'in',
+    'value' => $options,
+    'group' => '0',
+    'exposed' => FALSE,
+    'expose' => array(
+      'operator' => FALSE,
+      'label' => ''
+    ),
+    'id' => 'type',
+    'table' => 'node',
+    'field' => 'type',
+    'relationship' => 'none'
+  );
+  $view->display_handler->set_option('title', $vsite->group->title);
+  $view->display_handler->set_option('style_options', array('description' => $vsite->group->og_description));
+  $view->set_item('feed', 'filter', 'type', $v);
+}
+
+/**
+ * Return the default view given a specific feature
+ */
+function _vsite_feature_default_view($feature){
+
+  //Use the default feature menu to get the default view
+  foreach (features_get_component_map('menu_links') as $s_menu_key => $a_features) {
+    if(!in_array( $feature, $a_features)) continue;
+
+    list($s_menu,$s_path) = explode(":",$s_menu_key,2);
+    $default_feature_menu = ( object ) menu_get_item($s_path);
+    if ($default_feature_menu->page_callback == 'views_page') {
+      if(!is_array($default_feature_menu->page_arguments)) $default_feature_menu->page_arguments = unserialize($default_feature_menu->page_arguments);
+      return array('view' => $default_feature_menu->page_arguments[0], 'display' => $default_feature_menu->page_arguments[1]);
+    }
+  }
+
+  $feature_context = context_load('openscholar-feature-' . str_replace('scholar_','',$feature));
+  if (!$feature_context) return false;
+
+  //if there is no default view set, lets try determine which one it is
+  if (isset($feature_context->conditions['views']['values'])) {
+    foreach ($feature_context->conditions['views']['values'] as $s_view_key) {
+      list($view,$display) = explode(":",$s_view_key,2);
+      if(strpos($display,'page') === false) continue;
+
+      return array('view' => $view, 'display' => $display);
+    }
+  }
+
+  if (isset($feature_context->conditions['path']['values'])) {
+    foreach ($feature_context->conditions['path']['values'] as $path) {
+      if(strpos($path,'~') !== false || strpos($path,'*') !== false) continue; //Exclude Wildcards
+
+      $default_feature_menu = ( object ) menu_get_item($path);
+      if ($default_feature_menu->page_callback == 'views_page') {
+        if(!is_array($default_feature_menu->page_arguments)) $default_feature_menu->page_arguments = unserialize($default_feature_menu->page_arguments);
+        array('view' => $default_feature_menu->page_arguments[0], 'display' => $default_feature_menu->page_arguments[1]);
+      }
+    }
+  } //there is a path associated with the context and it points to a view
+
+  return false;
+}
+
+/**
+ * Called from nodeapi presave
+ *
+ * Provide some pathauto/purl integration
+ *
+ * - Add extra validation to make sure that a path withouth the purl prefix does not already exist
+ * - Add the purl prefix to manually created paths to preserve namespace
+ */
+function _vsite_alter_node_path_settings(&$node){
+	
+	$vsite = vsite_get_vsite();
+  if (module_exists('path') && module_exists('pathauto') && $vsite) {
+    
+    _pathauto_include();
+    // Get the specific pattern or the default
+    if (variable_get('language_content_type_' . $node->type, 0)) {
+      $pattern = trim(variable_get('pathauto_node_' . $node->type . '_' . $node->language . '_pattern', FALSE));
+    }
+    if (empty($pattern)) {
+      $pattern = trim(variable_get('pathauto_node_' . $node->type . '_pattern', FALSE));
+      if (empty($pattern)) {
+        $pattern = trim(variable_get('pathauto_node_pattern', FALSE));
+      }
+    }
+    
+    // Only do work if there's a pathauto pattern
+    if ($pattern) {
+      // Only check an alias if the checkbox was not provided or if the checkbox was provided and is checked
+      if (! isset($node->pathauto_perform_alias) || $node->pathauto_perform_alias) {
+        $placeholders = pathauto_get_placeholders('node', $node);
+        $src = "node/$node->nid";
+        $alias = pathauto_create_alias('node', 'return', $placeholders, $src, $node->nid, $node->type, $node->language);
+        
+        $s_proccessor = defined('PURL_VSITE_PATH') ? PURL_VSITE_PATH : PURL_PATH;
+        $processor = purl_get_processor($s_proccessor);
+        $parsed = purl_parse($processor, $alias);
+        foreach ( $parsed as $element ) {
+          $alias = $processor->remove($alias, $element);
+        }
+        
+        if (_pathauto_path_is_callback($alias)) {
+          //Cancel the pathauto for this node
+          $node->pathauto_perform_alias = false;
+          return;
+        }
+      }
+    }
+    
+    // Prefix the alias with the purl modifier if there is no pattern for this node, if the checkbox was not provided, or if the checkbox was provided and is unchecked
+    if (!$pattern || (isset($node->pathauto_perform_alias) && !$node->pathauto_perform_alias)) {
+      if (strlen($node->path) && strpos($node->path, $vsite->group->purl . "/") !== 0 && $node->nid != $vsite->group->nid && strlen($vsite->group->purl)) {
+        $node->path = $vsite->group->purl . "/" . $node->path;
+      } //Did they provide a path?  is the site purl already prepended?
+    }
+  }
+}
+
+/**
+ * Implementation of hook_views_plugins().
+ *
+ * sets access callback for this view
+ */
+function vsite_views_plugins() {
+  return array(
+    'module' => 'vsite',
+    'access' => array(
+      'vsite_admin_content' => array(
+        'title' => t('Space admin'),
+        'help' => t('Grant access only to space admin'),
+        'handler' => 'vsite_plugin_access_vsite_admin_content',
+        'path' => drupal_get_path('module', 'vsite') .'/views',
+        'uses options' => FALSE,
+      ),
+    ),
+  );
+}

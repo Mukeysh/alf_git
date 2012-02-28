@@ -1,0 +1,46 @@
+<?php
+
+function vsite_generic_settings_init() {
+  $active_menu = menu_get_item();
+  if ($active_menu['page_callback'] == 'drupal_get_form' &&
+    is_array($active_menu['page_arguments']) &&
+    in_array('cp_settings_form', $active_menu['page_arguments']) &&
+    in_array('generic', $active_menu['page_arguments'])) {
+    $a_settings = module_invoke_all('vsite_generic_settings', vsite_get_vsite(), array());
+
+    foreach ($a_settings as $s_key => $setting) {
+      //Add form Css
+      if (array_key_exists('css', $setting)) foreach ($setting['css'] as $css) drupal_add_css($css);
+
+      //Add form JS
+      if (array_key_exists('js', $setting)) foreach ($setting['js'] as $js) drupal_add_js($js);
+    }
+  }
+}
+
+function vsite_generic_settings_menu() {
+  $items = array();
+ 
+  $items['cp/settings'] = array(
+    'title' => "Settings",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_generic_settings_form'),
+    'file' => 'vsite_generic_settings.page.inc',
+    'access callback' => 'cp_access_cp',
+    'menu_name' => 'cp',
+    'weight' => 30,
+
+  );
+
+  $items['cp/settings/generic'] = array (
+    'title' => 'Other Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_generic_settings_form'),
+    'file' => 'vsite_generic_settings.page.inc',
+    'access callback' => 'cp_access_cp',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  return $items;
+}

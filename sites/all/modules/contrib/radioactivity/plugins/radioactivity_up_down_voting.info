@@ -1,0 +1,6 @@
+name = Radioactive up/down voting
+description = "VotingAPI up/down support for radioactive nodes and comments. Supports setting different energy values for positive and negative votes."
+dependencies[] = radioactivity
+dependencies[] = votingapi
+package = Radioactivity
+core = 6.x

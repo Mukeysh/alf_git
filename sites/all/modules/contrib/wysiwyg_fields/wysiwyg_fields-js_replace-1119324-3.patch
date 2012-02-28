@@ -1,0 +1,113 @@
+diff --git a/scripts/wysiwyg_fields.js b/scripts/wysiwyg_fields.js
+index bb3ffd7..01ac4a2 100644
+--- a/scripts/wysiwyg_fields.js
++++ b/scripts/wysiwyg_fields.js
+@@ -66,6 +66,7 @@
+     /**
+      * @TODO - wysiwygIsNode only fires when the 'node' object changes, so it
+      *   will unselect the DIV on a second click of the element.
++     *   It actually fires all the time in chrome
+      */
+     wysiwygIsNode: function(id, node) {
+       delete Drupal.settings.wysiwygFields.fields[id].active;
+@@ -135,12 +136,13 @@
+      */
+     wysiwygDetach: function(id, content, settings, instanceId) {
+       if (content.indexOf('wysiwyg_fields-placeholder') == -1) {
+-        var regex = new RegExp('<wysiwyg_field(?=[^>]*wf_field=["\']' + id + '["\']).*?>[\\n\\s\\S]*?</wysiwyg_field>', 'g');
++        var regex = new RegExp('<wysiwyg_field(?=[^>]*wf_field=["\']' + id + '["\']).*?>[\\n\\s\\S]*?</wysiwyg_field>', 'g'),
++        	matches;
+         if ((matches = content.match(regex))) {
+           $.each($(matches), function(i, elem) {
+-            var regex = new RegExp('<wysiwyg_field(.*?)>([\\n\\s\\S]*?)</wysiwyg_field>');
+-            var item = elem.match(regex);
+-            var token = '[wysiwyg_field' + item[1] + ']';
++            var regex = new RegExp('<wysiwyg_field(.*?)>([\\n\\s\\S]*?)</wysiwyg_field>'),
++            	item = elem.match(regex),
++            	token = '[wysiwyg_field' + item[1] + ']';
+ 
+             // Store replacement in Drupal.settings for wysiwygAttach.
+             Drupal.settings.wysiwygFields.fields[id].replacements = Drupal.settings.wysiwygFields.fields[id].replacements || {};
+@@ -191,18 +193,19 @@
+      */
+     dialogShowDefault: function(id) {
+       this.dialogClose(id);
++      var delta = 0,
++          _id = id.replace(/_/g, '-');
+ 
+       // Get field delta.
+-      delta = 0;
+       if (Drupal.settings.wysiwygFields.fields[id].delta !== null) {
+         delta = Drupal.settings.wysiwygFields.fields[id].delta;
+       }
+ 
+       if (Drupal.settings.wysiwygFields.fields[id].multiple > 0) {
+-        $('#' + id.replace('_', '-', 'g') + '-items, #wysiwyg_fields-' + id + '-wrapper table').hide();
+-        if ($('#edit-' + id.replace('_', '-', 'g') + '-' + delta + '-wysiwyg-fields-ahah-wrapper').parents('table#' + id + '_values').length == 1) {
+-          $('#edit-' + id.replace('_', '-', 'g') + '-' + delta + '-wysiwyg-fields-ahah-wrapper')
+-            .before('<div id="edit-' + id.replace('_', '-', 'g') + '-' + delta + '-wysiwyg-fields-ahah-wrapper-placeholder" class="wysiwyg_fields-placeholder" />')
++        $('#' + _id + '-items, #wysiwyg_fields-' + id + '-wrapper table').hide();
++        if ($('#edit-' + _id + '-' + delta + '-wysiwyg-fields-ahah-wrapper').parents('table#' + id + '_values').length == 1) {
++          $('#edit-' + _id + '-' + delta + '-wysiwyg-fields-ahah-wrapper')
++            .before('<div id="edit-' + _id + '-' + delta + '-wysiwyg-fields-ahah-wrapper-placeholder" class="wysiwyg_fields-placeholder" />')
+             .prependTo('#wysiwyg_fields-' + id + '-wrapper');
+         }
+       }
+@@ -217,15 +220,17 @@
+      */
+     dialogShowUpdate: function(id) {
+       this.dialogClose(id);
++      var deltas,
++          _id = id.replace(/_/g, '-');
+ 
+       if (Drupal.settings.wysiwygFields.fields[id].multiple > 0) {
+         deltas = Drupal.settings.wysiwygFields.fields[id].active.wf_deltas.split(',');
+ 
+         if (deltas.length == 1) {
+-          $('#' + id.replace('_', '-', 'g') + '-items, #wysiwyg_fields-' + id + '-wrapper table').hide();
+-          if ($('#edit-' + id.replace('_', '-', 'g') + '-' + Drupal.settings.wysiwygFields.fields[id].active.wf_deltas + '-wysiwyg-fields-ahah-wrapper').parents('table#' + id + '_values').length == 1) {
+-            $('#edit-' + id.replace('_', '-', 'g') + '-' + Drupal.settings.wysiwygFields.fields[id].active.wf_deltas + '-wysiwyg-fields-ahah-wrapper')
+-              .before('<div id="edit-' + id.replace('_', '-', 'g') + '-' + Drupal.settings.wysiwygFields.fields[id].active.wf_deltas + '-wysiwyg-fields-ahah-wrapper-placeholder" class="wysiwyg_fields-placeholder" />')
++          $('#' + _id + '-items, #wysiwyg_fields-' + id + '-wrapper table').hide();
++          if ($('#edit-' + _id + '-' + Drupal.settings.wysiwygFields.fields[id].active.wf_deltas + '-wysiwyg-fields-ahah-wrapper').parents('table#' + id + '_values').length == 1) {
++            $('#edit-' + _id + '-' + Drupal.settings.wysiwygFields.fields[id].active.wf_deltas + '-wysiwyg-fields-ahah-wrapper')
++              .before('<div id="edit-' + _id + '-' + Drupal.settings.wysiwygFields.fields[id].active.wf_deltas + '-wysiwyg-fields-ahah-wrapper-placeholder" class="wysiwyg_fields-placeholder" />')
+               .prependTo('#wysiwyg_fields-' + id + '-wrapper');
+           }
+         }
+@@ -233,7 +238,7 @@
+         else {
+           this.dialogShowAll(id);
+           $.each(deltas, function(delta) {
+-            $('#edit-' + id.replace('_', '-', 'g') + '-' + delta + '-wysiwyg-fields-select').attr('checked', 'checked');
++            $('#edit-' + _id + '-' + delta + '-wysiwyg-fields-select').attr('checked', 'checked');
+           });
+         }
+       }
+@@ -284,7 +289,7 @@
+       $('#' + Drupal.settings.wysiwygFields.activeId + '-' + id).remove();
+ 
+       if (Drupal.settings.wysiwygFields.fields[id].multiple > 0) {
+-        $('#wysiwyg_fields-' + id + '-wrapper table, #' + id.replace('_', '-', 'g') + '-items').show();
++        $('#wysiwyg_fields-' + id + '-wrapper table, #' + id.replace(/_/g, '-') + '-items').show();
+       }
+ 
+       // Undo DOM modificatons.
+@@ -336,13 +341,14 @@
+     insert: function(id, content, delta) {
+       $('#wysiwyg_fields-' + id + '-wrapper').dialog('close');
+       Drupal.wysiwygFields.dialogClose(id);
++      var active = Drupal.settings.wysiwygFields.activeId;
+ 
+       // Invoke custom insert callback if available.
+-      if ($.isFunction(this.wysiwyg[Drupal.wysiwyg.instances[Drupal.settings.wysiwygFields.activeId].editor].insert)) {
+-        this.wysiwyg[Drupal.wysiwyg.instances[Drupal.settings.wysiwygFields.activeId].editor].insert(Drupal.settings.wysiwygFields.activeId, content);
++      if ($.isFunction(this.wysiwyg[Drupal.wysiwyg.instances[active].editor].insert)) {
++        this.wysiwyg[Drupal.wysiwyg.instances[active].editor].insert(active, content);
+       }
+       else {
+-        Drupal.wysiwyg.instances[Drupal.settings.wysiwygFields.activeId].insert(content);
++        Drupal.wysiwyg.instances[active].insert(content);
+       }
+ 
+       Drupal.settings.wysiwygFields.fields[id].delta = delta;

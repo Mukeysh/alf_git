@@ -1,0 +1,747 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function os_install(){
+  // Add type,nid index to node table. Allows for more efficient joins to
+  // og_ancestry when limiting a view by a certain node type.
+  if (db_table_exists('node')) {
+    db_query("ALTER TABLE {node} ADD KEY type_node (type, nid)");
+  }
+}
+
+/*
+ * hook_update_N
+ * installs 'views_content_cache','os_views_content_cache','os_blocks_content_cache','os_wysiwyg_fields', 'citation_dsitribute'.
+ * removes 'cite_distribute'
+ *
+ * update hook for beta11 -> beta12
+ */
+function os_update_6001(&$sandbox){
+
+  $res = array();
+  module_rebuild_cache();
+
+  $modules = array('views_content_cache','os_views_content_cache','os_blocks_content_cache','os_wysiwyg_fields', 'citation_distribute', 'pathauto_extra', 'os_slideshow', 'views_slideshow', 'views_slideshow_singleframe', 'diff');
+
+  foreach ($modules as $mod) {
+    if(!module_exists($mod)){
+      include_once('includes/install.inc');
+      drupal_install_modules(array($mod));
+    }
+  }
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'Installed modules: ' . implode(', ', $modules),
+  );
+
+  //remove cite_distribute and its plugins
+  $remove = array('cs_meta', 'googlescholar_meta', 'repec_meta', 'sword_meta', 'cite_distribute');
+  $remove = array_filter($remove, 'module_exists');
+  foreach ($remove as $module) {
+    module_disable(array($module), TRUE);
+    drupal_uninstall_module($module);
+  }
+
+  if (count($remove) > 0) {
+    $res[0]['query'] .= '.  Uninstalled modules: ' . implode(', ', $remove);
+  }
+
+  return $res;
+
+}
+
+/*
+ * hook_update_N
+ *
+ * update hook for beta12 => beta13
+ *
+ * installs new $modules
+ */
+function os_update_6002(&$sandbox) {
+
+  $res = array();
+  $modules = array('boxes', 'vsite_controllers', 'os_boxes', 'spaces_simpleviews', 'vsite_contextual', 'os_modalframe', 'os_books', 'os_files', 'vsite_layout_ui', 'fb_social');
+  include_once('includes/install.inc');
+  drupal_install_modules($modules);
+
+  $failed = array();
+  foreach($modules as $mod) {
+    if (!module_exists($mod)) {
+      $failed[] = $mod;
+    }
+  }
+
+  //Uninstall no longer used modules, this will speed up cache clears
+  $uninstall_modules = array("vsite_widgets","vsite_vocab","vsite_front","install_profile_api","iqss_project","iqss_release","gkimport");
+  foreach ($uninstall_modules as $module) {
+  	drupal_uninstall_module($module);
+  }
+
+  if (count($failed)) {
+    $res = array('#abort' => array('success' => FALSE, 'query' => 'Failed to install modules: ' . implode(', ', $failed)));
+  } else {
+  	//Make sure the boxes controller is added right away
+  	cache_clear_all("plugins",'cache',true);
+  	cache_clear_all('spaces_registry', 'cache');
+  	spaces_controllers(true);
+
+    $res[] = array('success' => TRUE, 'query' => 'Installed modules: ' . implode(', ', $modules));
+    $res[] = array('success' => TRUE, 'query' => 'Uninstalled modules: ' . implode(', ', $uninstall_modules));
+  }
+
+  return $res;
+}
+
+/*
+ * hook_update_N
+ *
+ * Update hook for beta12 => beta13
+ *
+ * Updates block ids that are not going to use boxes
+ */
+function os_update_6003(&$sandbox) {
+  $res = array();
+
+  $a_changes = array(
+    'vsite_widgets-3' => 'vsite-site_search',
+    'vsite_widgets-5' => 'vsite-google_translate',
+    'vsite_menus-0' => 'vsite_menus-features',
+    'vsite_menus-1' => 'vsite_menus-scholar_secondary_menu',
+  );
+
+  // Multi-part update.
+  if (!isset($sandbox['os_update_6003'])) {
+    // initialize our variables
+    $sandbox['os_update_6003'] = 0;
+    $sandbox['os_update_6003_max'] = db_result(db_query("SELECT COUNT(*) FROM {spaces_overrides} WHERE object_type = 'context' "));
+  }
+
+  $result = db_query("SELECT * FROM {spaces_overrides} WHERE object_type = 'context' ORDER BY id ASC LIMIT %d,500 ",$sandbox['os_update_6003']);
+  $sandbox['os_update_6003'] += 500;
+
+  while ($row = db_fetch_object($result)) {
+      $value = unserialize($row->value);
+
+      foreach ($a_changes as $old => $new) {
+        if (array_key_exists($old,$value['blocks'])) {
+          $block = $value['blocks'][$old];
+          unset($value['blocks'][$old]);
+
+          list($new_module,$new_delta) = explode("-",$new,2);
+          $block['module'] = $new_module;
+          $block['delta'] = $new_delta;
+
+          $value['blocks'][$new] = $block;
+        }
+      }
+
+      db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE type LIKE '%s' AND id = %d AND object_type LIKE 'context' AND object_id LIKE '%s' ",serialize($value), $row->type, $row->id, $row->object_id);
+  }
+
+  if($sandbox['os_update_6003'] >= $sandbox['os_update_6003_max']){
+    $res[] = array(
+      'success' => true,
+      'query' => 'Block settings migrated.'
+    );
+  }else{
+    // Report how much is left to complete.
+    $res['#finished'] = $sandbox['os_update_6003'] / $sandbox['os_update_6003_max'];
+  }
+
+  return $res;
+}
+
+/*
+ *
+ * Update hook for beta12 => beta13
+ *
+ * Update blocks to boxes for blocks that will have default box instances
+ */
+function os_update_6004(&$sandbox){
+
+  // Multi-part update.
+  if (!isset($sandbox['os_update_6004'])) {
+    //Keep track of which block we are migrating
+    $sandbox['os_update_6004'] = 0;
+  }
+
+  //Update the plugin cache so that default boxes are avalible
+  cache_clear_all("plugins:boxes:plugins",'cache');
+  //Load the box schema
+  cache_clear_all('schema','cache');
+  drupal_get_schema('box',true);
+
+  // migrate existing blocks to new boxes
+  module_load_include('module', 'boxes');
+  require_once drupal_get_path('module', 'os') . '/includes/os.boxes.inc';
+
+  $a_migrate_info = _os_boxes_migrate_info();
+
+  $index = -1;
+  foreach ($a_migrate_info as $block_id => $box_delta) {
+  	$index++;
+  	if($index < $sandbox['os_update_6004']) continue;
+  	$max = db_result(db_query("SELECT COUNT(*) FROM {spaces_overrides} WHERE type = 'og' AND object_type = 'context' AND object_id LIKE '%%reaction:block%%' AND value LIKE '%%%s%%' ", $block_id));
+
+  	if($max > 0){
+	  	$o_box = boxes_load($box_delta);
+	  	if($o_box){
+	      os_boxes_replace_boxes($block_id, $o_box, false, false, 1000);
+	  	}
+  	}
+
+    if($max < 1000 ){ //|| !$o_box
+    	//Run updates on the next block
+    	$sandbox['os_update_6004']++;
+    }elseif (!$o_box){
+    	$sandbox['os_update_6004']++;
+    	$res[] = array(
+	      'success' => false,
+	      'query' => "Unable to load default box [{$box_delta}]."
+	    );
+    }
+
+    if($max > 0) break;
+  }
+
+
+  if($sandbox['os_update_6004'] >= count($a_migrate_info)){
+    $res[] = array(
+      'success' => true,
+      'query' => 'New Box settings migrated.'
+    );
+  }else{
+    // Report how much is left to complete.
+    $res['#finished'] = $sandbox['os_update_6004'] / count($a_migrate_info);
+  }
+
+  return $res;
+}
+
+/**
+ * This update creates box instances for users that have blocks in thier layout that will no longer have defaults
+ *
+ * Update hook for beta12 => beta13
+ * @param $sandbox
+ */
+function os_update_6005(&$sandbox) {
+  $res = array();
+
+  if(!module_exists('boxes')){
+    return array("#abort" => array('success' => FALSE, 'query' => 'Boxes module was not installed when this update ran, please run update.php again.'));
+  }
+
+  require_once drupal_get_path('module', 'os') . '/includes/os.boxes.inc';
+  module_load_include('module', 'boxes');
+
+  // Multi-part update.
+  if (!isset($sandbox['os_update_6005'])) {
+    // initialize our variables
+    $sandbox['os_update_6005'] = array(
+      'views-publication_years-block_1' => 'year',
+      'views-publication_contributors-block_1' => 'contributors',
+      'scholar_publications-pub_by_type' => 'type'
+    );
+  }
+
+  foreach ($sandbox['os_update_6005'] as $block => $type) {
+    switch ($type) {
+      case 'year':
+        $box = boxes_factory('os_boxes_pub_year');
+        $box->title = $box->description = "Publications By Year";
+      break;
+      case 'contributors':
+        $box = boxes_factory('os_boxes_pub_ca');
+        $box->title = $box->description = "Publications By Co-Author";
+      break;
+      case 'type':
+        $box = boxes_factory('os_boxes_pub_type', array('whitelist' => array('all' => 'all')));
+        $box->title = $box->description = "Publications By Type";
+      break;
+    }
+    $box = (object)(array)$box;  // type cast to stdClass;
+
+    $s = "SELECT DISTINCT(id) AS sid, type FROM {spaces_overrides} WHERE object_type='context' AND value LIKE '%%%s%%' LIMIT 100";
+    $q = db_query($s, $block);
+    $num_results = 0;
+
+    // for each vsite that uses this block, we need to create a new box instance
+    // and by new instance, we mean delta
+    while ($r = db_fetch_array($q)) {
+      $box->delta = os_boxes_create_delta($r['type'].'-'.$r['sid']);
+      // check for custom block titles from legacy Spaces code
+      $q_subj = db_query("SELECT * FROM {spaces_overrides} WHERE object_type='variable' AND object_id='block_subject_customizer' AND id = %d", $r['sid']);
+      if ($r_subj = db_fetch_array($q_subj)) {
+        $value = unserialize($r_subj['value']);
+        if ($value[$block]) {
+          $box->title = $value[$block];
+          unset($value[$block]);
+          $r_subj['value'] = $value;
+          drupal_write_record('spaces_overrides', $r_subj, array('object_type', 'object_id', 'id'));
+        }
+      }
+      os_boxes_replace_boxes($block, $box, false, $r['sid']);
+      $override = array(
+        'type' => $r['type'],
+        'id' => $r['sid'],
+        'object_type' => 'boxes',
+        'object_id' => $box->delta,
+        'value' => $box,
+      );
+
+     drupal_write_record('spaces_overrides', $override);
+     $num_results++;
+    }
+
+    break;
+  }
+
+  if($num_results < 100) array_shift($sandbox['os_update_6005']);
+
+  if(!count($sandbox['os_update_6005'])){
+    $res[] = array(
+      'success' => true,
+      'query' => 'Publication blocks have been replaced with boxes.'
+    );
+  }else{
+    // Report how much is left to complete.
+    $res['#finished'] = 1 - count($sandbox['os_update_6005']) / 3;
+  }
+
+
+  return $res;
+}
+
+/**
+ * Create twitter boxes for users that have twitter settings and have the twitter box in thier layout
+ *
+ * Update hook for beta12 => beta13
+ * @param array $sandbox
+ */
+function os_update_6006(&$sandbox){
+
+  if(!module_exists('boxes')){
+    return array("#abort" => array('success' => FALSE, 'query' => 'Boxes module was not installed when this update ran, please run update.php again.'));
+  }
+
+  require_once drupal_get_path('module', 'os') . '/includes/os.boxes.inc';
+
+  //Get all the sites with twitter blocks setup
+  $q = db_query("SELECT * FROM {spaces_overrides} WHERE `object_type` LIKE 'variable' AND `object_id` LIKE 'scholar_reader_twitter_username' ");
+  while ($res = db_fetch_object($q)) {
+    $twitter_username = unserialize($res->value);
+    if(strlen($twitter_username)){
+      $twitter_box = boxes_factory('os_boxes_twitterfeed', array('twitter_username' => $twitter_username, 'title' => "Twitter Feed", 'description' => "Twitter Updates"));
+      $twitter_box->delta = os_boxes_create_delta("{$res->type}-{$res->id}");
+
+      unset($twitter_box->new);
+      unset($twitter_box->export_type);
+      $box = new stdClass();
+      foreach ($twitter_box as $k => $v) $box->$k = $v; //convert to std class
+
+      $override = array(
+        'type' => $res->type,
+        'id' => $res->id,
+        'object_type' => 'boxes',
+        'object_id' => $box->delta,
+        'value' => $box,
+      );
+      drupal_write_record('spaces_overrides', $override);
+
+      os_boxes_replace_boxes('scholar_reader-my_twitter_feed', $twitter_box, false, $res->id);
+    }
+  }
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'Updated twitter boxes for scholar reader',
+  );
+
+  return $res;
+}
+
+/**
+ * Add new default box to all custom front pages, so that existing sites do not automatically recieve the bio on thier homepage
+ *
+ * Update hook for beta12 => beta13
+ * @param array $sandbox
+ */
+function os_update_6007(&$sandbox){
+	$res = array();
+
+  //Do nothing if the biocv module is not enabled
+  if(!module_exists('scholar_biocv')) return $res;
+
+  if(!module_exists('boxes')){
+    return array("#abort" => array('success' => FALSE, 'query' => 'Boxes module was not installed when this update ran, please run update.php again.'));
+  }
+
+  //Retrieved 250 records max lets count so we know if there are more
+  $max = 250;
+  //Get all existing front contexts and remove the new default bio blurb
+  $q = db_query("SELECT * FROM {spaces_overrides} WHERE `object_type` LIKE 'context' AND `object_id` LIKE 'openscholar-feature-front:reaction:block:%%' AND value NOT LIKE '%%boxes-scholar_biocv_bio%%' LIMIT {$max} ");
+
+
+  while ($r = db_fetch_object($q)) {
+    $max--;
+    $value = unserialize($r->value);
+
+    $value['blocks']['boxes-scholar_biocv_bio'] = array(
+          'module' => 'boxes',
+          'delta' => 'scholar_biocv_bio',
+          'weight' => 0,
+          'region' => false,
+          'label' => 'Bio Teaser',
+    );
+    $value = serialize($value);
+
+    db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE type = '%s' AND id = '%s' AND object_type = '%s' AND object_id = '%s' ",array($value,$r->type,$r->id,$r->object_type,$r->object_id));
+
+  }
+
+  if ($max <= 1) {
+    $res['#finished'] = .5;
+  } else {
+    $res['#finished'] = TRUE;
+
+    $res[] = array(
+      'success' => true,
+      'query' => 'Updated bio box on existing front contexts',
+    );
+  }
+
+  return $res;
+}
+
+/**
+ *  Copies bio blurb into a custom box instance
+ *
+ *  Update hook for beta12 => beta13
+ */
+function os_update_6008(&$sandbox){
+  $ret = array();
+  require_once drupal_get_path('module', 'os') . '/includes/os.boxes.inc';
+
+  //Do nothing if the biocv module is not enabled
+  if(!module_exists('scholar_biocv')) return $res;
+
+  if (module_exists('os_boxes')) {
+
+    //copy blurbs from bios into simple boxes
+    $query  = 'SELECT DISTINCT c.nid,c.field_hook_text_value,n.uid ';
+    $query .= 'FROM {content_type_bio} c INNER JOIN {node} n ON c.nid=n.nid ';
+    $query .= 'WHERE field_hook_text_value IS NOT NULL ';
+    $query .= 'GROUP BY c.nid HAVING max(c.vid) ';
+    $result = db_query($query);
+    // for final update, doing a list of nids might be safer.  I figure this code can be used to provide that list at a
+    //later date.  for now it's adequate for testing.
+
+    $a_blurb_updates = array();
+    while ($r = db_fetch_object($result)) {
+      $blurb = trim($r->field_hook_text_value);
+
+      //users who own multiple vsites should still have their bios listed on each vsite
+      //no vsite has multiple owners.
+      if(strlen($blurb)) $vsites = vsite_get_vsite_by_owner($r->uid);
+      while (strlen($blurb) && count($vsites) && $vsite = array_shift($vsites)){
+        //make delta
+        $identifier = $vsite->type . '-' . $vsite->id;
+        $hash = boxes_create_hash($identifier);
+        $delta = $identifier . '-' . $hash;
+
+        $boxopts = array(
+          'title' => 'My Bio',
+          'description' => 'Your Bio blurb.',
+          'body' => $blurb,
+          'delta' => $delta,
+        );
+
+        if (($box = boxes_factory('os_boxes_simple', $boxopts)) && isset($vsite->controllers->boxes)) {
+          $vsite->controllers->boxes->set($box->delta, $box);
+          os_boxes_replace_boxes('scholar_biocv-bio_blurb', $box, false, $vsite->id);
+          $a_blurb_updates[] = $r->uid;
+        }
+      }
+    }
+
+    if (count($a_blurb_updates)) {
+      $ret[] = array(
+        'success' => true,
+        'query' => 'Created simplebox bio blurbs for UIDs: ' . implode(', ', $a_blurb_updates),
+      );
+    }
+
+  } else {
+    $ret['#abort'] = array('success' => FALSE, 'query' => 'os_boxes not installed.  Don\'t migrate bio blurbs to boxes until os_boxes is available.');
+  }
+
+  return $ret;
+}
+
+/*
+ * Implementation of hook_update_N
+ * Update hook for beta12 => beta13
+ *
+ * Takes front page settings from each space, choose a box representative of those settings, adds it to vsite in the new content_top region
+ */
+function os_update_6009(&$sandbox){
+  $ret = array();
+
+  //init sandbox.  this persists between batches
+  if (!isset($sandbox['os_update_6009_progress'])) {
+
+    //Do nothing if the front module is not enabled
+    if(!module_exists('scholar_front')) return $ret;
+
+    //make sure boxes prereqs are all met before installing
+    if (! (module_exists('os_boxes') && module_exists('spaces_simpleviews') )) {
+      $ret['#abort'] = array('success' => FALSE, 'query' => 'Please enable os_boxes and spaces_simpleviews before running scholar_front_update_6002');
+      return $ret;
+    }
+
+    // Set the correct values for 'scholar_content_type' from strongarm
+    // It is possible that strongarm has not been inited
+    strongarm_set_conf();
+
+    //make sure vsite->controllers->boxes exists
+    $v = db_result( db_query('SELECT nid FROM {node} WHERE type = "%s" LIMIT 1',variable_get('scholar_content_type', 'vsite')) );
+    $vsite = vsite_get_vsite($v);
+    if (! isset($vsite->controllers->boxes)) {
+      $ret['#abort'] = array('success' => FALSE, 'query' => 'vsite object has no box controller.  clear cache before running update.');
+      return $ret;
+    }
+
+    $sandbox['os_update_6009_progress'] = 0;
+    $sandbox['max'] = (int)db_result(  db_query('SELECT COUNT(nid) FROM {node} WHERE type = "%s" ',variable_get('scholar_content_type', 'vsite'))  );
+  }
+
+  //vsites per batch.
+  $limit = 40;
+
+  require_once drupal_get_path('module', 'scholar_front') . '/includes/scholar_front.box_maker.inc';
+  //$batch['operations'][] = array('scholar_front_frontpage_boxmaker',array($limit, $offset, $total_vsites),);
+  $updated_vsites = scholar_front_frontpage_boxmaker($limit, $sandbox['os_update_6009_progress'], $sandbox['max']);
+  $sandbox['os_update_6009_progress'] += $limit;
+
+  if ($sandbox['os_update_6009_progress'] < $sandbox['max']) {
+    $ret['#finished'] = $sandbox['os_update_6009_progress'] / $sandbox['max'];
+  } else {
+    $ret['#finished'] = TRUE;
+    $ret[] = array(
+      'success' => true,
+      'query' => 'Created front page boxes.',
+    );
+  }
+
+  return $ret;
+}
+
+/**
+ *
+ *  Update hook for beta12 => beta13
+ *  removes bio blurb from bio content type
+ */
+function os_update_6010(&$sandbox){
+  //Do nothing if the biocv module is not enabled
+  if(!module_exists('scholar_biocv')) return $res;
+
+  $ret = array();
+  if (module_exists('os_boxes')) {
+    module_load_include('inc', 'content', 'includes/content.crud');
+    $field_name = 'field_hook_text';
+    $type_name = 'bio';
+    content_field_instance_delete($field_name, $type_name);
+
+    $ret['#success']['success'] = true;
+    $ret['#success']['query'] = "Removed bio_blurb field from content type";
+  } else {
+    $ret['#abort'] = array('success' => FALSE, 'query' => 'os_boxes not installed.  Don\'t migrate bio blurbs to boxes until os_boxes is available.');
+  }
+
+  return $ret;
+}
+
+function os_update_6011(&$sandbox) {
+
+  $a_migrate_info = _os_boxes_migrate_info();
+
+  $q = db_query("SELECT * FROM {spaces_overrides} WHERE object_type = 'variable' AND object_id = 'block_subject_customizer'");
+  while ($r = db_fetch_array($q)) {
+    $value = unserialize($r['value']);
+    foreach ($value as $old_id => $title) {
+      if (isset($a_migrate_info[$old_id])) {
+        $box = boxes_load($a_migrate_info[$old_id]);
+        $box->title = $title;
+        unset($value[$old_id]);
+        $data = array(
+          'type' => 'og',
+          'id' => $r['id'],
+          'object_type' => 'boxes',
+          'object_id' => $box->delta,
+          'value' => (object)(array)$box,  // double cast to stdClass
+        );
+        drupal_write_record('spaces_overrides', $data);
+      }
+    }
+    if (empty($value)) {
+      db_query("DELETE FROM {spaces_overrides} WHERE id = %d AND object_type = 'variable' AND object_id = 'block_subject_customizer'", $r['id']);
+    }
+    else {
+      db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE id = %d AND object_type = 'variable' AND object_id = 'block_subject_customizer'", serialize($value), $r['id']);
+    }
+  }
+
+  return array (
+    array(
+      'success' => true,
+      'query' => 'Block Subject Customizations moved into Boxes.',
+    ),
+  );
+}
+
+/**
+ * Migrates all the featured posts flag into a Custom List box
+ * And replaces the Featured Post block with the box
+ */
+function os_update_6012(&$sandbox) {
+  require_once drupal_get_path('module', 'os') . '/includes/os.boxes.inc';
+  $featured = flag_get_flag('featuredposts');
+  $front = flag_get_flag('scholar_frontpage');
+  $boxes = array();
+  // get the flagged content
+  $q = db_query("SELECT nid, n.title, group_nid, f.fid FROM {flag_content} f INNER JOIN {node} n ON f.content_id = n.nid INNER JOIN {og_ancestry} oga USING (nid) WHERE f.fid = %d OR f.fid = %d ORDER BY n.changed DESC", $featured->fid, $front->fid);
+  while ($r = db_fetch_array($q)) {
+    $grp = $r['group_nid'];
+    if (!isset($boxes[$grp])) {
+      $title = '';
+      $descrip = '';
+      if ($r['fid'] == $featured->fid) {
+        $title = 'Featured Posts';
+        $descrip = 'Featured Posts';
+      }
+      elseif ($r['fid'] == $front->fid) {
+        $descrip = 'Front Page';
+        $title = '';
+      }
+      $boxes[$grp.'-'.$r['fid']] = boxes_factory('os_boxes_manual_list', array(
+      				'delta' => os_boxes_create_delta('og-'.$grp),
+      				'new' => false,
+      				'title' => $title,
+      				'description' => $descrip)
+            );
+    }
+
+    if (count($boxes[$grp.'-'.$r['fid']]->options['nodes']) < 5) {
+      $boxes[$grp.'-'.$r['fid']]->options['nodes'][] = array('nid' => $r['nid'], 'title' => $r['title'], 'weight' => count($boxes[$grp.'-'.$r['fid']]->options['nodes']));
+    }
+  }
+
+  // add all the new boxes in one query
+  $tpl = '("og", %d, "boxes", "%s", "%s")';
+  $args = array();
+  $s = "INSERT INTO {spaces_overrides} VALUES ";
+  $val_strs = array();
+  foreach ($boxes as $grp => $box) {
+    $grp = explode('-',$grp);
+    $fid = $grp[1];
+    $grp = $grp[0];
+
+    $old = '';
+    if ($fid == $featured->fid) {
+      $old = 'views-vsite_featuredposts-block_1';
+    }
+    elseif ($fid == $front->fid) {
+      $old = 'views-scholar_front-block_1';
+    }
+    if (!os_boxes_replace_boxes($old, $box, false, $grp)) continue;
+
+    $val = $tpl;
+    $args[] = $grp;
+    $args[] = $box->delta;
+    $args[] = serialize((object)(array)$box);
+    $val_strs[] = $tpl;
+
+    // but replace them in contexts
+  }
+  if (count($val_strs) == 0) {
+    return array(
+      array(
+        'success' => true,
+        'query' => 'Query completed. No changes necessary.',
+      )
+    );
+  }
+  $s .= implode(', ', $val_strs);
+  if (count($boxes) && db_query($s, $args)) {
+    return array(
+      array(
+        'success' => true,
+        'query' => 'Query ran successfully!',
+      ),
+    );
+  }
+  else {
+    return array(
+      array(
+        'success' => false,
+        'query' => 'Query failed to complete.',
+      )
+    );
+  }
+}
+
+/**
+ * Implements hook_update_N
+ *
+ * Enables jcaruousel module
+ **/
+function os_update_6013(&$sandbox) {
+  $modules = array('jcarousel');
+  module_enable($modules);
+  return array(array('success' => TRUE, 'query' => "'jcarousel' module enabled."));
+}
+
+function _os_boxes_migrate_info() {
+  return array(
+    "scholar-0" => "site_info",
+    "scholar-1" => "site_logo",
+  	"scholar_project-0" => "site_logo",
+    "scholar_project-1" => "site_info",
+    'vsite_widgets-1' => 'site_info',
+    'vsite_widgets-0' => 'site_logo',
+    'vsite_widgets_1' => 'site_info', //Few iterations of these block id's thats why there are multiple logo/info here, this unifies them
+    'vsite_widgets_0' => 'site_logo',
+    'vsite_widgets-2' => 'shield_default',
+    "views-scholar_announcements-block_1" => "scholar_announcements_latest",
+    //"scholar_biocv-bio_blurb" => "scholar_biocv_bio", //handled by creating instances
+    'views-scholar_book-block_1' => 'scholar_book_recent_docs',
+    'views-scholar_image_gallery-block_1' => 'image_gallery_recent_images',
+    'views-scholar_publications-block_1' => 'scholar_publications_recent',
+    "vsite_taxonomy-0" => 'vsite_taxonomy_fltr_cat',
+    'vsite_widgets-4' => 'os_addthis',
+    'scholar_book-booktoc' => 'scholar_book_current_toc',
+    'scholar_blog-rss' =>  'scholar_blog-blog_rss' ,
+    'vsite_widgets-6' => 'vsite_rss',
+    'vsite_widgets_6' => 'vsite_rss',
+    'views-scholar_reader-block_1' => 'scholar_reader-feeds_list',
+    'views-scholar_reader-block_2' => 'scholar_reader-latest_feed_items',
+    'views-scholar_presentations-block_1' => 'scholar_presentations_recent'
+  );
+}
+
+/**
+ * Implements hook_update_N
+ *
+ * clears ctools cache
+ **/
+function os_update_6014(&$sandbox) {
+  
+  //Ctools should re-create these paths
+  cache_clear_all('plugins:', 'cache', TRUE);
+  cache_clear_all('ctools_plugin_files:', 'cache', TRUE);
+  
+  return array(array('success' => TRUE, 'query' => "Plugins have changed directories so the plugin cache has been cleared manually."));
+}

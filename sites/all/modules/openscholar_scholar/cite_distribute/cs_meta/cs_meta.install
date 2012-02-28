@@ -1,0 +1,20 @@
+<?php
+
+// $Id: cs_meta.install,v 1.1.1.1 2008/11/21 20:42:34 jweiner Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+
+function cs_meta_install() {
+ //do nothing
+}
+
+function cs_meta_uninstall() {
+
+//remove this module's system varaibles
+variable_del('cs_meta_inst_name','');
+variable_del('cs_meta_archive_path','');
+variable_del('cs_meta_show_widget','1');
+
+}

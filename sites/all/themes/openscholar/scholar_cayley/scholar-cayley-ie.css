@@ -1,0 +1,9 @@
+#page {
+  filter:
+  progid:DXImageTransform.Microsoft.DropShadow(color=#555555, offx=1, offy=1);
+  zoom: 1;
+}
+
+#sidebar-first {
+	left: -220px;
+	}

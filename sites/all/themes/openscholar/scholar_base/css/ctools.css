@@ -1,0 +1,24 @@
+.ctools-locked {
+  color: red;
+  border: 1px solid red;
+  padding: 1em;
+}
+
+.ctools-owns-lock {
+  background: #FFFFDD none repeat scroll 0 0;
+  border: 1px solid #F0C020;
+  padding: 1em;
+}
+
+a.ctools-ajaxing,
+input.ctools-ajaxing,
+select.ctools-ajaxing, ul.admin li a.ctools-ajaxing, html.js a.views-throbbing, html.js span.views-throbbing {
+  padding-right: 25px !important;
+  background: url('../images/throbber.gif') right center no-repeat;
+}
+
+div.ctools-ajaxing {
+  float: left;
+  width: 25px;
+  background: url('../images/throbber.gif') center center no-repeat;
+}

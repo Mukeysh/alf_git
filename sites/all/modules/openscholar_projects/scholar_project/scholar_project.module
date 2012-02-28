@@ -1,0 +1,79 @@
+<?php
+
+include_once('scholar_project.features.inc');
+
+function scholar_project_preprocess_page($vars){
+  $vars['body_classes'] .= ' scholar-projects-distro';
+}
+
+function scholar_project_theme() {
+  $theme = array();
+  $theme['vsite_site_logo'] = array(
+    'function' => '_scholar_project_logo_wdgt',
+    'arguments' => array(),
+  );
+  $theme['vsite_site_info'] = array(
+    'function' => '_scholar_project_basicinfo_wdgt',
+    'arguments' => array(),
+  );
+  return $theme;
+}
+
+/**
+ * Scholar Basic Info Widget Content
+ * @return array
+ */
+function _scholar_project_basicinfo_wdgt(){
+  $scholar = vsite_get_vsite();
+
+
+  if (!$scholar) return '';
+
+  if (!strlen($scholar->group->title)) {
+    $output = l('Project Site (' . $scholar->group->purl . ')', $scholar->get_absolute_url());
+  }
+  else {
+    $output =  "<h1>" . l($scholar->group->title, $scholar->get_absolute_url()) . "</h1>".
+    ((strlen($scholar->group->og_description)) ? "<h2>" . $scholar->group->og_description . "</h2>" : "" );
+  }
+
+  return $output;
+}
+
+/**
+ * Scholar Logo Widget Content
+ * @return array
+ */
+function _scholar_project_logo_wdgt(){
+
+  $vsite = vsite_get_vsite();
+  if($vsite && ($a_files = filefield_get_node_files($vsite->group,'field_project_logo')) && count($a_files)){
+    $output = '<div id="logo"><a href="'.url("home").'">'.theme('vsite_logo',$vsite,'field_project_logo' ,false).'</a></div>';
+  }//Only show content if an image exists
+
+  return $output;
+}
+
+/**
+ * Implementation of hook_form_alter()
+ **/
+function scholar_project_form_alter(&$form, $form_state, $form_id) {
+  $scholar_content_type = variable_get('scholar_content_type', 'vsite');
+  switch ($form_id) {
+    case $scholar_content_type.'_node_form':
+      //Customize the "Site Information" form
+      if(arg(0) != 'cp') break;
+      if(array_key_exists('title',$form)) $form['title']['#title'] = "Headline";
+      if(array_key_exists('og_description',$form)){
+      	$form['og_description']['#title'] = "Sub Headline";
+      	$form['og_description']['#required'] = false;
+      	$form['field_vsite_logo'][0]['#title'] = "Project Logo";
+        $form['field_vsite_logo'][0]['#description'] = "Upload the logo of the project, if there is one. Note: Currently there is a set aspect-ratio to this image. First upload the image and then use the cropping tool to crop to the desired scaling.";
+      }
+      unset($form['body_field']['format']);
+      _spaces_og_make_hidden($form['body_field']);
+    break;
+    default:
+
+  }
+}

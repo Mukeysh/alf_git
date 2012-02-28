@@ -1,0 +1,70 @@
+name        = Base Theme
+description = Base theme for OpenScholar
+screenshot  = screenshot.png
+core        = 6.x
+engine      = phptemplate
+
+;------ defauly drupal styles we don't want ------
+stylesheets[all][]    = defaults.css
+stylesheets[all][]    = book.css
+stylesheets[all][]    = node.css
+stylesheets[all][]    = system-menus.css
+stylesheets[all][]    = user.css
+stylesheets[all][]    = content-module.css
+stylesheets[all][]    = filefield.css
+stylesheets[all][]    = og.css
+
+;------ styles ------
+stylesheets[all][]    = css/libraries.css
+stylesheets[all][]    = css/system.css
+stylesheets[all][]    = css/scholar-base.css
+stylesheets[all][]    = css/typography.css
+stylesheets[all][]    = css/tabs.css
+stylesheets[all][]    = css/admin.css
+stylesheets[all][]    = css/taxonomy.css
+stylesheets[all][]    = css/tables.css
+stylesheets[all][]    = css/comments.css
+stylesheets[all][]    = css/modal.css
+stylesheets[all][]    = css/ctools.css
+stylesheets[all][]    = css/dropdown.css
+stylesheets[all][]    = css/biblio.css
+stylesheets[all][]    = css/forms.css
+stylesheets[all][]    = css/admin-toolbar.css
+stylesheets[all][]    = css/toggle-slider.css
+stylesheets[all][]    = css/users.css
+
+;------ styles, additional ------
+stylesheets[print][] = css/print.css
+conditional-stylesheets[if lte IE 7][all][] = css/ie-7.css
+
+
+;------ scripts ------
+scripts[]              = js/scholar_base.js
+
+;------ regions ------
+regions[header_top]    	= header top
+regions[header_left]    = header left
+regions[header_main]    = header main
+regions[header_right]   = header right
+regions[navbar]         = navigation bar
+regions[left]           = first sidebar
+regions[right]          = second sidebar
+regions[content_top]    = content top
+regions[content_bottom] = content bottom
+regions[content_left]   = content left
+regions[content_right]  = content right
+regions[footer]         = footer
+regions[closure_region] = closure
+regions[admin_area]     = Administrative
+
+;------ features ------
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = mission
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+features[] = secondary_links

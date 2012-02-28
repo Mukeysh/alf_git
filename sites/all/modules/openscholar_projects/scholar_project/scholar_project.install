@@ -1,0 +1,10 @@
+<?php
+
+/**
+ * Implementaton of hook_enable().
+ */
+function scholar_project_enable() {
+  // Weight scholar_project to be after vsite
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'vsite'"));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'scholar_project'", ($weight + 1));  
+}

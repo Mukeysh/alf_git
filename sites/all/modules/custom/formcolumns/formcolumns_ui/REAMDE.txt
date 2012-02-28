@@ -1,0 +1,6 @@
+Form Columns UI provides an interface for arranging forms into columns. 
+
+Begin by entering a form_id or path into the main form. This will add your form
+to formcolumn's database and allow you to position its forms with a drag and drop interface. 
+
+Form Columns UI allows site builders to export their form column configuration via Features.

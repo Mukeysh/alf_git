@@ -1,0 +1,74 @@
+<?php 
+
+/**
+ * implementation of hook_l10n_update
+ */
+/*function os_l10n_update() {
+  module_load_include('inc', 'os', 'os.l10n');
+  return _os_l10n_default_projects(); 
+}
+*/ 
+
+/**
+ * implementation of hook_update_projects_alter()
+ * lets l10n_update know that os has its own translation server
+ */
+function os_update_projects_alter(&$projects) {
+  module_load_include('inc', 'os_l10n');
+  _os_update_projects_alter($projects);
+}
+
+/**
+ * implementation of hook_l10n_servers()
+ * defines additional servers for localization updates
+ */
+function os_l10n_servers() {
+  module_load_include('inc', 'os_l10n');
+  return _os_l10n_servers();  
+}
+
+/**
+ * implementation of hook_strongarm
+ * enables sharing translations with OS localization server
+ */
+function os_l10n_strongarm() {
+  module_load_include('inc', 'os_l10n');
+  $export = array();
+  
+  // sets the default translation server to openscholar, rather than localize.drupal.org
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE;
+  $strongarm->api_version = 1;
+  $strongarm->name = 'l10n_client_server';
+  $strongarm->value = 'http://'.OS_L10N_SERVER;
+  $export['l10n_client_server'] = $strongarm; 
+
+  // new translations should be submitted to OS translation server
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE;
+  $strongarm->api_version = 1;
+  $strongarm->name = 'l10n_client_use_server';
+  $strongarm->value = 1;
+  $export['l10n_client_use_server'] = $strongarm;
+
+  // language negotiation determined by 1) path language codes 2) account langauge pref, or 3) browser settings
+  // this is the easiest way to let users change their own langauge in a multilingual site
+  $strongarm = new stdClass();
+  $strongarm->disabled = FALSE;
+  $strongarm->api_version = 1;
+  $strongarm->name = 'language_negotiation';
+  $strongarm->value = 2; //path prefix with lanuguage fall back = 2
+  $export['language_negotiation'] = $strongarm;
+  
+  return $export;
+}
+
+/**
+* Implementation of hook_ctools_plugin_api().
+* makes sure that strongarm hook can be called
+*/
+function os_l10n_ctools_plugin_api($module, $api) {
+  if ($module == "strongarm" && $api == "strongarm") {
+    return array("version" => 1);
+  }
+}

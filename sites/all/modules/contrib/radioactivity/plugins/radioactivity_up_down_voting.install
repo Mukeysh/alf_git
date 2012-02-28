@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Radioactivity up-down install hooks
+ */
+function radioactivity_up_down_voting_install() {
+  // nothing required
+}
+
+function radioactivity_up_down_voting_uninstall() {
+  // nothing required
+}

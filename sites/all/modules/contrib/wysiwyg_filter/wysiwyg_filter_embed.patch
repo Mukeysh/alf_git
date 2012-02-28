@@ -1,0 +1,24 @@
+diff --git a/wysiwyg_filter.inc b/wysiwyg_filter.inc
+index 16b7cdd..fd683fc 100644
+--- a/wysiwyg_filter.inc
++++ b/wysiwyg_filter.inc
+@@ -95,7 +95,6 @@ function wysiwyg_filter_get_elements_blacklist() {
+     'basefont',
+     'body',
+     'button',
+-    'embed',
+     'form',
+     'frame',
+     'frameset',
+@@ -110,11 +109,8 @@ function wysiwyg_filter_get_elements_blacklist() {
+     'meta',
+     'noframes',
+     'noscript',
+-    'object',
+     'optgroup',
+     'option',
+-    'param',
+-    'script',
+     'select',
+     'style',
+     'textarea',

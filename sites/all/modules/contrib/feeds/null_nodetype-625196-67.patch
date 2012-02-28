@@ -1,0 +1,13 @@
+diff --git a/feeds.module b/feeds.module
+index 01a4782..5f0bbfe 100644
+--- a/feeds.module
++++ b/feeds.module
+@@ -329,7 +329,7 @@ function feeds_nodeapi(&$node, $op, $form) {
+   // Break out node processor related nodeapi functionality.
+   _feeds_nodeapi_node_processor($node, $op);
+ 
+-  if ($importer_id = feeds_get_importer_id($node->type)) {
++  if ($node->type && $importer_id = feeds_get_importer_id($node->type)) {
+     switch ($op) {
+       case 'validate':
+         // On validation stage we are working with a FeedsSource object that is

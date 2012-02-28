@@ -1,0 +1,10 @@
+name = Contextual Annotation
+description = "Provides contextual annotations for nodes"
+core = 6.x
+dependencies[] = ctools
+; Information added by drupal.org packaging script on 2011-03-18
+version = "6.x-1.0-alpha1"
+core = "6.x"
+project = "contextual_annotation"
+datestamp = "1300474868"
+

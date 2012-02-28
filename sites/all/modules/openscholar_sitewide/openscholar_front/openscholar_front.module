@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * The current openscholar version.
+ */
+define('OPENSCHOLAR_VERSION', '2.0-BETA14');
+
+include_once('openscholar_front.features.inc');
+include_once('openscholar_front.blocks.inc');
+
+/**
+ * Implementation of hook menu
+ */
+function openscholar_front_menu(){
+  $items = array();
+  $items['welcome'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => '',
+    'page callback' => 'openscholar_front_welcome',
+    'access arguments' => array(
+      'access content'
+    ),
+    );
+
+  return $items;
+}
+
+/**
+ * This is the default content body for the homepage, currently empty
+ *
+ * To add custom content your module can override the menu entry to call the function of your choosing
+ */
+function openscholar_front_welcome(){
+  return '';
+}
+
+
+/**
+ * Implementation of hook_block().
+ */
+function openscholar_front_block($op = 'list', $delta = 0) {
+  switch ($op) {
+    case 'list':
+      $info = array(
+        'top_links' => array('info' => t('OpenScholar: Top links')),
+        'site_info' => array('info' => t('OpenScholar: Site info')),
+        'video_info' => array('info' => t('OpenScholar: Video info')),
+        'site_mission' => array('info' => t('OpenScholar: Mission Statement')),
+        'site_activity' => array('info' => t('OpenScholar: Public Site Activity')),
+        'recent_publications' => array('info' => t('OpenScholar: Recent Publications')),
+      );
+
+      return $info;
+    case 'view':
+      //Functions defined in openscholar_front.blocks.inc
+      $function = "_openscholar_front_block_{$delta}";
+      if (function_exists($function)) {
+        return call_user_func($function);
+      }
+      break;
+  }
+}
+
+/**
+ * Logic for displaying the button used to create a users site
+ */
+function openscholar_front_getyoursitebutton() {
+  if (!module_exists('scholarregister')) return;
+  global $user;
+  $vsites = vsite_get_vsite_by_owner($user->uid);
+  
+  //we always allow admin and users with ability to create a site to see site registration button.
+  if ( !scholarregister_vsite_exists_access($vsites)) {
+    if(!$vsites) return "";
+    
+	  $site_link = (count($vsites) > 1) ? 'user' :  "node/".$vsites[0] -> id;
+	  $site_text  = (count($vsites) > 1) ? 'Go to your sites' : "Go to your site";
+	  return l($site_text, $site_link);
+  }
+  
+  //link for front page button
+  return  l(((count($vsites) > 1)?"Create a web site.":'Get your web site!'), 'site/register');
+
+}
+
+/**
+ * hook_theme
+ */
+function openscholar_front_theme() {
+  
+  $items = array();
+  if(module_exists('vsite')){
+  
+	  //Alter the title to link correctly to the vsite
+	  $items['views_view_field__openscholar_sites__title'] = array(
+	    'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL ),
+	    'function' => 'theme_views_view_field_link_to_vsite',
+	    'path' => drupal_get_path('module','vsite')."/includes/",
+	    'file' => 'vsiteapi.inc',
+	  );
+	  
+	  //Alter the logo to link correctly to the vsite
+	  $items['views_view_field__openscholar_sites__field_vsite_logo_fid'] = array(
+	    'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL ),
+	    'function' => 'theme_views_view_field_link_to_vsite',
+	    'path' => drupal_get_path('module','vsite')."/includes/",
+	    'file' => 'vsiteapi.inc',
+	  );
+  }
+  
+  return $items;
+}

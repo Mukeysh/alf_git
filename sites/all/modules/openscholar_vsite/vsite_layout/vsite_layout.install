@@ -1,0 +1,93 @@
+<?php
+
+function vsite_layout_update_6001(&$sandbox) {
+
+  $a_return = array();
+  $query =  "SELECT ss.value, ss.sid, og.og_theme FROM {spaces_settings} ss INNER JOIN {og} og ON og.nid=ss.sid WHERE ss.type = 'og' AND ss.id = 'layout'  ";
+  $result = db_query($query);
+  while ($data = db_fetch_object($result)) {
+
+    $a_setting = unserialize($data->value);
+    $s_setting = serialize( array($data->og_theme => $a_setting) );
+
+    $a_return[] = db_query("UPDATE {spaces_settings} SET value = '%s' WHERE sid = %d AND type = 'og' AND id = 'layout' ", $s_setting, $data->sid);
+  }
+}
+
+function vsite_layout_update_6002(&$sandbox) {
+  module_load_include('inc', 'vsite_layout', 'vsite_layout.overrides');
+
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  $n_success = 0;
+  $a_return = array();
+  $query =  "SELECT ss.value, ss.sid FROM {spaces_settings} ss WHERE ss.type = 'og' AND ss.id = 'layout'  ";
+  $result = db_query($query);
+  while ($data = db_fetch_object($result)) {
+
+    $a_setting = unserialize($data->value);
+
+    foreach ($a_setting as $s_theme => $a_context_blocks) {
+    	foreach ($a_context_blocks as $s_section => $a_blocks) {
+        $s_section = str_replace("scholar_","",$s_section);
+    		if($s_section == 'all') $s_section = 'none';
+
+    		$context = context_load('openscholar-feature-'.$s_section);
+    		if(!$context){
+    			$a_return[] = array(
+			      'success' => false,
+			      'query' => 'Unable to load context openscholar-feature-'.$s_section,
+			    );
+    			continue;
+    		}
+
+    		$a_new_blocks = (isset($context->reactions['block']['blocks']))? $context->reactions['block']:array( 'blocks' => array());
+    		//vsite_layout_merge_default_blocks($a_new_blocks['blocks']);
+
+	    	foreach ($a_new_blocks['blocks'] as $s_key => $block) {
+			    $a_new_blocks['blocks'][$s_key]['region'] = isset($a_blocks[$s_key])? $a_blocks[$s_key]:false;
+			    $a_new_blocks['blocks'][$s_key]['weight'] = array_search($s_key,array_keys($a_blocks));
+			  }
+			  $s_setting = serialize( $a_new_blocks );
+			  $sql = "INSERT INTO {spaces_overrides} SET value = '%s' ,id = %d ,object_type = 'context' ,type = 'og', object_id = '%s' ";
+    		$a_ret = db_query($sql,$s_setting, $data->sid,'openscholar-feature-'.$s_section.":reaction:block:".$s_theme);
+
+    		if($a_ret){
+    			$n_success++;
+    		}else {
+    			$a_return[] = array('success' => false, 'query' => check_plain($sql));
+    		}
+    	}
+    }
+  }
+
+  $a_return[] = array(
+    'success' => true,
+    'query' => "[".$n_success."] Context overrides migrated from spaces settings.",
+  );
+
+  return $a_return;
+}
+
+function vsite_layout_update_6003(&$sandbox) {
+  drupal_install_modules(array('vsite_layout_ui'));
+
+  $ret = array();
+  if (module_exists('vsite_layout_ui')) {
+    $ret[] = array(
+      'success' => true,
+      'query' => 'VSite Layout UI has been installed.',
+    );
+  }
+  else {
+    $ret[] = array(
+      'success' => false,
+      'query' => 'VSite Layout UI has failed to install',
+    );
+  }
+
+  return $ret;
+}

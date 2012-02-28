@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * Radioactivity votingapi install hooks
+ */
+function radioactivity_votingapi_install() {
+  // nothing required
+}
+
+function radioactivity_votingapi_uninstall() {
+  // nothing required
+}

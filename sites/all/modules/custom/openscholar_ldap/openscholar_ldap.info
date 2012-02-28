@@ -1,0 +1,7 @@
+name = OpenScholar LDAP
+description = "Simple OpenScholar LDAP integration"
+dependencies[] = "scholarregister"
+dependencies[] = "scholar"
+package = OpenScholar Other
+core = 6.x
+version = "6.x-beta14"

@@ -1,0 +1,5 @@
+name = Citation Distribute
+description = Framework allows plugins to define services for distributing biblio citations
+core = 6.x
+dependencies[] = flag
+version = "6.x-beta14"

@@ -1,0 +1,6 @@
+name = Radioactive Fivestar
+description = "VotingAPI fivestar support for radioactive nodes and comments. Supports setting different energy values for one through five star votes."
+dependencies[] = radioactivity
+dependencies[] = votingapi
+package = Radioactivity
+core = 6.x

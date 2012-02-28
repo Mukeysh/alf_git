@@ -1,0 +1,399 @@
+<?php
+
+// $Id: repec_meta.install,v 1.1.1.1 2008/11/21 20:42:34 jweiner Exp $
+
+
+
+
+function repec_meta_schema() {
+	
+	 $schema['repec_types'] = array(
+	  'description' => t('The types of repec templates'),
+	  'fields' => array(
+	    'tid' => array(
+	      'description' => t('RePEc template ID'),
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'unsigned' => TRUE,
+	      'default' => 0,
+	    ),
+	    
+	    'type' => array(
+	      'description' => t("RePEc template type"),
+	      'type' => 'varchar',
+	      'length' => 255,
+	      'not null' => TRUE,
+	      'default' => '',
+	    ),
+	    
+	    'name' => array(
+	      'description' => t("RePEc template name"),
+	      'type' => 'varchar',
+	      'length' => 255,
+	      'not null' => TRUE,
+	      'default' => '',
+	    ),
+	  ),
+	  
+	  //'primary' => array('tid'),
+	  
+	);
+  
+  $schema['repec_type_details'] = array(
+  'description' => t('The types of repec templates'),
+  'fields' => array(
+    'id' => array(
+      'description' => t('ID Field'),
+      'type' => 'serial',
+      'not null' => TRUE,
+      'unsigned' => TRUE,
+    ),
+    
+    'weight' => array(
+      'description' => t('ID Field'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'unsigned' => TRUE,
+      'default' => 0,
+    ),
+    
+     'tid' => array(
+      'description' => t('Weight Field'),
+      'type' => 'int',
+      'not null' => TRUE,
+      'unsigned' => TRUE,
+      'default' => 0,
+    ),
+    
+     'type' => array(
+      'description' => t("Type Field"),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    
+    'identifier' => array(
+      'description' => t("Identifier Field"),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    
+    
+    'data' => array(
+      'description' => t("Data Field"),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => TRUE,
+      'default' => '',
+    ),
+    
+    'required' => array(
+	    'description' => t("Marks Required Fields"),
+	    'type' => 'int',
+	    'size' => 'tiny',
+	    'not null' => TRUE,
+	    'unsigned' => TRUE,
+	    'default' => 0,
+    ),
+   
+    'active' => array(
+	    'description' => t("Marks whether field is active"),
+	    'type' => 'int',
+	    'size' => 'tiny',
+	    'not null' => TRUE,
+	    'unsigned' => TRUE,
+	    'default' => 0,
+    ),
+  ),
+  
+   'primary key' => array('id'),
+   'index' => array('id' => array('id')),  
+	);
+
+
+  $schema['repec_biblio_types'] = array(
+	  'description' => t('Maps repec types to biblio types'),
+	  'fields' => array(
+	    'bid' => array(
+	      'description' => t('Biblio template type ID'),
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'unsigned' => TRUE,
+	      'default' => 0,
+	    ),
+	    
+	    'b_type' => array(
+	      'description' => t('Biblio template type name'),
+	      'type' => 'varchar',
+	      'length' => 255,
+	      'not null' => TRUE,
+	      'default' => '',
+	    ),
+	    
+	     'rid' => array(
+	      'description' => t('RePEc template type name'),
+	      'type' => 'int',
+	      'not null' => TRUE,
+	      'unsigned' => TRUE,
+	      'default' => 0,
+	    ),
+	    
+	    'r_type' => array(
+	      'description' => t('RePEc template type name'),
+	      'type' => 'varchar',
+	      'length' => 255,
+	      'not null' => TRUE,
+	      'default' => '',
+	    ),
+	  ),
+  );
+  
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+
+function repec_meta_install() {  
+  //install repec meta tables
+  drupal_install_schema('repec_meta');
+ 
+	 $insert = db_query("INSERT INTO `repec_types` (`tid`, `type`, `name`) VALUES
+		(1, 'booktm', 'Book'),
+		(2, 'bookch', 'Book Chapter'),
+		(3, 'journl', 'Journal Article'),
+		(4, 'sftwre', 'Software'),
+		(5, 'wpaper', 'Working Paper')"
+	); 
+	
+	//populate repec_biblio_types table from biblio_types table
+
+	 $insert = db_query("INSERT INTO `repec_biblio_types` (`bid`, `b_type`, `rid`, `r_type`) VALUES
+		(100, 'Book', 1, 'booktm'),
+		(101, 'Book Chapter', 2, 'bookch'),
+		(102, 'Journal Article', 3, 'journl'),
+		(103, 'Conference Paper', 5, 'wpaper'),
+		(104, 'Conference Proceedings', 5, 'wpaper'),
+		(105, 'Newspaper Article',3, 'journl'),
+		(106, 'Magazine Article', 3, 'journl'),
+		(107, 'Web Article', 3, 'journl'),
+		(108, 'Thesis', 5, 'wpaper'),
+		(109, 'Report', 5, 'wpaper'),	
+		(110, 'Film', 3, 'journl'),
+		(111, 'Broadcast', 3, 'journl'),
+		(112, 'Artwork', 3, 'journl'),
+		(113, 'Software', 4, 'sftwre'),
+		(114, 'Audiovisual', 4, 'sftwre'),
+		(115, 'Hearing', 5, 'wpaper'),
+		(116, 'Case', 5, 'wpaper'),
+		(117, 'Bill', 5, 'wpaper'),
+		(118, 'Statute', 5, 'wpaper'),
+		(119, 'Patent', 5, 'wpaper'),
+		(120, 'Personal', 5, 'wpaper'),
+		(121, 'Manuscript', 3, 'journl'),
+		(122, 'Map', 5, 'wpaper'),
+		(123, 'Chart', 5, 'wpaper'),
+		(124, 'Unpublished', 5, 'wpaper'),
+		(125, 'Database', 4, 'sftwre'),
+		(126, 'Government Report', 5, 'wpaper'),
+		(127, 'Classical', 5, 'wpaper'),
+		(128, 'Legal Ruling', 5, 'wpaper'),
+		(129, 'Miscellaneous', 5, 'wpaper'),
+		(130, 'Miscellaneous Section',5, 'wpaper'),
+		(1000, 'Working Paper',5, 'wpaper')"
+	);
+  
+
+	$insert = db_query("INSERT INTO `repec_type_details` (`weight`, `tid`, `type`, `identifier`, `data`, `required`, `active`) VALUES
+		
+		(1, 1, 'booktm', 'Template-Type', 'ReDIF-Book 1.0', 1, 1),
+		(2, 1, 'booktm', 'Editor-Name', 'biblio_contributors', 0, 1),
+		(3, 1, 'booktm', 'Editor-Email', '', 0, 1),
+		(4, 1, 'booktm', 'Editor-Workplace-Name', '', 0, 0),
+		(5, 1, 'booktm', 'Title', 'title', 1, 1),
+		(6, 1, 'booktm', 'Provider-Name', 'biblio_publisher', 1, 1),
+		(7, 1, 'booktm', 'Abstract', 'biblio_abst_e', 0, 1),
+		(8, 1, 'booktm', 'Keywords', 'biblio_keywords', 0, 1),
+		(9, 1, 'booktm', 'HasChapter', '', 0, 0),
+		(10, 1, 'booktm', 'Volume', 'biblio_volume', 0, 1),
+		(11, 1, 'booktm', 'Edition', 'biblio_edition', 0, 1),
+		(12, 1, 'booktm', 'Year', 'biblio_year', 0, 1),
+		(13, 1, 'booktm', 'Month', '', 0, 0),
+		(14, 1, 'booktm', 'Classification-JEL', '', 0, 0),
+		(15, 1, 'booktm', 'File-URL', '', 0, 1),
+		(16, 1, 'booktm', 'File-Format', '', 0, 1),
+		(17, 1, 'booktm', 'Handle', '', 1, 1),
+		
+		(1, 2, 'bookch', 'Template-Type', 'ReDIF-Chapter 1.0', 1, 1),
+		(2, 2, 'bookch', 'Author-Name', 'biblio_contributors', 1, 1),
+		(3, 2, 'bookch', 'Author-Email', '', 0, 1),
+		(4, 2, 'bookch', 'Author-Workplace-Name', '', 0, 0),
+		(5, 2, 'bookch', 'Title', 'title', 1, 1),
+		(6, 2, 'bookch', 'Abstract', 'biblio_abst_e', 0, 1),
+		(7, 2, 'bookch', 'Keywords', 'biblio_keywords', 0, 1),
+		(8, 2, 'bookch', 'In-Book', '', 0, 0),
+		(9, 2, 'bookch', 'Pages', 'biblio_pages', 0, 1),
+		(10, 2, 'bookch', 'Volume', 'biblio_volume', 0, 1),
+		(11, 2, 'bookch', 'Chapter', 'biblio_section', 0, 1),
+		(12, 2, 'bookch', 'Edition', 'biblio_edition', 0, 1),
+		(13, 2, 'bookch', 'Year', 'biblio_year', 0, 1),
+		(14, 2, 'bookch', 'Month', '', 0, 0),
+		(15, 2, 'bookch', 'Classification-JEL', '', 0, 0),
+		(16, 2, 'bookch', 'File-URL', '', 0, 1),
+		(17, 2, 'bookch', 'File-Format', '', 0, 0),
+		(18, 2, 'bookch', 'Handle', '', 1, 1),
+		(19, 2, 'bookch', 'Publisher', 'biblio_publisher', 0, 1),
+		
+		
+		(1, 3, 'journl', 'Template-Type', 'ReDIF-Article 1.0', 1, 1),
+		(2, 3, 'journl', 'Author-Name', 'biblio_contributors', 0, 1),
+		(3, 3, 'journl', 'Author-Email', '', 0, 1),
+		(4, 3, 'journl', 'Author-Workplace-Name', '', 0, 1),
+		(5, 3, 'journl', 'Title', 'title', 1, 1),
+		(6, 3, 'journl', 'Abstract', 'biblio_abst_e', 0, 1),
+		(7, 3, 'journl', 'Keywords', 'biblio_keywords', 0, 1),
+		(8, 3, 'journl', 'Journal', 'biblio_secondary_title', 0, 1),
+		(9, 3, 'journl', 'Pages', 'biblio_pages', 0, 1),
+		(10, 3, 'journl', 'Volume', 'biblio_volume', 0, 1),
+		(11, 3, 'journl', 'Issue', 'biblio_issue', 0, 1),
+		(12, 3, 'journl', 'Year', 'biblio_year', 0, 1),
+		(13, 3, 'journl', 'Month', '', 0, 1),
+		(14, 3, 'journl', 'Classification-JEL', '', 0, 1),
+		(15, 3, 'journl', 'File-URL', '', 0, 1),
+		(16, 3, 'journl', 'File-Format', '', 0, 0),
+		(17, 3, 'journl', 'Handle', '', 1, 1),
+		
+		(1, 4, 'sftwre', 'Template-Type', 'ReDIF-Software 1.0', 1, 1),
+		(2, 4, 'sftwre', 'Author-Name', 'biblio_contributors', 1, 1),
+		(3, 4, 'sftwre', 'Author-WorkPlace-Name', '', 0, 0),
+		(4, 4, 'sftwre', 'Author-Email', '', 0, 1),
+		(5, 4, 'sftwre', 'Title', 'title', 1, 1),
+		(6, 4, 'sftwre', 'Programming-Language', '', 0, 0),
+		(7, 4, 'sftwre', 'Series', 'biblio_tertiary_title', 0, 1),
+		(8, 4, 'sftwre', 'Creation-Date', '', 0, 0),
+		(9, 4, 'sftwre', 'Length', 'biblio_pages', 0, 1),
+		(10, 4, 'sftwre', 'Number', '', 0, 0),
+		(11, 4, 'sftwre', 'Classification-JEL', '', 0, 0),
+		(12, 4, 'sftwre', 'File-URL', '', 0, 1),
+		(13, 4, 'sftwre', 'File-Format', '', 0, 0),
+		(14, 4, 'sftwre', 'File-Function', '', 0, 0),
+		(15, 4, 'sftwre', 'Handle', '', 1, 1),
+		(16, 4, 'sftwre', 'Publisher', 'biblio_publisher', 0, 1),
+		
+		(1, 5, 'wpaper', 'Template-Type', 'ReDIF-Paper 1.0', 1, 1),
+		(2, 5, 'wpaper', 'Author-Name', 'biblio_contributors', 1, 1),
+		(3, 5, 'wpaper', 'Author-X-Name-First', '', 0, 0),
+		(4, 5, 'wpaper', 'Author-X-Name-Last', '', 0, 0),
+		(5, 5, 'wpaper', 'Author-Email', '', 0, 1),
+		(6, 5, 'wpaper', 'Author-Workplace-Name', '', 0, 0),
+		(7, 5, 'wpaper', 'Title', 'title', 1, 1),
+		(8, 5, 'wpaper', 'Abstract', 'biblio_abst_e', 0, 1),
+		(9, 5, 'wpaper', 'Keywords', 'biblio_keywords', 0, 1),
+		(10, 5, 'wpaper', 'Length', 'biblio_pages', 0, 1),
+		(11, 5, 'wpaper', 'Creation-Date', 'biblio_date', 0, 1),
+		(12, 5, 'wpaper', 'Revision-Date', '', 0, 0),
+		(13, 5, 'wpaper', 'Publication-Status', '', 0, 0),
+		(14, 5, 'wpaper', 'Number', '', 0, 0),
+		(15, 5, 'wpaper', 'Classification-JEL', '', 0, 0),
+		(16, 5, 'wpaper', 'File-URL', '', 0, 1),
+		(17, 5, 'wpaper', 'File-Format', '', 0, 0),
+		(18, 5, 'wpaper', 'File-Function', '', 0, 0),
+		(19, 5, 'wpaper', 'Handle', '', 1, 1),
+		(20, 5, 'wpaper', 'Publisher', 'biblio_publisher', 0, 1)"
+
+  );  
+
+  //'Author-X-Name-First' and 'Author-X-Name-Last' are disabled by default from 'wpaper' template
+  // because the current biblio module form doesn't provide a separate imput for first name/last name.
+}
+
+/**
+ * Add publishers
+ * Make id unique and serial 
+ */
+
+function repec_meta_update_6000() {
+	$ret = array(array('success' => TRUE,	'query' => 'RePEc publication entries added'));
+	
+	
+	/* update ids so they're not all 0 */
+	
+	//get used ids so we can prevent duplicating any ids
+	$query = "SELECT id FROM {repec_type_details} WHERE id != 0";
+	$result = db_query($query);
+	$_used_ids = array();
+	while ($r = db_fetch_array($result)) {
+		$_used_ids[] = $r->id;
+	}
+	
+	//get all entries with id=0 and update them with a new id
+	$query = "SELECT * FROM {repec_type_details} WHERE id = 0";
+	$result = db_query($query);
+	$id = 1;
+	while ($r = db_fetch_array($result)) {
+		//get a unique id
+		while (in_array($id, $_used_ids)) { 
+			$id++;
+		}
+		
+		$_used_ids[] = $id;
+		$query = "UPDATE {repec_type_details} SET id='$id' WHERE ";
+		$_where_clauses = array();
+		foreach($r as $field => $value) {
+			//$query .= " $field = '$value' AND ";
+			$_where_clauses[] = "$field = '$value'";
+		}
+		$query .= implode ( " AND ", $_where_clauses);
+		db_query($query);
+	}
+	
+	
+	/* set id as primary key, auto inc */
+	db_change_field($ret, 'repec_type_details', 'id', 'id', 
+		array('type' => 'serial', 'not null' => TRUE),
+		array('primary key' => array('id'))
+	);
+	
+	
+	/* add biblio_publisher mappings where missing */
+	foreach(array('sftwre', 'bookch', 'wpaper') as $type) {
+		$weight = db_result(db_query("SELECT MAX(weight) FROM {repec_type_details} WHERE type = '%s'", $type));
+		$tid    = db_result(db_query("SELECT tid FROM {repec_type_details} WHERE type = '%s' LIMIT 1", $type));
+		$weight = 20; $tid=50;
+		
+		$q =  'INSERT INTO {repec_type_details} ';
+		$q .= '(weight, tid, type, identifier, data, required, active) VALUES ';
+		$q .= "(%d, %d, '%s', '%s', '%s', %d, %d)";
+		$r = db_query($q, $weight, $tid, $type, 'Publisher', 'biblio_publisher', 0, 1);
+		if ($r) {
+			watchdog('repec_meta update', 'Updated repec_meta publications for type %type.', array('%type' => $type));
+		} else {
+			$ret = array('#abort' => array( 'success' => FALSE, 'query' => check_plain($q)));
+		}
+	}
+ 
+	return $ret;
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function repec_meta_uninstall() {
+    //cleanup - remove flag
+  cite_distribute_remove_flag('repec_meta');
+  
+   //install repec meta tables
+  drupal_uninstall_schema('repec_meta');
+ 
+  //remove system variables 
+  $vars = array('archive_code', 'archive_url', 'archive_path', 'inst_name', 'show_widget', 'maintainer_name', 'maintainer_email', 'provider_institution');
+  
+  foreach($vars as $var) {
+  	variable_del('repec_meta_' . $var);
+  }
+}

@@ -1,0 +1,65 @@
+<?php
+
+
+/**
+ * Implementation of hook_theme
+ */
+function itweak_filefield_theme() {
+  return array(
+    'itweak_filefield_current' => array(
+      'arguments' => array('form' => NULL),
+      'function' => 'itweak_filefield_current',
+    )
+	);
+}
+
+/**
+ * Implementation of hook_form_alter
+ */
+function itweak_filefield_form_alter(&$form, $form_state, $form_id) {
+ if (isset($form['type']) && isset($form['#node'])  && ($form['type']['#value'] . '_node_form' == $form_id) ) {
+    $form['#pre_render'][] = '_itweak_filefield_form_prerender';
+  }
+}
+
+/**
+ * Implementation of prerender function
+ */
+function _itweak_filefield_form_prerender($form) {
+  $path = drupal_get_path('module', 'itweak_filefield');
+  drupal_add_css($path . '/itweak_filefield.css');
+  drupal_add_js($path . '/itweak_filefield.js');
+//  if ($form['field_file'])
+//    $form['field_file']['#pre_render'][] = '_itweak_filefield_form_prerender_themes';
+  return $form;
+}
+
+/**
+ * This code does nothing.
+
+ * Implementation of prerender  theme functions
+
+function _itweak_filefield_form_prerender_themes($form)	{
+	global $base_path;
+	global $base_url;
+	$array_keys = array_keys($form);
+	foreach($array_keys as $value) {
+		if(is_numeric($value) && ($form[$value]['#default_value']['fid'])) {
+  		$form[$value]['#theme'] = 'itweak_filefield_current';
+  		$html = '<div><span>'.$form[$value]['#default_value']['filename'].'</span><a >Remove</a></div>';
+  		$html .= '<div>'.$form[$value]['#default_value']['filesize'].' bytes - '.$base_url.$base_path.$form[$value]['#default_value']['filepath'].'</div>';
+  		$form[$value]['preview']['#value'] = $html;
+		}
+	}
+  return $form;
+}
+
+
+/**
+ * Implementation of itweak_filefield_current theme function
+
+	function itweak_filefield_current($form) {
+  	$output .= drupal_render($form);
+  	return $output;
+	}
+*/

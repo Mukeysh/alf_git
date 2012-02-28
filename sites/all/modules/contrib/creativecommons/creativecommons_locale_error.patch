@@ -1,0 +1,32 @@
+diff --git a/sites/all/modules/contrib/creativecommons/creativecommons.module b/sites/all/modules/contrib/creativecommons/creativecommons.module
+index 85ae92e..5c68042 100644
+--- a/sites/all/modules/contrib/creativecommons/creativecommons.module
++++ b/sites/all/modules/contrib/creativecommons/creativecommons.module
+@@ -753,14 +753,20 @@ function creativecommons_get_locales() {
+   $uri = '/locales';
+   $xml = creativecommons_get_xml($uri);
+ 
+-  $parser = new SimpleXMLElement($xml);
+-  $locales = array('');
+-  foreach ($parser->locale as $locale) {
+-    $id = (string)$locale['id'];
+-    $locales[$id] = $id;
+-  }
+-  asort($locales);
+-  return $locales;
++  try {
++    $parser = new SimpleXMLElement($xml);
++    $locales = array('');
++    foreach ($parser->locale as $locale) {
++      $id = (string)$locale['id'];
++      $locales[$id] = $id;
++    }
++    asort($locales);
++    return $locales;
++  }
++  catch (Exception $e) {
++    return array('error' => 'Error Getting Locales');
++  }
+ }
+ 
+ /**

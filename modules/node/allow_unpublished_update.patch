@@ -1,0 +1,13 @@
+diff --git a/modules/node/node.module b/modules/node/node.module
+index a35aa79..bfda982 100644
+--- a/modules/node/node.module
++++ b/modules/node/node.module
+@@ -2050,7 +2050,7 @@ function node_access($op, $node, $account = NULL) {
+ 
+   // If the module did not override the access rights, use those set in the
+   // node_access table.
+-  if ($op != 'create' && $node->nid && $node->status) {
++  if ($op != 'create' && $node->nid && ($node->status || $op == 'update')) {
+     $grants = array();
+     foreach (node_access_grants($op, $account) as $realm => $gids) {
+       foreach ($gids as $gid) {

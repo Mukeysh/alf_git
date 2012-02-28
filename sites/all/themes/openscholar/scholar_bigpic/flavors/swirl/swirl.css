@@ -1,0 +1,29 @@
+body {
+  background: url('images/swirl.jpg') 0 0 no-repeat #fff;
+  }
+
+#page {
+  background: rgba(255, 255, 255, 0.4)
+  }
+
+#header h1 a, #header h1 a:visited, #header h2, #header p, #header p a, #header p a:visited  {
+  color: #678898;
+  }
+
+#navbar li a.active, #navbar li.active-trail a {
+  color: #83c0de;
+  }
+
+#navbar li a,
+#navbar li a:visited {
+  color: #678898;
+  text-transform: uppercase;
+  }
+
+#navbar li a.active, #navbar li.active-trail a {
+  color: #83c0de;
+  }
+
+p.copy a.poweredby {
+  background-position: 0 0;
+  }

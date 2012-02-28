@@ -1,0 +1,43 @@
+diff --git a/olark.module b/olark.module
+index 92d98d8..7b53bfc 100755
+--- a/olark.module
++++ b/olark.module
+@@ -64,7 +64,7 @@ function olark_footer() {
+   $role_display_olark_chat = olark_check_role_access();
+ 
+   //if the display olark chat AND the variable for olark enable is true, then display Olark Chat
+-  if ($role_display_olark_chat && variable_get('olark_enable', 1)) {
++  if ($role_display_olark_chat && variable_get('olark_enable', 1) && !olark_suppress(FALSE)) {
+     if (!variable_get('olark_context', 0)) {
+       return variable_get('olark_code', '');
+     }
+@@ -212,4 +212,27 @@ function olark_add_js() {
+ 
+     $added = TRUE;
+   }
+-}
+\ No newline at end of file
++}
++
++/**
++ * Implementation of hook_suppress()
++ * 
++ * Allows other modules to suppress display of Olark
++ *
++ * This function should be called from within another module's page callback
++ * (preferably using module_invoke()) when the menu should not be displayed.
++ * This is useful for modules that implement popup pages or other special
++ * pages where the chat would be distracting or break the layout.
++ *
++ * @param $set
++ *   Defaults to TRUE. If called before hook_footer(), the chat will not be
++ *   displayed. If FALSE is passed, the suppression state is returned.
++ **/
++function olark_suppress($set = TRUE) {
++  static $suppress = FALSE;
++  if (!empty($set) && $suppress === FALSE) {
++    $suppress = TRUE;
++  }
++  return $suppress;
++}
++

@@ -1,0 +1,5 @@
+name = Radioactivity debugging
+description = "Provides useful radioactivity debug functionality."
+dependencies[] = radioactivity
+package = Radioactivity
+core = 6.x

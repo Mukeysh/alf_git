@@ -1,0 +1,462 @@
+<?php
+include_once('scholar_software.features.inc');
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function scholar_software_menu_alter(&$items) {
+
+	//Change the software release link to only show if a software project has been created
+	if(isset($items['node/add/scholar-software-release'])){
+		switch($items['node/add/scholar-software-release']['access callback']){
+			case "node_access":
+				$items['node/add/scholar-software-release']['access callback'] = "scholar_software_access_create_release";
+			break;
+			case "spaces_menu_access":
+				$items['node/add/scholar-software-release']['access arguments'][] = "scholar_software_access_create_release";
+      break;
+		}
+	}//Use custom menu access to only show "add release" if a project exists on the site
+}
+
+function scholar_software_access_create_release(){
+	$view = views_get_view('scholar_software_releaseprojects');
+	if($view) $view->execute();
+
+	//Check for projects
+	return ($view && $view->result && count($view->result) && node_access('create',"scholar_software_release"));
+}
+
+/**
+ * Implementation of hook_scholar_admin_link() on behalf of the node module.
+ */
+function scholar_software_vsite_admin_link($type, $object) {
+  $links = array();
+  if ($type == 'node' && $object->type == 'scholar_software_project' && empty($object->field_scholar_software_method[0]['value'])) {
+
+    $item = menu_get_item('node/add/scholar-software-release');
+    if ($item && $item['access']) {
+      $links['scholar-software-add-release'] = array(
+        'title' => t('Add new Release'),
+        'href' => 'node/add/scholar-software-release',
+        'query' => array('software_name' => $object->field_scholar_software_name[0]['value']),
+      );
+    }
+  }
+  return $links;
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function scholar_software_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch($node->type){
+  	case 'scholar_software_project':
+  		switch($op){
+  			case 'presave':
+		  		if (!$node->field_scholar_software_method[0]['value']) {
+			      $node->field_scholar_software_repository[0]['value'] = '';
+			    }else{
+			      $a_handlers = scholar_software_get_handlers();
+			      if(array_key_exists($node->field_scholar_software_method[0]['value'],$a_handlers)){
+			        $a_handler_info = $a_handlers[$node->field_scholar_software_method[0]['value']];
+			        if($a_handler_info['path']) require_once($a_handler_info['path']);
+			        $o_handler = new $a_handler_info['class']($node->field_scholar_software_repo[0]['value'], $node->field_scholar_software_name[0]['value']);
+			        $o_handler->alterProject($node);
+			      }
+			    }
+  		  break;
+  			case 'insert':
+  				if ($node->field_scholar_software_method[0]['value']) {
+			      $a_handlers = scholar_software_get_handlers();
+			      if(array_key_exists($node->field_scholar_software_method[0]['value'],$a_handlers)){
+			        $a_handler_info = $a_handlers[$node->field_scholar_software_method[0]['value']];
+			        if($a_handler_info['path']) require_once($a_handler_info['path']);
+			        $o_handler = new $a_handler_info['class']($node->field_scholar_software_repo[0]['value'], $node->field_scholar_software_name[0]['value']);
+			        $o_handler->initReleases($node);
+			      }
+			    }//Add the initial releases
+			  break;
+  			case 'delete':
+		  		$result = db_query(
+			      "SELECT nid
+			       FROM {content_type_scholar_software_release} content_type_scholar_software_release
+			       WHERE field_scholar_software_project_nid = %d ", $node->nid);
+
+			    while ($a_result = db_fetch_array($result)) {
+			      node_delete($a_result['nid']);
+			    }
+        break;
+	  		case 'view' :
+	  			if($a4){
+		  			$view = views_get_view('scholar_software_releases');
+		  			$view->set_arguments(array($node->nid));
+		  			$a_content = $view->execute_display('block_1');
+			      $node->content['scholar_software_recommended_releases'] = array(
+			        '#weight' => content_extra_field_weight($node->type, 'scholar_software_recommended_releases'),
+			        '#value' => "<h3>{$a_content['subject']}</h3>".$a_content['content'],
+			      );
+
+			      $view = views_get_view('scholar_software_releases');
+	          $view->set_arguments(array($node->nid));
+	          $a_content = $view->execute_display('block_2');
+	          $node->content['scholar_software_recent_releases'] = array(
+	            '#weight' => content_extra_field_weight($node->type, 'scholar_software_recent_releases'),
+	            '#value' => "<h3>{$a_content['subject']}</h3>".$a_content['content'],
+	          );
+	  			}//Displaying stand alone page
+	      break;
+  		}
+    break;
+    case 'scholar_software_release':
+      switch($op){
+        case 'presave':
+		      $node->title = scholar_software_generate_version($node);
+
+			    // If this release is recommended, set all other ones to not recommended.
+			    if ($node->field_scholar_software_recommend[0]['value'] == 1) {
+			      $view = views_get_view('scholar_software_releases');
+			      $view->set_arguments(array($node->field_scholar_software_project[0]['nid']));
+			      $view->execute('block_1');
+			      foreach ($view->result as $data) {
+			        if (!isset($node->nid) || $data->nid != $node->nid) {
+			          $release = node_load($data->nid);
+			          $release->field_scholar_software_recommend[0]['value'] = 0;
+			          $release->pathauto_perform_alias = false;
+			          node_save($release);
+			        }
+			      }
+			    }
+        break;
+        case 'view':
+        	drupal_add_css(drupal_get_path('module', 'scholar_software') . '/scholar_software.css');
+
+        	if($a4){
+				    $s_filepath = $node->field_scholar_software_file[0]['filepath'];
+				    $download_url = (substr($s_filepath,0,7) == 'http://')? $s_filepath:file_create_url($s_filepath);  //Absolute?
+
+				    $contents = file_exists($node->field_scholar_software_file[0]['filepath']) ? file_get_contents($node->field_scholar_software_file[0]['filepath']) : '';
+				    $info = array();
+				    $info[] = t('Download: !url', array('!url' => l($download_url, $download_url, array('absolute' => TRUE))));
+				    $info[] = t('md5 hash: !md5', array('!md5' => md5($contents)));
+				    $info[] = t('Size: !size', array('!size' => format_size($node->field_scholar_software_file[0]['filesize'])));
+				    $node->content['scholar_software_release_info'] = array(
+				      '#type' => 'fieldset',
+				      'content' => array(
+				        '#type' => 'markup',
+				        '#value' => theme('item_list', $info, NULL, 'ul', array('id' => 'scholar_software-release-info')),
+				      ),
+				      '#weight' => content_extra_field_weight($node->type, 'scholar_software_release_info'),
+				    );
+
+				    $project = node_load($node->field_scholar_software_project[0]['nid']);
+				    $node->content['scholar_software_parent_project'] = array(
+				      '#type' => 'item',
+				      '#title' => 'Software Project',
+				      '#value' => l($project->title, 'node/' . $project->nid),
+				      '#weight' => content_extra_field_weight($node->type, 'scholar_software_parent_project'),
+				    );
+
+				    //Set seperate page title for Release page
+					  $s_version = "{$node->field_versionmajor[0]['value']}.{$node->field_versionpatch[0]['value']}" . (!empty($node->field_versionextra[0]['value']) ? "-{$node->field_versionextra[0]['value']}" : '');
+				    drupal_set_title($project->title." <span class='version-info'>Release: ".$s_version."</span>");
+
+        	}//Displaying standalone page
+        break;
+      }
+    break;
+  }
+}
+
+/**
+ * Option field callback for version options.
+ */
+function scholar_software_cck_options($type = 'major') {
+  switch ($type) {
+    case 'major':
+      $major = range(0, 500);
+      return $major;
+
+    case 'method':
+    	$a_handlers = scholar_software_get_handlers();
+    	$a_methods = array(0 => t('Manual upload'));
+    	foreach ($a_handlers as $s_key => $a_info){
+    		$a_methods[$s_key] = $a_info['name'];
+    	}
+
+      return $a_methods;
+    case 'patch':
+      return range(0, 500);
+
+    case 'recommended':
+      return array(t('Not recommended'), t('Recommended'));
+
+    case 'security':
+      return array(t('Not a security release'), t('Security release'));
+
+  }
+}
+
+
+/**
+ * Implementation of hook_form_alter() for scholar_software_project_node_form.
+ */
+function scholar_software_form_scholar_software_project_node_form_alter(&$form, $form_state) {
+  drupal_add_js(drupal_get_path('module', 'scholar_software') . '/scholar_software.js');
+  $form['#validate'][] = 'scholar_software_project_node_form_validate';
+
+
+}
+
+
+/**
+ *  Implementation of hook_form_alter().
+ */
+function scholar_software_form_alter(&$form, $form_state, $form_id) {
+	if (isset($form['#node']) && $form['#node']->type === 'scholar_software_project' && $form_id == 'scholar_software_project_node_form') {
+		if(count(($a_options = scholar_software_cck_options('method'))) == 1){
+			$form['field_scholar_software_method'] = array('#type' => 'value', '#value' => key($a_options));
+		}//Hide the method select box if there is only one option
+
+		$form['title']['#element_validate'] = array("scholar_software_project_title_validate");
+		$form['title']['#required'] = false;
+	}
+}
+
+/**
+ *
+ */
+function scholar_software_project_title_validate($element, &$form_state){
+	if(empty($element['#value'])){
+		//If the title is empty they must have selected a software_method that is going to retrieve the title for them
+		if (empty($form_state['values']['field_scholar_software_method']['value'])){
+			form_set_error('title','Projects title is required with this packaging method.');
+		}
+	}
+}
+
+/**
+ * Validate handler for scholar_software_project_node_form.
+ */
+function scholar_software_project_node_form_validate($form, &$form_state) {
+  // Ensure repository URL is set if using a non-manual method.
+  if (!empty($form_state['values']['field_scholar_software_method']['value']) && empty($form_state['values']['field_scholar_software_repository'][0]['value'])) {
+    form_set_error($form_state['values']['field_scholar_software_repository'][0]['_error_element'], t('Please provide a valid repository URL for this project.'));
+  }
+}
+
+/**
+ * Implementation of hook_form_alter() for scholar_software_release_node_form.
+ */
+function scholar_software_form_scholar_software_release_node_form_alter(&$form, $form_state) {
+  drupal_add_css(drupal_get_path('module', 'scholar_software') . '/scholar_software.css');
+  $form['title'] = array(
+    '#type' => 'value',
+    '#value' => 'VOID',
+  );
+  $form['#submit'][] = 'scholar_software_release_node_form_submit';
+}
+
+/**
+ * Submit handler for scholar_software_release_node_form.
+ */
+function scholar_software_release_node_form_submit($form, &$form_state) {
+  // Only do something, if the user clicked the preview button.
+  if (isset($form_state['clicked_button']['#submit']) && in_array('node_form_build_preview', $form_state['clicked_button']['#submit'])) {
+    $node = node_submit($form_state['values']);
+    $node->title = scholar_software_generate_version($node);
+    $form_state['values'] = (array) $node;
+  }
+}
+
+/**
+ * Generate a standard version string from a node object.
+ * @TODO: Merge this or make use of it in scholar_software_handler_field_release_tag::render().
+ */
+function scholar_software_generate_version($node, $raw = FALSE) {
+  $project = node_load($node->field_scholar_software_project[0]['nid']);
+  $major = $node->field_versionmajor[0]['value'];
+  $patch = $node->field_versionpatch[0]['value'];
+  $extra = $node->field_versionextra[0]['value'];
+  $version = "{$major}.{$patch}" . (!empty($extra) ? "-{$extra}" : '');
+  return $raw ? $version : "{$project->title} $version";
+}
+
+/**
+ * Return the valid package handlers
+ */
+function scholar_software_get_handlers() {
+
+  $handlers = module_invoke_all('scholar_software_handlers');
+  drupal_alter('scholar_software_handlers', $handlers);
+
+  return $handlers;
+}
+
+/**
+ * Implementation of hook_scholar_software_handlers()
+ */
+function scholar_software_scholar_software_handlers() {
+  return array(
+    //Add default handlers here if any in the future
+  );
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function scholar_software_cron() {
+  $n_interval = variable_get('scholar_software_cron_update_interval',20 * 60); //Default: Every 20 minutes (or cron lengh)
+  $n_time = time();
+	$a_handlers = array_keys(scholar_software_get_handlers());
+	if(!count($a_handlers)) return; //No custom handlers to process
+
+  $result = db_query("SELECT nid FROM {content_type_scholar_software_project} content_type_scholar_software_project WHERE field_scholar_software_method_value IN (".db_placeholders($a_handlers,'varchar').") ",$a_handlers);
+
+  while ($a_result = db_fetch_array($result)) {
+    $o_project = node_load($a_result['nid']);
+
+    if($o_project->changed + $n_interval < $n_time){
+    	scholar_software_proccess_cron($o_project);
+    }//Time to check for update?
+  }
+}
+
+
+/**
+ * Perform any cron actions that should take place on all software packages
+ */
+function scholar_software_proccess_cron($node) {
+  $b_modified_project = false;
+  //Global actions here
+
+	//Method Actions here
+  $a_handlers = scholar_software_get_handlers();
+  if(array_key_exists($node->field_scholar_software_method[0]['value'],$a_handlers)){
+    $a_handler_info = $a_handlers[$node->field_scholar_software_method[0]['value']];
+    if($a_handler_info['path']) require_once($a_handler_info['path']);
+    $o_handler = new $a_handler_info['class']($node->field_scholar_software_repo[0]['value'], $node->field_scholar_software_name[0]['value']);
+    if(method_exists($o_handler,'proccessCron')) $b_modified_project = $o_handler->proccessCron($node);
+  }
+
+  //Save node
+  $node->pathauto_perform_alias = false;
+  if($b_modified_project) node_save($node);
+}
+
+/**
+ * Implementation of CCK's hook_field_formatter_info().
+ */
+function scholar_software_field_formatter_info() {
+  return array(
+    'scholar_software_url_plain' => array(
+      'label' => t('Scholar Software: URL to file'),
+      'field types' => array('filefield'),
+      'description' => t('Displays the full URL to the file.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme().
+ * @todo: autogenerate theme registry entrys for widgets.
+ */
+function scholar_software_theme() {
+  return array(
+    'scholar_software_formatter_scholar_software_url_plain' => array(
+      'arguments' => array('element' => NULL),
+    ),
+ );
+}
+
+/**
+ * Theme function for the 'url_plain' formatter.
+ */
+function theme_scholar_software_formatter_scholar_software_url_plain($element) {
+  // Inside a View this function may be called with null data. In that case,
+  // just return.
+  if (empty($element['#item'])) {
+    return '';
+  }
+
+  $field = content_fields($element['#field_name']);
+  $item = $element['#item'];
+
+  if (empty($item['filepath']) && !empty($item['fid'])) {
+    $item = array_merge($item, field_file_load($item['fid']));
+  }
+
+  //Absolute URL to offsite file?
+  if(substr($item['filepath'],0,7) == 'http://') return $item['filepath'];
+
+  return empty($item['filepath']) ? '' : file_create_url($item['filepath']);
+}
+
+
+/**
+* Implementation of hook_content_extra_fields.
+*/
+function scholar_software_content_extra_fields($s_type) {
+
+	$extras = array();
+
+	if($s_type == 'scholar_software_project'){
+	  $extras['scholar_software_recommended_releases'] = array(
+	      'label' => t('Recommended Software Releases'),
+	      'description' => t('Show a software\'s Recommended Software Releases.'),
+	      'weight' => 20,
+	  );
+
+	  $extras['scholar_software_recent_releases'] = array(
+        'label' => t('Recent Software Releases'),
+        'description' => t('Show a software\'s recent Software Releases.'),
+        'weight' => 25,
+    );
+	}elseif ($s_type == 'scholar_software_release'){
+		$extras['scholar_software_release_info'] = array(
+        'label' => t('Release Info'),
+        'description' => t('Information about the release file.'),
+        'weight' => -10,
+    );
+
+    $extras['scholar_software_parent_project'] = array(
+        'label' => t('Parent Project'),
+        'description' => t('Info about the Parent Project.'),
+        'weight' => -11,
+    );
+	}
+
+  return $extras;
+}
+
+/**
+ * hook vsite_widgets
+ */
+function scholar_software_vsite_widgets(){
+  $items = array();
+  $items['scholar_software_releases-block_3'] = array(
+        'module' => 'views',
+        'delta' => 'scholar_software_releases-block_3',
+        'weight' => 20,
+        'region' => false,
+        'tags' => array(
+          'Content',
+        ),
+        'label' => 'Recent Software Releases',
+        'cache' => BLOCK_CACHE_CONTENT_CACHE,
+        'cache_keys' => array(
+          'node' => array('scholar_software_project' => 'scholar_software_project', 'scholar_software_release' => 'scholar_software_release'),
+          'os_og' => array('current' => 'current'),
+        ),
+      );
+  return $items;
+}
+
+/**
+ * An implementation of hook_views_pre_view().
+ */
+function scholar_software_views_pre_view(&$view, &$display_id, &$args) {
+  if ($view->name == 'scholar_software_updates' && $display_id == 'feed_1') {
+    $args[1] = '6.x';
+  }
+}

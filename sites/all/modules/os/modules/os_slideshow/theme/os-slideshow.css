@@ -1,0 +1,59 @@
+
+#os-slideshow-640x360 {width:648px;}
+#os-slideshow-480x270 {width:488px;}
+
+.views_slideshow_slide .views-field-title {background:#333;color:#fff;padding-left:8px;font-size:12px;margin-bottom:0px;z-index:500;position:relative;}
+
+.views-slideshow-controls-bottom {background: url('images/imgGalleryControlsBg.png') repeat-x;height:22px;border:1px solid #666;border-top:none;width:100%;z-index:6;position:relative;}
+
+
+#views_slideshow_singleframe_main_os_slideshow-default {margin-bottom:-25px;}
+
+.views_slideshow_controls .views_slideshow_play {background: url('images/imgGalleryControlsPlay.png') no-repeat; width:17px; height:17px;text-indent:-9999px;position: absolute;left: 38px;}
+.views_slideshow_controls .views_slideshow_pause {background: url('images/imgGalleryControlsPause.png') no-repeat; width:17px; height:17px; text-indent:-9999px;position: absolute;left: 38px; }
+.views_slideshow_controls .views_slideshow_previous {background: url('images/imgGalleryControlsBack.png') no-repeat; width:14px;  height:14px;text-indent:-9999px;position: absolute;left: 16px;margin-top: 1px;}
+.views_slideshow_controls .views_slideshow_next {background: url('images/imgGalleryControlsForward.png') no-repeat; width:14px;height:14px; text-indent:-9999px;position: absolute;left: 66px;margin-top: 1px; }
+
+div.pager-item {font-size:10px;width:10px;height:10px;}
+
+.views_slideshow_singleframe_pager div {
+    display: inline;
+    padding-left: 7px;
+}
+
+ .pager-item a {background: #CCC; color:#333;padding:2px 4px;text-decoration: none;
+-moz-border-radius:8px 8px 8px 8px;
+  -webkit-border-radius:8px 8px 8px 8px;
+  border-radius: 8px 8px 8px 8px;}
+  
+.pager-item a:hover {background: #CCC; color:#000;text-decoration: none;}
+
+.pager-item.activeSlide a {background: #FFF; color:#000;}
+
+
+#views_slideshow_singleframe_controls_os_slideshow-default {float:left; padding-top: 2px;}
+#views_slideshow_singleframe_pager_os_slideshow-default {float:right; margin-right:4px;}
+
+
+.views_slideshow_singleframe_no_display,
+.views_slideshow_singleframe_hidden,
+.views_slideshow_singleframe_controls,
+.views_slideshow_singleframe_image_count {
+  display: none;
+}
+
+/*Pager Settings */
+
+.views_slideshow_singleframe_pager div a img {
+  width: 75px;
+  height: 75px;
+}
+
+
+.views_slideshow_singleframe_pager.thumbnails a.activeSlide img {
+  border: 3px solid #000;
+}
+
+.views_slideshow_singleframe_pager.numbered a.activeSlide {
+  text-decoration: underline;
+}

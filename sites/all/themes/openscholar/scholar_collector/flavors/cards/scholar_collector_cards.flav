@@ -1,0 +1,5 @@
+name = With Cards
+description = Version with cards at bottom of screen
+screenshot = screenshot.png
+
+css[] = cards.css

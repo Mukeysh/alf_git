@@ -1,0 +1,22 @@
+diff --git a/sites/all/modules/contrib/biblio/biblio.pages.inc b/sites/all/modules/contrib/biblio/biblio.pages.inc
+index 569498e..bce9708 100644
+--- a/sites/all/modules/contrib/biblio/biblio.pages.inc
++++ b/sites/all/modules/contrib/biblio/biblio.pages.inc
+@@ -407,6 +407,17 @@ function biblio_build_query($arg_list) {
+       }
+     }
+   }
++  
++  /*
++   * Filter the results to include elements in only this space if a spaces is active
++   */
++  if(($space = spaces_get_space())){
++    $joins[] = "INNER JOIN {og_ancestry} og_ancestry ON n.nid = og_ancestry.nid";
++    $where[] = "og_ancestry.group_nid = %n ";
++    $terms[] = $space->group->nid;
++    //array_push($args, 'group_nid', $space->group->nid);
++  }
++  
+   $where[] = "n.type='biblio' ";
+   if ($user->uid != 1 ) {
+     $where[] = 'n.status = 1 ';

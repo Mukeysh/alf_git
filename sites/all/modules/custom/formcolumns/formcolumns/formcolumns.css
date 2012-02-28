@@ -1,0 +1,13 @@
+.node-form .form-region-right {
+  width: 49%;
+  float: right;
+}
+
+.node-form-has-region-right .form-region-main {
+  float: left;
+  width: 50%;
+}
+
+.node-form-has-region-right .form-region-footer {
+  clear: both;
+}

@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * Implementation of hook menu
+ */
+function vsite_ga_menu(){
+  $items = array();
+
+  $items['admin/settings/scholar_ga'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Google Analytics for OpenScholar',
+    'description' => 'Settings for Global Google Analytics.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_ga_settings_form'),
+    'file' => 'vsite_ga.admin.inc',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'weight' => 10,
+  );
+/*
+ * Do we really need this?
+  $items['admin/settings/scholar_ga/settings'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'Settings for OpenScholar Google Analytics',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_ga_settings_form'),
+    'file' => 'vsite_ga.admin.inc',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'weight' => 0,
+	// test commit
+  ); */
+
+  return $items;
+}
+
+/**
+ * Implementation hook vsite_generic_settings()
+ * @return array
+ */
+function vsite_ga_vsite_generic_settings(){
+  $a_settings = array();
+
+  $a_settings['vsite_ga_google_analytics_id'] = array(
+    'form' => array(
+      '#type' => 'textfield',
+      '#title' => t('Enter your Google Analytics ID'),
+      '#size' => 20,
+      '#maxlength' => 255,
+      '#default_value' => variable_get('vsite_ga_google_analytics_id',''),
+      '#description' => t("Entering your ID this will send page and visitor data to your Google Analytics account. Go to the <a href=\"http://www.google.com/analytics/\">Google Analytics site</a> to set one up. Your ID will be in the format UA-XXXXXXX-XX."),
+      '#element_validate' => array('vsite_ga_analytics_id_validate')
+  	),
+  	'group' => array(
+  	  '#id' => 'ga',
+  	  '#title' => t('Google Analytics'),
+  	  '#weight' => 0,
+  	),
+  );
+  return $a_settings;
+}
+
+function vsite_ga_init() {
+  $ga_vars = _vsite_ga_ga_id_vars();
+  if(!count($ga_vars)) return;  //if no ga ids are saved, then return
+  global $user;
+
+  // Build tracker code for footer.
+
+  $script = '';
+
+  //global pageTracker object
+  if($ga_vars['global_id']){
+  $script = 'var _gaq = _gaq || [];';
+  $script .= '_gaq.push(["_setAccount", ' . drupal_to_js($ga_vars['global_id']) . ']);';
+  //pass segmentation data to pageTrackerGlobal account
+  if (!empty($segmentation)) {
+    $script .= $segmentation;
+  }
+  $script .= '_gaq.push(["_trackPageview"]);';
+  $script .= '(function() {';
+  $script .= 'var ga = document.createElement("script");';
+  $script .= 'ga.type = "text/javascript";';
+  $script .= 'ga.async = true;';
+  $script .= 'ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";';
+  $script .= 'var s = document.getElementsByTagName("script")[0];';
+  $script .= 's.parentNode.insertBefore(ga, s);';
+  $script .= '})();';
+ }
+
+//vsite pageTracker object
+if($ga_vars['vsite_id']){
+  $script .= 'var _gaq = _gaq || [];';
+  $script .= '_gaq.push(["_setAccount", ' . drupal_to_js($ga_vars['vsite_id']) . ']);';
+  $script .= '_gaq.push(["_trackPageview"]);';
+  $script .= '(function() {';
+  $script .= 'var ga = document.createElement("script");';
+  $script .= 'ga.type = "text/javascript";';
+  $script .= 'ga.async = true;';
+  $script .= 'ga.src = ("https:" == document.location.protocol ? "https://ssl" : "http://www") + ".google-analytics.com/ga.js";';
+  $script .= 'var s = document.getElementsByTagName("script")[0];';
+  $script .= 's.parentNode.insertBefore(ga, s);';
+  $script .= '})();';
+  }
+  if (strlen($script)){
+    //code snippet goes in header by default
+    drupal_add_js($script, 'inline', variable_get('vsite_ga_scope' , 'header'));
+  }
+}
+
+/**
+ * Check for global and site-specific Google Analytics ID variables
+ */
+function _vsite_ga_ga_id_vars(){
+  $ga_vars = array();
+
+  //global id
+  $vsite = vsite_get_vsite();
+  if ($vsite) {
+    if (strlen($vsite->controllers->variable->get('vsite_ga_google_analytics_id', 'original'))) {
+      $ga_vars['global_id'] = variable_get('vsite_ga_global_id' , '');
+    }
+
+    //site-specific id
+    if($local_id = variable_get('vsite_ga_google_analytics_id', '')) {
+      if (strlen($local_id)) {
+        $ga_vars['vsite_id'] = $local_id;
+      }
+    }
+  }
+  else {
+    if($global_id = variable_get('vsite_ga_google_analytics_id', '')) {
+      if (strlen($global_id)) {
+        $ga_vars['global_id'] = $global_id;
+      }
+    }
+  }
+  return $ga_vars;
+}
+
+/**
+ * Validates a user-entered GA string
+ */
+function vsite_ga_analytics_id_validate($element, $form_state) {
+	$pattern = '/^UA-[0-9]+-[0-9]{1,2}$/';
+	if($element['#value'] && !preg_match($pattern, trim($element['#value']))) {
+		form_error($element, t('This field does not follow the correct format.'));
+	}
+
+}

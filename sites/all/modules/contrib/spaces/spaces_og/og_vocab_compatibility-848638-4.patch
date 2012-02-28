@@ -1,0 +1,26 @@
+diff --git a/sites/all/modules/contrib/spaces/spaces_og/spaces_og.module b/sites/all/modules/contrib/spaces/spaces_og/spaces_og.module
+index 878a22e..7180aa5 100644
+--- a/sites/all/modules/contrib/spaces/spaces_og/spaces_og.module
++++ b/sites/all/modules/contrib/spaces/spaces_og/spaces_og.module
+@@ -253,7 +253,7 @@ function spaces_og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+           $private = $space->controllers->variable->get('spaces_og_private');
+           if ($op == 'update' && $private != $node->og_private) {
+             // Privacy has changed, update og_public flags, and queue a rebuid.
+-            db_query("UPDATE {og_access_post} og_p 
++            db_query("UPDATE {og_access_post} og_p
+                       INNER JOIN {og_ancestry} og_a ON og_p.nid = og_a.nid
+                       INNER JOIN {node} n ON og_p.nid = n.nid
+                       SET og_public = %d WHERE og_a.group_nid = %d",
+@@ -501,6 +501,12 @@ function spaces_og_db_rewrite_sql($query, $primary_table, $primary_field, $args)
+           $groups = implode(', ', $groups);
+           $return['where'] .= " OR (spaces_og_oga.group_nid IN ({$groups}) AND spaces_og_n.status = 1)";
+         }
++        
++        if(module_exists('og_vocab') && ($space = spaces_get_space())){
++        	$sid = intval($space->id);
++        	$return['join'] .= " LEFT JOIN {og_vocab} og_vocab_v ON {$primary_table}.vid = og_vocab_v.vid AND og_vocab_v.nid = {$sid} ";
++        	$return['where'] .= " OR (og_vocab_v.nid IS NOT NULL)";
++        }
+         return $return;
+       }
+       break;

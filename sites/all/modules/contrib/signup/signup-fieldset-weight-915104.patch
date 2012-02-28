@@ -1,0 +1,28 @@
+? signup-fieldset-weight-915104.patch
+Index: includes/node_form.inc
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/signup/includes/node_form.inc,v
+retrieving revision 1.4.2.2
+diff -u -p -r1.4.2.2 node_form.inc
+--- includes/node_form.inc	16 Sep 2009 00:42:57 -0000	1.4.2.2
++++ includes/node_form.inc	17 Sep 2010 19:19:47 -0000
+@@ -114,12 +114,18 @@ function signup_alter_node_form(&$form, 
+   $admin_all = user_access('administer all signups');
+   $admin_own = user_access('administer signups for own content') && (empty($node) || ($node->uid == $user->uid));
+   if ($signups_possible && ($admin_all || $admin_own)) {
++    
++    $weight = variable_get('signup_info_node_weight_'. $node->type, 10);
++    if (module_exists('content')) {
++      $weight = content_extra_field_weight($node->type, 'signup_node_info');
++    }
++              
+     $form['signup'] = array(
+       '#type' => 'fieldset',
+       '#title' => t('Signup settings'),
+       '#collapsible' => TRUE,
+       '#collapsed' => TRUE,
+-      '#weight' => 30,
++      '#weight' =>  $weight,
+     );
+ 
+     // Figure out what the options should be.  If there are already

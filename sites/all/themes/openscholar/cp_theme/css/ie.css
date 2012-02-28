@@ -1,0 +1,34 @@
+#main-content #cp-content .frame, #main-content #cp-content .innerframe {
+  position: static;
+  }
+
+
+#ie-warning {
+  position: absolute;
+  background: rgba(10, 10, 10, .8);
+  top: 0;
+  width:100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:transparent;
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000050,endColorstr=#99000050);
+  zoom: 1;
+  }
+
+#ie-warning p {
+  background: #fff;
+  border: 2px solid #666;
+  width: 300px;
+  padding: 20px;
+  font-weight: bold;
+  height: 150px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -150px;
+  margin-top: -225px;
+  font-size: 1.3em;
+  line-height:1.4em;
+  margin-bottom: 0;
+  }

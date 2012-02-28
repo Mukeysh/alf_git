@@ -1,0 +1,255 @@
+@import url('http://fonts.googleapis.com/css?family=Goudy+Bookletter+1911');
+
+html,body {
+  min-width:1000px;
+  }
+
+body {
+  color:#666;
+  font-family: 'Goudy Bookletter 1911', palatino, baskerville, "palatino linotype", "Times New Roman", Times, Georgia, serif;
+  background: url(images/body-bg-no-sidebar.jpg) 50% 135px repeat-y #6d2a01;
+  }
+
+body.sidebar-first {
+    background-image: url(images/body-bg-left-sidebar.jpg);
+    }
+
+body.sidebar-second {
+    background-image: url(images/body-bg-right-sidebar.jpg);
+    }
+
+body.two-sidebars {
+    background-image: url(images/body-bg-both-sidebar.jpg);
+    }
+
+#page {
+  padding-top: 40px;
+  background:url(images/header-no-sidebar.jpg) no-repeat top center transparent;
+  }
+
+body.sidebar-first #page {
+    background-image:url(images/header-left-sidebar.jpg);
+    }
+
+body.sidebar-second #page {
+    background-image:url(images/header-right-sidebar.jpg);
+    }
+
+body.two-sidebars #page {
+    background-image:url(images/header-both-sidebar.jpg);
+    }
+
+
+#page {
+    width: 982px;
+    margin: 0 auto;
+    padding: 35px 9px 213px 9px;
+    }
+
+/* TYPOGRAPHY */
+
+a,
+a:visited {
+    color:#953a0d;
+    text-decoration: none;
+    }
+
+.title a,
+.title a:visited {
+  color:#870202;
+  font-size: 1.2em;
+  }
+
+a:hover, a.active,
+.active-trail a {
+  color:#000;
+  text-decoration: underline;
+  }
+
+h2,
+h3,
+#sidebar-second a,
+#sidebar-first a,
+.title a,
+.title a:visited {
+    font-weight: bold;
+    text-decoration: none !important;
+    }
+
+h2, h3, h4 {
+  margin-bottom: 0;
+  margin-top: 1em;
+  }
+
+h2.title {
+  margin-bottom: 1em;
+  }
+
+#block-menu-primary-links {
+    text-transform: uppercase;
+    }
+
+#header h1 {
+    font-size: 27px;
+    }
+
+#header, #header a, #header a:visited {
+    font-variant: small-caps;
+    color:#414040;
+    }
+
+#header h1 a,
+#header h1 a:visited {
+    text-decoration: none;
+    padding: 0;
+    }
+
+#header h2 {
+    font-size: 16px;
+    }
+
+#header a, #header a:visited {
+    text-decoration: none;
+    }
+
+#sidebar-first {
+  text-align:right;
+  }
+
+#sidebar-first ul.menu {
+  text-transform: uppercase;
+  text-align:right;
+  }
+
+/* LAYOUT */
+
+
+#sidebar-first,
+#header-left,
+#logo {
+  width: 166px;
+  }
+
+#sidebar-first,
+#header-left {
+  left: -206px;
+  }
+
+#sidebar-second,
+#header-right {
+  width: 166px;
+  }
+
+#header #header-right,
+#header #header-left {
+  padding-top: 20px;
+  }
+
+.hg-container {
+  padding-left: 186px;
+  padding-right: 206px;
+  }
+
+/*CONTENT AREA */
+
+#sidebar-first,
+#sidebar-second {
+  font-size: 13px;
+  line-height: 112%;
+  }
+
+#sidebar-first li,
+#sidebar-second li {
+  margin-bottom: .7em;
+  }
+
+body.sidebar-first #content-area .hg-container {
+  padding-right: 70px;
+  }
+
+body.no-sidebars #content-area .hg-container {
+  padding-right: 35px;
+  padding-left: 35px;
+  }
+
+body.navbar #content-main {
+  margin-top: 30px;
+  }
+
+#content-main,
+#sidebar-second,
+#sidebar-first {
+  padding-top: 0;
+  }
+
+/* HEADER ELEMENTS */
+
+.sidebar-second.header-main #header,
+.sidebar-second.header-left-main #header,
+.sidebar-first.header-main #header,
+.sidebar-first.header-main-right #header,
+.one-sidebar #navbar {
+  width: 796px;
+  }
+
+.two-sidebars #navbar,
+.two-sidebars.header-main-right #header,
+.two-sidebars.header-left-main #header,
+.two-sidebars.header-main #header {
+  width: 610px;
+  margin-left: 186px;
+  }
+
+.header-main .box-os_boxes_modal_sitelogo,
+.header-main-right .box-os_boxes_modal_sitelogo {
+  padding-left: 149px;
+  background: url(images/crest.png) no-repeat 21px 0 transparent;
+  min-height: 112px;
+  }
+
+#scholar-shield {
+ padding-top: 10px;
+ text-align: center;
+ }
+
+#navbar {
+  padding: 5px 15px;
+  }
+
+#navbar li {
+  font-weight: bold;
+  margin-right: 15px;
+  font-variant: small-caps;
+  }
+
+#navbar a:hover,
+#navbar a.active {
+  color: #993300;
+  }
+
+#content-main #content {
+  padding-left: 30px;
+  padding-right: 30px;
+  }
+
+/* FOOTER */
+
+#footer {
+  padding: 30px;
+  }
+
+body.sidebar-first #footer, body.two-sidebars #footer {
+  margin-left:184px;
+  }
+
+body.sidebar-second #footer, body.two-sidebars #footer {
+  margin-right:209px;
+  }
+
+/* Nodes */
+
+.submitted {
+  color: #a1b1b1;
+  display:block;
+  }
+

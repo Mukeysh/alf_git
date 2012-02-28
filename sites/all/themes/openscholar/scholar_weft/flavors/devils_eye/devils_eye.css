@@ -1,0 +1,24 @@
+#extradiv {
+  background-image: url('images/fabric-strip-devil-eye.png');
+  }
+
+body {
+  background-color: #2e2e2e;
+  }
+
+#navbar {
+  background-image: url('images/menu-strip-devil-eye.png');
+  }
+
+a, a:visited {
+  color:#833426;
+  }
+
+#navbar li a, #navbar li a:visited {
+  color: #fae09c;
+  }
+
+#navbar li a:hover, #navbar li a.active, #navbar .active-trail a {
+  background: #e2e594;
+  color: #233130;
+  }

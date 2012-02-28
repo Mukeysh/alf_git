@@ -1,0 +1,146 @@
+body,
+#footer {
+  background:#0c0c0c;
+  }
+
+#page,
+#page-wrapper {
+  width: 100%;
+  background: transparent;
+  }
+
+.wrap {
+  width:1000px;
+  padding: 0 48px;
+  margin: 0 auto;
+  }
+
+#header {
+  background:url('images/header.png') repeat-x 0 100%;
+
+  }
+
+#header .wrap {
+  background: #4a4a4a 50% 100%;
+width: 940px;
+  }
+
+#navbar,
+#content-area {
+  background: #9a9c9f;
+  }
+
+#navbar .wrap {
+  background:url('images/nav-wrap.png') repeat-y 50% 0;
+  padding: 0 48px;
+  }
+
+body.one-sidebar #content-area .wrap {
+  background:url('images/content-wrap-wide.png') repeat-y 50% 0;
+  }
+
+#content-area .wrap {
+  background:url('images/content-wrap.png') repeat-y 50% 0;
+  }
+
+#footer .wrap {
+  background:#d0d7d8;
+  width: 884px;
+  }
+
+#header .wrap .hg-container {
+  padding-top: 10px;
+  }
+
+#navbar,
+#navbar .wrap,
+#navbar li {
+  height: 36px;
+  }
+
+#sidebar-first {
+  background:#f6f7d7;
+  }
+
+#sidebar-second {
+  background:#efefef;
+  }
+
+#header p, #header p a {
+    font-size: 13px;
+  color: #FFFFFF;
+}
+
+#header h2 {
+    color: #FFFFFF;
+    font-size: 18px;
+    margin-top: 0;
+}
+
+h2.title, h3.title {
+  color: #000;
+  }
+
+
+#sidebar-first h3.title {
+  background: #e4e8bd;
+  }
+
+#sidebar-second h3.title {
+  background: #b7bec1;
+  }
+
+#navbar li a,
+#navbar li a:visited {
+  border:none;
+  color: #fff;
+  display:block;
+  height: 36px;
+  line-height: 36px;
+  position:relative;
+  }
+
+#navbar li.last a {
+  border: none;
+  }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar li.active-trail a,
+#navbar li.active-trail a:hover {
+  background: url('images/nav-over.png') no-repeat 50% 0 transparent;
+  color: #fff;
+  top: 0;
+  height: 43px;
+  }
+
+#navbar li a:hover {
+  background-position: 0 0;
+  color: #000;
+  }
+
+#navbar li a.active:hover {
+  background-position: 50% 0;
+  color: #fff;
+  }
+
+#header h1 a, #header h1 a:visited, #header #block-vsite_menus-scholar_secondary_menu li a, #header #block-vsite_menus-scholar_secondary_menu li a:visited {
+  color:#fff;
+  }
+
+#header #block-vsite_menus-scholar_secondary_menu li {
+  border-color: #ebf1ff;
+  }
+
+
+#header h1 a, #header h1 a:visited {
+  display:block;
+  }
+  
+#block-scholar_project-1 {
+	float: left;
+}
+
+.front #content-main .title {
+	display: none;
+}

@@ -1,0 +1,95 @@
+<?php
+
+include_once('scholar_image_gallery.features.inc');
+
+/**
+ * Implementation of hook_init().
+ */
+function scholar_image_gallery_init() {
+  drupal_add_css(drupal_get_path('module', 'scholar_image_gallery') .'/scholar_image_gallery.css');
+}
+
+function scholar_image_gallery_link_alter(&$links, $node){
+  if(isset($links['image_field_gallery'])){
+    unset($links['image_field_gallery']);
+  }
+}
+
+/**
+ * hook  vsite_content_types_alter
+ */
+function scholar_image_gallery_vsite_content_types_alter(&$content_types){
+  unset($content_types['image']);
+}
+
+/**
+ * Implementation of hook_context_links_alter().
+ */
+function scholar_image_gallery_context_links_alter(&$links){
+  if (! empty($links['image'])) {
+    unset($links['image']);
+  }
+}
+
+/**
+ * hook vsite_taxonomy_content_types_alter
+ * @return unknown_type
+ */
+function scholar_image_gallery_vsite_taxonomy_content_types_alter(&$types){
+  // no taxonomy for gallery/images
+  unset($types['gallery']);
+  unset($types['image']);
+}
+
+/**
+ * content_extra_fields callback for this plugin
+ */
+function scholar_image_gallery_content_extra_fields($type_name){
+  $extras = array();
+  if ('gallery' == $type_name) {
+    $extras['image_gallery_add_image_link'] = array(
+      'label' => t('Add image link'), 
+      'description' => t('Add image to this gallery link'), 
+      'weight' => 100 
+    );
+  }
+  return $extras;
+}
+
+/**
+ * Hook nodeapi
+ * Used to trickle deltes to an image galleries dependent image childern
+ */
+function scholar_image_gallery_nodeapi(&$node, $op, $teaser, $a4){
+  if ($node->type != 'gallery')
+    return;
+  switch ($op) {
+    case 'view' :
+      if ($teaser && arg(0) == 'images' && ! arg(1)) {
+        $node->content['body']['#value'] = t('Created on @datetime', array(
+          '@datetime' => format_date($node->created) 
+        )) . $node->content['body']['#value'];
+      
+      }
+      
+      // "Add images to this gallery" link
+      $link = nodereference_url_build_all_links($node, FALSE);
+      $weight = (module_exists('content')) ? content_extra_field_weight($node->type, 'image_gallery_add_image_link') : 100;
+      $node->content['image_gallery_add_image_link'] = array(
+        '#weight' => $weight, 
+        '#value' => theme('links', $link, $attributes = array(
+          'class' => 'add-reference-node' 
+        )) 
+      );
+      break;
+    case 'delete' :
+      vsite_include('vsite');
+      $a_referers = vsite_get_referrers($node->nid, array(), array(
+        'image' 
+      ));
+      foreach ( $a_referers as $nid => $info )
+        node_delete($nid);
+      break;
+  }
+}
+

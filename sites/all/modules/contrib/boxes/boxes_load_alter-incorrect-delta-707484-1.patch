@@ -1,0 +1,12 @@
+index 4040a32..21a0da5 100644
+--- a/sites/all/modules/contrib/boxes/boxes.module
++++ b/sites/all/modules/contrib/boxes/boxes.module
+@@ -247,7 +242,7 @@ function boxes_load($delta = NULL) {
+   $boxes = array();
+   foreach (ctools_export_load_object('box') as $box) {
+     $box = boxes_box::load($box->delta);
+-    drupal_alter('boxes_load', $box, $delta);
++    drupal_alter('boxes_load', $box, $box->delta);
+     $boxes[$box->delta] = $box;
+   }
+   return $boxes;

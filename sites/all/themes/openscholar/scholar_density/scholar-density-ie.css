@@ -1,0 +1,21 @@
+#footer, #extradiv {
+  {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#C103263F,endColorstr=#C103263F)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#C103263F,endColorstr=#C103263F);   /* IE6 & 7 */
+      zoom: 1;
+  }
+
+#sidebar-first {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#C1D2DAB8,endColorstr=#C1D2DAB8)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#C1D2DAB8,endColorstr=#C1D2DAB8);   /* IE6 & 7 */
+      zoom: 1;
+}
+
+.node-teaser {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#33D2DAB8,endColorstr=#33D2DAB8)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#33D2DAB8,endColorstr=#33D2DAB8);   /* IE6 & 7 */
+      zoom: 1;
+}

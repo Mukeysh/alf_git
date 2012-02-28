@@ -1,0 +1,156 @@
+<?php
+/**
+ * Implementation of hook_views_api().
+ */
+function os_views_content_cache_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'os_views_content_cache') .'/views',
+  );
+}
+
+/**
+ * Implementation of hook_context_plugins().
+ *
+ * This is a ctools plugins hook.
+ */
+function os_views_content_cache_views_content_cache_plugins() {
+  $plugins = array();
+
+  $plugins['vsite_config'] = array(
+    'title' => t('vsite Config'),
+    'description' => t('Invalidates cache when a vsites config cahnges'),
+    'handler' => array(
+      'path' => drupal_get_path('module', 'os_views_content_cache') . '/plugins',
+      'file' => 'vsite_config.inc',
+      'class' => 'views_content_cache_key_vsite_config',
+      'parent' => 'base',
+    ),
+  );
+  
+  $plugins['os_og'] = array(
+    'title' => t('OS Extended Organic Groups'),
+    'description' => t('Handles Organic Groups with additional features for OS sites'),
+    'handler' => array(
+      'path' => drupal_get_path('module', 'os_views_content_cache') . '/plugins',
+      'file' => 'os_og.inc',
+      'class' => 'views_content_cache_key_os_og',
+      'parent' => 'og',
+    ),
+  );
+  
+  return $plugins;
+}
+
+/**
+ * Implementation of hook flag
+ */
+function os_views_content_cache_flag($action, $flag, $content_id, $account){
+	$node = node_load($content_id);
+	if($node){
+    views_content_cache_update_set($node, 'node');
+	}//If a node is (un)flagged clear the cache like the node was saved
+}
+
+function os_views_content_cache_feeds_after_import($feed_importer,FeedsSource $feed_source){
+	if($feed_source->feed_nid){
+		$node = node_load($feed_source->feed_nid);
+	  if($node){
+	    views_content_cache_update_set($node, 'node');
+	  }//If a node feed is updated mark it as so
+	}
+}
+
+/**
+ * Implementation of hook_form_alter()
+ **/
+function os_views_content_cache_form_alter(&$form, $form_state, $form_id){
+	if(array_key_exists($form_id, os_views_content_cache_vsite_config_forms())){
+		if(!is_array($form['#submit'])) $form['#submit'] = array();
+    array_unshift($form['#submit'],'os_views_content_cache_form_submission');
+  }
+}
+
+/**
+ * Pass along form submissions to the cache system
+ * @param array $form
+ * @param array $form_state
+ */
+function os_views_content_cache_form_submission($form, &$form_state){
+	$form_id = isset($form_state['values']['form_id'])?$form_state['values']['form_id']:$form['form_id']['#value'];
+	views_content_cache_update_set($form_id, 'form_id');
+	
+	if($form_id == 'spaces_features_form'){
+		os_views_content_cache_feature_update($form, $form_state);
+	}
+	
+	if (($feature_name = vsite_is_feature_settings_form($form, $form_state))){
+		_os_views_content_cache_feature_node_update($feature_name);
+	}//Cleare the node cache for this feature
+}
+
+/**
+ * When a feature is changed assume that it's nodes privacy settings have changed
+ */
+function os_views_content_cache_feature_update($form, &$form_state){
+	$old_settings = variable_get('spaces_features', array());
+	$vsite = vsite_get_vsite();
+	
+  foreach ($old_settings as $s_feature => $privacy) {
+  	if($privacy != $form_state['values']['spaces_features'][$s_feature]){
+  		_os_views_content_cache_feature_node_update($s_feature, $vsite);
+  	}//Detect changes
+  }
+}
+
+/**
+ * Private function to invalidate feature's nodes
+ *
+ * ex. when a features settings are changed
+ */
+function _os_views_content_cache_feature_node_update($s_feature, $vsite = false){
+	if(!$vsite) $vsite = vsite_get_vsite();
+	
+  $feature = features_get_features($s_feature);
+  if(isset($feature->info['features']['node'])){
+    foreach ($feature->info['features']['node'] as $node_type) {
+      //Clear the cache for this node type
+      $node = array('type' => $node_type);
+      if($vsite && $vsite->group->nid){
+        $node['og_groups'] = array($vsite->group->nid);
+      }
+      views_content_cache_update_set((object)$node, 'node');
+    }
+  }
+}
+
+/**
+ * Forms that should be monitored for changes
+ */
+function os_views_content_cache_vsite_config_forms(){
+	
+  //Just going to return a semi-static list for now
+  $a_settings = array(
+    'vsite_layout_settings_form' => "Layout settings",
+    'vsite_menus_settings_form' => "Menu Settings",
+    'vsite_taxonomy_form' => "Taxonomy Term Order Changed",
+    'taxonomy_form_vocabulary' => "Add/Edit Vocabulary",
+    'taxonomy_vocabulary_confirm_delete' => "Delete a Vocabulary",
+    'taxonomy_form_term' => "Add/Edit Taxonomy Term",
+    'vsite_generic_settings_form' => "Generic Settings",
+    'vsite_design_theme_picker_form' => "Theme Setting",
+    'spaces_features_form' => 'Spaces Features',
+  );
+    
+  $features = spaces_features( 'og' );
+  ksort($features);
+    
+  foreach ($features as $feature => $info) {
+    $item = menu_get_item("features/{$feature}");
+    if ($item) {
+      $a_settings[$item['page_arguments'][0]] = "{$info->info['name']} feature settings";
+    }
+  }
+    
+  return $a_settings;
+}

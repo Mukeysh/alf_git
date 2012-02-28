@@ -1,0 +1,4 @@
+name = Radioactivity core
+description = "Core for advanced popularity metrics by radioactivity model. Radioactivity modules provide 'most popular node/comment/etc views' with different time scales."
+package = Radioactivity
+core = 6.x

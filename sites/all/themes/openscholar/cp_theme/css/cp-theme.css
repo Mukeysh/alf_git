@@ -1,0 +1,269 @@
+body.section-cp,
+.cp-toolbar-full #top,
+#footer {
+  overflow: hidden;
+  }
+
+#main-content,
+.cp-toolbar-full #top,
+#footer,
+#cp-sidemenu,
+#cp-content,
+#sidebar-second {
+	padding: 0;
+	margin: 0;
+	left: 0;
+	right: 0;
+	top: 40px;
+	bottom: 42px;
+	position: absolute;
+	float:none;
+	width: 100%;
+	overflow: hidden;
+	}
+
+#cp-sidemenu,
+#cp-content,
+#sidebar-second {
+  overflow: auto;
+  }
+
+#main-content,
+#main,
+#cp-content {
+	background: #fff;
+	float: none;
+	}
+
+.cp-toolbar-full #top,
+#footer {
+	top: 0;
+	bottom: auto;
+	height: 42px;
+	background:url(../images/top-bottom-bg.png) repeat-x #000 0 -9px;
+	}
+
+#footer {
+	bottom: 0;
+	top: auto;
+	width: auto;
+	}
+
+#cp-sidemenu,
+#cp-content,
+#sidebar-second {
+	top: 0;
+	bottom: 0;
+	}
+
+#cp-sidemenu {
+  width: 170px;
+  right: auto;
+  background:#f2f3f3;
+  border-right: 1px solid #bfc6c6;
+  }
+
+#cp-content {
+  left: 171px;
+  width: auto;
+  }
+
+body.sidebar-second #cp-content,
+body.two-sidebars #cp-content {
+  right: 171px;
+  }
+
+body.no-sidebars #cp-content,
+body.sidebar-second #cp-content {
+  left:0;
+  }
+
+#sidebar-second {
+  width: 175px;
+  padding: 35px 10px 0 15px;
+  background: #f2f3f3;
+  border-left: 1px solid #b8c0c0;
+  margin: 0;
+  right:0;
+  left:auto;
+  overflow: hidden;
+  }
+
+.frame {
+  overflow:hidden;
+  }
+
+.innerframe {
+  position: absolute;
+  width: 100%;
+  overflow: auto;
+  overflow-x: hidden;
+  top: 0;
+  bottom: 0;
+  min-height:200px;
+  }
+  
+#cp-content .innerframe {
+	position: relative;
+}
+
+#sidebar-second .innerframe {
+  width: 185px;
+  }
+
+#main-content .frame {
+  background: #fff;
+  }
+
+/* max width at 980px, centered for these pages */
+.section-node-add #main-content .frame,
+.section-node-edit #main-content .frame,
+.section-node-add #main-content .innerframe,
+.section-node-edit #main-content .innerframe,
+.page-cp-features #main-content .frame,
+.page-cp-features #main-content .innerframe {
+  overflow: visible;
+  max-width: 980px;
+  padding-top:1px;
+  margin: 0 auto;
+  }
+
+#cp-settings-menus,
+#cp-settings-site,
+#vsite-generic-settings-form,
+#vsite-taxonomy-form {
+  max-width: 810px;
+  }
+
+#user-profile-form,
+.page-cp-users-myaccount-personal #node-form,
+#contact-mail-page {
+  max-width: 721px;
+  margin-top: 18px;
+  }
+
+#cp-content .innerframe form,
+.view-display-id-page_1,
+.view-dom-id-1,
+#cp-content .views-processed,
+#cp-content .view-vsite-support {
+  margin: 30px 30px;
+  }
+  
+body.page-cp-settings #cp-content .innerframe form  {
+  margin-left: 75px;
+  }
+
+#cp-content .views-processed,
+#cp-content .view-vsite-support {
+  max-width: 980px;
+  clear:both;
+  }
+
+.page-cp-appearance-theme #cp-content .innerframe form,
+.page-cp-appearance #cp-content .innerframe form {
+  margin-top: 21px;
+  }
+
+#cp-content .innerframe .view-display-id-default form {
+  margin: 0 0 1.5em 0;
+  }
+
+#cp-content .innerframe .vsite_content_filter_box form {
+  margin: 0;
+  }
+
+.page-cp-settings #cp-content .innerframe form .resizable-textarea  {
+  width: 99%;
+  }
+
+.help {
+position: absolute;
+right: 4px;
+ top: 4px;
+  }
+  
+  
+h2.title + .help {
+left: 30px;
+ position: absolute;
+top: 30px;
+  }
+
+/* For use with admin_menu module only */
+
+body.admin-menu.cp-toolbar-full #top {
+  top: 22px;
+  }
+
+body.admin-menu #main-content {
+  top: 62px;
+  }
+
+
+/* Exposed View Form */
+
+#cp-content .innerframe form#views-exposed-form-vsite-content-default {
+  margin: 0;
+  padding: 20px 20px 10px 20px;
+  background:#EAEBE9;
+  font-size: .8em;
+  }
+
+table {
+  border: none;
+  font-size: .9em;
+  clear:both;
+  }
+
+table td, table th {
+  padding: 3px 4px;
+  }
+
+table th {
+  border: none;
+  padding-bottom: 1px;
+  }
+
+table tr,
+table tr.odd,
+table tr.even {
+  padding: 0;
+  }
+
+
+/* SPECIFIC PAGE VIEWS */
+
+
+/* Content Area */
+#cp-content .innerframe form#views-bulk-operations-form--1 {
+  margin: 0px;
+  }
+
+.section-cp fieldset.vsite_content_filter_box {
+  border: 0px;
+  margin-bottom:0px;
+  }
+
+.section-cp fieldset.vsite_content_filter_box .fieldset-wrapper{
+	margin-bottom:5px;
+  }
+
+
+.view-vsite-news-follow-candidate td {
+  padding: 10px 4px;
+  border: 2px solid #ececec;
+  }
+
+.view-vsite-news-follow-candidate .views-field-field-vsite-logo-fid img {
+  float: left;
+  margin-right: 4px;
+  }
+
+.view-vsite-news-follow-candidate .flag {
+  text-decoration: underline;
+  }
+
+.view-vsite-news-follow-candidate .unflag-action {
+  color: #000;
+  }

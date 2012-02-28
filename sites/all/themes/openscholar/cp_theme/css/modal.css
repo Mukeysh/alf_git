@@ -1,0 +1,144 @@
+/* $Id: modal.css,v 1.6 2009/07/10 17:40:09 merlinofchaos Exp $ */
+
+/* CTools popup */
+
+#modalContent {
+  top: 0 !important;
+  }
+
+div.ctools-modal-content {
+  color: #000;
+  margin: 0;
+  text-align: left;
+  background: #fff;
+  -moz-box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+  }
+
+div.ctools-modal-content .modal-title {
+  color: #626161;
+  font-size:20px;
+  }
+
+#modal-content {
+ padding: 20px 0 20px 25px;
+  }
+
+div.ctools-modal-content {
+  height: 100% !important;
+  }
+
+div.ctools-modal-content .modal-header {
+  background: url('../images/modalHeaderBg.gif') repeat-x;
+ height:45px;
+ padding:10px;
+  }
+
+div.ctools-modal-content .modal-header a {
+float:right;
+color: transparent;
+background: url('../images/icon-close-window.png') no-repeat;
+width:30px;
+height:30px;
+  }
+
+div.ctools-modal-content .modal-content {
+  padding: 12px 12px 0 12px;
+  overflow: auto;
+  width: 575px;
+  height: 400px;
+  }
+
+#modalContent .spaces-customize-form .buttons input.form-submit {
+  margin-right: 140px;
+  }
+
+div.ctools-modal-content .button-div-wrapper {
+  display: inline;
+  }
+
+div.ctools-modal-content a.close:hover {
+  text-decoration: none;
+}
+
+div.ctools-modal-content a.close img {
+  position: relative;
+  top: 1px;
+  display:none;
+}
+
+div.ctools-modal-content .modal-content .modal-throbber-wrapper {
+  text-align: center;
+}
+
+div.ctools-modal-content .modal-content .modal-throbber-wrapper img {
+  margin-top: 160px;
+}
+
+/** modal forms CSS **/
+
+#modalContent {
+  padding: 0 23px 35px 40px;
+  background: transparent;
+  }
+
+#ctools-left, #ctools-right, #ctools-bottom {
+  position: absolute;
+  }
+
+#ctools-left, #ctools-right, #ctools-bottom {
+  top:0;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  background: url('../images/dropdown-window.png') repeat-x 0 100% transparent;
+  }
+
+#ctools-right {
+  left: auto;
+  right: 0;
+  background-position: 100% 100%;
+  width: 23px;
+  bottom: -6px;
+  }
+
+#ctools-bottom {
+  width:auto;
+  height: 35px;
+  right: 23px;
+  left: 40px;
+  top: auto;
+  background: url('../images/dropdown-window-bot.png') repeat-x 0 100% transparent;
+  }
+
+#modalframe-container {
+	padding: 0;
+  overflow: hidden;  
+}
+
+#modalframe-element {
+	border: 0;
+}
+
+/** SLIDESHOW STYLE SELECTION RADIOS **/
+	
+.form-radios.thumbnails {margin-top:10px;}
+	
+#edit-style--wrapper img,
+#edit-style--light-wrapper img { 
+display:block;
+}
+	
+#edit-style--wrapper { 
+float:left;	
+margin-right:20px;
+}
+	
+#edit-style--light-wrapper {
+margin-bottom:0;
+}
+
+#edit-style--light-wrapper.form-item {display:inline-block;}
+
+.form-submit {float:left;}

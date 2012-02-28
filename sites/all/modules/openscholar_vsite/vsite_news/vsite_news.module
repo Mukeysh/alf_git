@@ -1,0 +1,355 @@
+<?php
+
+include_once('vsite_news.features.inc');
+
+
+function vsite_news_init() {
+  $a_valid_realms = variable_get('activity_access_realms', array('comment'));
+  if (!in_array('vsite', $a_valid_realms)) {
+    variable_set('activity_access_realms', array_merge($a_valid_realms, array('vsite')));
+  }
+}
+
+function vsite_news_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'insert':
+    case 'update':
+      $context = array(
+        'hook' => 'nodeapi',
+        'op' => $op,
+        'node' => $node
+      );
+
+      actions_do('vsite_news_activity_action', $node, $context);
+    break;
+  }
+}
+
+/*
+ * Implementation of hook menu
+ */
+function vsite_news_menu() {
+
+  $items = array();
+
+  $items['cp/news'] = array(
+    'title' => 'News',
+    'page callback' => 'vsite_news_activity',
+    'menu_name' => 'cp',
+    'access callback' => 'cp_access_cp',
+    'type' => MENU_CALLBACK,
+    'weight' => 60,
+  );
+
+  $items['cp/news/activity'] = array(
+    'title' => 'Activity',
+    'page callback' => 'vsite_news_activity',
+    'access callback' => 'cp_access_cp',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  return $items;
+}
+
+/**
+ * show the vsite_news_view
+ */
+function vsite_news_activity() {
+  vsite_news_set_last_access();
+
+  require_once(drupal_get_path('module', 'activity') . '/views/activity.views.inc');
+  activity_views_access_user(user_load($vsite->group->uid));//Set the default user to group owner
+  return views_page('vsite_activity', 'default');
+}
+
+/**
+ * Updates the last accessed time for the current user on the current vsite
+ */
+function vsite_news_set_last_access() {
+  $last_access = variable_get('vsite_news_last_access', array());
+  global $user;
+  $last_access[$user->uid] = time();
+  if ($vsite = vsite_get_vsite()) {
+    $vsite->controllers->variable->set('vsite_news_last_access', $last_access);
+  }
+  else {
+    variable_set('vsite_news_last_access', $last_access);
+  }
+}
+
+/**
+ * The action hook
+ */
+function vsite_news_action_info() {
+  $info['vsite_news_activity_action'] = array(
+    'type' => 'activity',
+    'description' => t("Record a new node's creation for activity tracker"),
+    'configurable' => FALSE,
+    'hooks' => array(
+      'any' => TRUE,
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * The action called to add a vsite modification to the activity table, Change the message here to
+ * @param $object
+ * @param $context
+ * @return unknown_type
+ */
+function vsite_news_activity_action($object, $context) {
+
+  if (!vsite_get_vsite()) return FALSE;
+
+  $vsite = vsite_get_vsite();
+
+  vsite_include('vsiteapi');
+  if (!in_array($object->type, array_keys(vsite_content_types()))) return FALSE; //Is this type public?
+
+  $is_private = $vsite->controllers->variable->get('vsite_private');
+  if ($is_private) return FALSE; //If the site is private do not log
+
+  //Setup the advanced Patterns
+  $context['node-pattern-en'] =
+  $context['everyone-pattern-en'] = '[in-vsite], [type-name] [action]:';
+  $context['activity_types'] = array_keys(vsite_content_types());
+  $s_action = 'modified';
+  switch ($context['op']) {
+    case 'submit':
+      if (!variable_get('vsite_activity_insert',1)) return FALSE;
+    case 'insert':
+      $s_action = "created";
+      break;
+    case 'view':
+      $s_action = $context['op'] . "ed";
+    break;
+    case 'update':
+      if (!variable_get('vsite_activity_update',1)) return FALSE;
+      $s_action = $context['op'] . "d";
+    break;
+  }
+  $context['node-pattern-en'] = str_replace('[action]', $s_action, $context['node-pattern-en']);
+  $context['everyone-pattern-en'] = str_replace('[action]', $s_action, $context['everyone-pattern-en']);
+
+  if ($vsite && $vsite->group->uid) {
+    $dds_users_vsite = "[author-name]";//Default is "by UserName (or real name)"
+    if (strlen($vsite->group->title)){
+      $s_users_vsite = "{$vsite->group->title} ";
+    }
+
+    $context['everyone-pattern-en'] = str_replace('[in-vsite]', $s_users_vsite, $context['everyone-pattern-en']);//third person message
+    $context['node-pattern-en'] = str_replace('[in-vsite]', $s_users_vsite, $context['node-pattern-en']); //First person message
+  }
+
+  return activity_record($object, $context);
+}
+
+/**
+* Implementation of hook_activity_grants().
+*/
+function vsite_news_activity_grants($activity) {
+  $vsite = vsite_get_vsite();
+  if (!$vsite) return array();
+
+  return array(
+    'vsite' => array($vsite->group->nid), // the module_id that will be used
+  );
+}
+
+/**
+* Implementation of hook_activity_info().
+*/
+function vsite_news_activity_info() {
+  $info = new stdClass();
+  $info->api = 2;
+  $info->name = 'vsite_activity';
+  $info->object_type = 'vsite_activity';
+  $info->realms = array('vsite' => 'Virtual Site (vsite)');
+  $info->type_options = array();
+  return $info;
+}
+
+/**
+* Implementation of hook_activity_access_records_alter().
+* This removes any access records except vsite. Prevents friend
+* modules from providing direct access.
+*/
+function vsite_news_access_records_alter(&$grants, $context) {
+  foreach ($grants as $realm => $value) {
+     if ($realm != 'vsite') {
+         unset($grants[$module]);
+     }
+  }
+}
+
+/**
+ * Implementation of hook_activity_access_grants().
+ */
+function vsite_news_activity_access_grants($acccount) {
+  $view = views_get_view('vsite_news_follow');
+  $view->execute();
+
+  $realm_ids = array();
+  foreach ($view->result as $o_site) {
+    $realm_ids['vsite'][] = $o_site->nid;
+  }
+  return $realm_ids;
+}
+
+/**
+ * hook_theme
+ */
+function vsite_news_theme() {
+
+  $items = array();
+
+  $items['views_view_field__vsite_activity__title'] = array(
+    'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL ),
+  );
+
+  if(module_exists('vsite')){
+    //Alter the title to link correctly to the vsite
+    $items['views_view_field__vsite_news_follow_candidate__title'] = array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL ),
+      'function' => 'theme_views_view_field_link_to_vsite',
+      'path' => drupal_get_path('module','vsite')."/includes/",
+      'file' => 'vsiteapi.inc',
+    );
+
+    //Alter the logo to link correctly to the vsite
+    $items['views_view_field__vsite_news_follow_candidate__field_vsite_logo_fid'] = array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL ),
+      'function' => 'theme_views_view_field_link_to_vsite',
+      'path' => drupal_get_path('module','vsite')."/includes/",
+      'file' => 'vsiteapi.inc',
+    );
+  }
+
+  return $items;
+}
+
+
+/**
+ * Display a single views field "title" for the activity view
+ */
+function theme_views_view_field__vsite_activity__title($view, $field, $row) {
+  //purl_disable(TRUE);
+  $field->options['alter']['path'] =  TRUE;
+  $s_content = $field->render($row);
+
+
+  $tokens = array();
+  $alt = $field->options['alter']['alt'];
+  if (!empty($alt) && $alt !== '') {
+    $tokens = $this->get_render_tokens($alt);
+    $alt = $this->render_altered($alt, $tokens);
+  }
+
+  // $path will be run through check_url() by l() so we do not need to
+  // sanitize it ourselves.
+  $path = $field->options['alter']['path'];
+
+  $nid_alias = $field->aliases['nid'];
+  $nid = $row->$nid_alias;
+
+  $options = array('html' => 'TRUE');
+
+  //Add the correct purl provider
+  vsite_add_purl_provider($nid,$options);
+
+  // Use strip tags as there should never be HTML in the path.
+  $path = strip_tags(strtr($path, $tokens));
+
+  // Parse the URL and move any query and fragment parameters out of the path.
+  $url = parse_url($path);
+  if (isset($url['query'])) {
+    $path = strtr($path, array('?' . $url['query'] => ''));
+    $options['query'] = $url['query'];
+  }
+  if (isset($url['fragment'])) {
+    $path = strtr($path, array('#' . $url['fragment'] => ''));
+    $options['fragment'] = $url['fragment'];
+  }
+
+  if ($alt) {
+    $options['attributes']['title'] = $alt;
+    $options['attributes']['alt'] = $alt;
+  }
+
+  $class = $field->options['alter']['link_class'];
+  if ($class) {
+    $options['attributes']['class'] = $class;
+  }
+
+  $s_content = l($s_content, $path, $options);
+
+  $field->last_render = $s_content;
+
+  return $s_content;
+}
+
+function vsite_news_vsite_generic_settings() {
+  $settings = array();
+  $settings['vsite_activity_insert'] = array(
+    'group' => array(
+      '#id' => 'privacy',
+      '#title' => t('Privacy'),
+      '#weight' => 0,
+    ),
+    'form' => array(
+      '#type' => 'radios',
+      '#title' => "Should an activity be recorded when you create a post?",
+      '#options' => array(1 => t('Record an activity message'), 0 => t('Do not record')),
+      '#default_value' => variable_get('vsite_activity_insert',1),
+    ),
+  );
+  $settings['vsite_activity_update'] = array(
+    'group' => array(
+      '#id' => 'privacy',
+      '#title' => t('Privacy'),
+      '#weight' => 0,
+    ),
+    'form' => array(
+      '#type' => 'radios',
+      '#title' => "Should an activity be recorded when you update a post?",
+      '#options' => array(1 => t('Record an activity message'), 0 => t('Do not record')),
+      '#default_value' => variable_get('vsite_activity_update',1),
+    ),
+  );
+
+  if (variable_get('vsite_private', 0)){
+       $settings['info'] = array(
+          'group' => array(
+            '#id' => 'privacy',
+            '#title' => t('Privacy'),
+            '#weight' => 0,
+          ),
+         'form' => array(
+           '#type' => 'item',
+           '#description' => "Note: Your site is private and activity messages will not be recorded untill your site becomes public.",
+         ),
+       );
+  }
+
+  return $settings;
+}
+
+function vsite_news_get_new_activity_count() {
+  global $user;
+  // this is set in vsite_news_activity()
+  // or in the footer of the exported views
+  $args[] = $user->uid;
+  $last_access = variable_get('vsite_news_last_access', array());
+  $args[] = $last_access[$user->uid];
+  if ($vsite = vsite_get_vsite()) {
+    $join = ' INNER JOIN {og_ancestry} USING (nid)';
+    $where = ' AND group_nid = %d';
+    $args[] = $vsite->group->nid;
+  }
+
+  $r = db_result(db_query("SELECT COUNT(*) AS c FROM {activity} a INNER JOIN {node} n USING(nid)$join WHERE a.uid != %d AND a.created > %d AND n.status = 1$where", $args));
+  return $r;
+}

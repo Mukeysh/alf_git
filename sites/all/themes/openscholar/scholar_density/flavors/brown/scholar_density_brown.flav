@@ -1,0 +1,6 @@
+name = Brown
+description = A Brown Version of the scholor-theme-08 theme
+screenshot = screenshot.png
+
+css[] = brown.css
+conditional-css[if lt IE 9][all][] = brown-ie.css

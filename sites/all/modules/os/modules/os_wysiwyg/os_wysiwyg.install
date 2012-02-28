@@ -1,0 +1,89 @@
+<?php
+
+function os_wysiwyg_install() {
+  _os_wysiwyg_add_profiles();
+}
+
+function os_wysiwyg_enable() {
+  _os_wysiwyg_set_default_formats();
+}
+
+function os_wysiwyg_update_6001(&$sandbox) {
+  _os_wysiwyg_add_profiles();
+
+  $res = array(
+    array(
+      'success' => true,
+      'message' => 'Wysiwyg profiles added to new filter formats.',
+    ),
+  );
+
+  return $res;
+}
+
+function os_wysiwyg_update_6002(&$sandbox) {
+  _os_wysiwyg_set_default_formats();
+
+  return array(
+    array(
+      'success' => true,
+      'message' => 'Default formats set for node types.',
+    ),
+  );
+}
+
+function os_wysiwyg_update_6003(&$sandbox) {
+  return os_wysiwyg_update_6001($sandbox);
+}
+
+function os_wysiwyg_update_6004(&$sandbox) {
+  _os_wysiwyg_add_profiles();
+  return array(
+    array(
+      'success' => true,
+      'message' => 'Wywiwyg profiles updated with new settings.',
+    )
+  );
+}
+
+
+function _os_wysiwyg_add_profiles() {
+  db_query("DELETE FROM {wysiwyg} WHERE format = 5 OR format = 6");
+  db_query('INSERT INTO {wysiwyg} VALUES (5, "tinymce", "%s"), (6, "tinymce", "%s")',
+  				'a:20:{s:7:"default";i:1;s:11:"user_choose";i:0;s:11:"show_toggle";i:1;s:5:"theme";s:8:"advanced";s:8:"language";s:2:"en";s:7:"buttons";a:3:{s:7:"default";a:15:{s:4:"bold";i:1;s:6:"italic";i:1;s:9:"underline";i:1;s:13:"strikethrough";i:1;s:11:"justifyleft";i:1;s:13:"justifycenter";i:1;s:12:"justifyright";i:1;s:11:"justifyfull";i:1;s:7:"bullist";i:1;s:7:"numlist";i:1;s:4:"link";i:1;s:6:"unlink";i:1;s:9:"forecolor";i:1;s:4:"copy";i:1;s:5:"paste";i:1;}s:10:"fullscreen";a:1:{s:10:"fullscreen";i:1;}s:6:"drupal";a:3:{s:36:"wysiwyg_fields_field_os_inline_image";i:1;s:37:"wysiwyg_fields_field_os_inline_oembed";i:1;s:36:"wysiwyg_fields_field_os_inline_files";i:1;}}s:11:"toolbar_loc";s:3:"top";s:13:"toolbar_align";s:4:"left";s:8:"path_loc";s:6:"bottom";s:8:"resizing";i:1;s:11:"verify_html";i:1;s:12:"preformatted";i:1;s:22:"convert_fonts_to_spans";i:1;s:17:"remove_linebreaks";i:0;s:23:"apply_source_formatting";i:1;s:27:"paste_auto_cleanup_on_paste";i:1;s:13:"block_formats";s:32:"p,address,pre,h2,h3,h4,h5,h6,div";s:11:"css_setting";s:5:"theme";s:8:"css_path";s:0:"";s:11:"css_classes";s:0:"";}',
+          'a:20:{s:7:"default";i:1;s:11:"user_choose";i:0;s:11:"show_toggle";i:1;s:5:"theme";s:8:"advanced";s:8:"language";s:2:"en";s:7:"buttons";a:6:{s:7:"default";a:24:{s:4:"bold";i:1;s:6:"italic";i:1;s:9:"underline";i:1;s:13:"strikethrough";i:1;s:11:"justifyleft";i:1;s:13:"justifycenter";i:1;s:12:"justifyright";i:1;s:11:"justifyfull";i:1;s:7:"bullist";i:1;s:7:"numlist";i:1;s:7:"outdent";i:1;s:6:"indent";i:1;s:4:"undo";i:1;s:4:"redo";i:1;s:4:"link";i:1;s:6:"unlink";i:1;s:9:"forecolor";i:1;s:3:"sup";i:1;s:3:"sub";i:1;s:10:"blockquote";i:1;s:3:"cut";i:1;s:4:"copy";i:1;s:5:"paste";i:1;s:7:"charmap";i:1;}s:4:"font";a:3:{s:12:"formatselect";i:1;s:10:"fontselect";i:1;s:14:"fontsizeselect";i:1;}s:10:"fullscreen";a:1:{s:10:"fullscreen";i:1;}s:14:"insertdatetime";a:2:{s:10:"insertdate";i:1;s:10:"inserttime";i:1;}s:5:"table";a:1:{s:13:"tablecontrols";i:1;}s:6:"drupal";a:3:{s:36:"wysiwyg_fields_field_os_inline_image";i:1;s:37:"wysiwyg_fields_field_os_inline_oembed";i:1;s:36:"wysiwyg_fields_field_os_inline_files";i:1;}}s:11:"toolbar_loc";s:3:"top";s:13:"toolbar_align";s:4:"left";s:8:"path_loc";s:6:"bottom";s:8:"resizing";i:1;s:11:"verify_html";i:1;s:12:"preformatted";i:1;s:22:"convert_fonts_to_spans";i:1;s:17:"remove_linebreaks";i:0;s:23:"apply_source_formatting";i:1;s:27:"paste_auto_cleanup_on_paste";i:1;s:13:"block_formats";s:32:"p,address,pre,h2,h3,h4,h5,h6,div";s:11:"css_setting";s:5:"theme";s:8:"css_path";s:0:"";s:11:"css_classes";s:0:"";}');
+
+  db_query("UPDATE {wysiwyg} SET settings = '%s' WHERE format = 1", 'a:20:{s:7:"default";i:1;s:11:"user_choose";i:0;s:11:"show_toggle";i:1;s:5:"theme";s:8:"advanced";s:8:"language";s:2:"en";s:7:"buttons";a:7:{s:7:"default";a:17:{s:4:"bold";i:1;s:6:"italic";i:1;s:9:"underline";i:1;s:13:"strikethrough";i:1;s:11:"justifyleft";i:1;s:13:"justifycenter";i:1;s:12:"justifyright";i:1;s:11:"justifyfull";i:1;s:7:"bullist";i:1;s:7:"numlist";i:1;s:4:"link";i:1;s:6:"unlink";i:1;s:9:"forecolor";i:1;s:3:"cut";i:1;s:4:"copy";i:1;s:5:"paste";i:1;s:7:"charmap";i:1;}s:4:"font";a:1:{s:12:"formatselect";i:1;}s:10:"fullscreen";a:1:{s:10:"fullscreen";i:1;}s:5:"paste";a:2:{s:9:"pastetext";i:1;s:9:"pasteword";i:1;}s:13:"searchreplace";a:1:{s:7:"replace";i:1;}s:5:"table";a:1:{s:13:"tablecontrols";i:1;}s:6:"drupal";a:4:{s:5:"break";i:1;s:36:"wysiwyg_fields_field_os_inline_image";i:1;s:37:"wysiwyg_fields_field_os_inline_oembed";i:1;s:36:"wysiwyg_fields_field_os_inline_files";i:1;}}s:11:"toolbar_loc";s:3:"top";s:13:"toolbar_align";s:4:"left";s:8:"path_loc";s:6:"bottom";s:8:"resizing";i:1;s:11:"verify_html";i:1;s:12:"preformatted";i:1;s:22:"convert_fonts_to_spans";i:1;s:17:"remove_linebreaks";i:0;s:23:"apply_source_formatting";i:0;s:27:"paste_auto_cleanup_on_paste";i:1;s:13:"block_formats";s:28:"p,address,pre,h2,h3,h4,h5,h6";s:11:"css_setting";s:5:"theme";s:8:"css_path";s:0:"";s:11:"css_classes";s:0:"";}');
+  db_query("UPDATE {wysiwyg} SET settings = '%s' WHERE format = 4", 'a:20:{s:7:"default";i:1;s:11:"user_choose";i:0;s:11:"show_toggle";i:1;s:5:"theme";s:8:"advanced";s:8:"language";s:2:"en";s:7:"buttons";a:4:{s:7:"default";a:7:{s:4:"bold";i:1;s:6:"italic";i:1;s:7:"bullist";i:1;s:4:"link";i:1;s:4:"code";i:1;s:3:"cut";i:1;s:4:"copy";i:1;}s:5:"paste";a:1:{s:9:"pastetext";i:1;}s:10:"xhtmlxtras";a:1:{s:4:"cite";i:1;}s:6:"drupal";a:3:{s:36:"wysiwyg_fields_field_os_inline_image";i:1;s:36:"wysiwyg_fields_field_os_inline_files";i:1;s:37:"wysiwyg_fields_field_os_inline_oembed";i:1;}}s:11:"toolbar_loc";s:3:"top";s:13:"toolbar_align";s:4:"left";s:8:"path_loc";s:6:"bottom";s:8:"resizing";i:1;s:11:"verify_html";i:1;s:12:"preformatted";i:0;s:22:"convert_fonts_to_spans";i:1;s:17:"remove_linebreaks";i:1;s:23:"apply_source_formatting";i:0;s:27:"paste_auto_cleanup_on_paste";i:0;s:13:"block_formats";s:32:"p,address,pre,h2,h3,h4,h5,h6,div";s:11:"css_setting";s:5:"theme";s:8:"css_path";s:0:"";s:11:"css_classes";s:0:"";}');
+}
+
+function _os_wysiwyg_set_default_formats($types = array()) {
+  if (empty($types)) {
+    module_load_include('module', 'content');
+    $types = content_types();
+  }
+
+  module_load_include('module', 'strongarm');
+  $vars = strongarm_vars_load();
+
+  $strip = array(2, 3);
+  $select = "SELECT COUNT(format) FROM {better_formats_defaults} WHERE type = 'node/%s' AND rid = 2";
+  $update = "UPDATE {better_formats_defaults} SET format = %d WHERE type = 'node/%s' AND rid = 2";
+  $insert = "INSERT INTO {better_formats_defaults} VALUES (2, 'node/%s', %d, 2, 25)";
+  foreach ($types as $type => $data) {
+    // for every type, get the formats its allowed to use.
+    // every format should only have 3: a wysisyg-enabled type, full HTML and PHP code
+    // the default is always
+    $allowed = $vars['better_formats_allowed_'.$type]->value;
+    if (!is_array($allowed)) $allowed = array(1);
+    $default = current(array_diff($allowed, $strip));
+
+    $old_format = db_result(db_query($select, $type));
+    if ($old_format) {
+      db_query($update, $default, $type);
+    }
+    else {
+      db_query($insert, $type, $default);
+    }
+  }
+}

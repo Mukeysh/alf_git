@@ -1,0 +1,10 @@
+name = Shorten URLs
+description = "Allows easy URL shortening via external services."
+core = 6.x
+package = Shorten URLs
+; Information added by drupal.org packaging script on 2011-11-05
+version = "6.x-1.12"
+core = "6.x"
+project = "shorten"
+datestamp = "1320472235"
+

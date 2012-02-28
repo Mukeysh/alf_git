@@ -1,0 +1,13 @@
+.book-menu {
+  width: 33%;
+  float: right;
+  margin: 0 0 1em 1.5em;
+  border-left: 1px dashed #ccc;
+  padding-left: .7em;
+  font-size: .95em;
+  }
+
+
+.book-menu h3 {
+  margin: .5em 0;
+  }

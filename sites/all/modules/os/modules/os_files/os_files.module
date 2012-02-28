@@ -1,0 +1,181 @@
+<?php
+
+/**
+ * Implementation of hook_form_alter()
+ **/
+function os_files_form_alter(&$form, $form_state, $form_id){
+	switch ($form_id) {
+		case "upload_js":
+      
+      /**
+       * When the upload js ajax is executed the file_alias settings are checked within filefield_paths,
+       * if the current type has been setup to use file aliases the correct alias is generated and displayed
+       * in the returned file element instead of a path that will be incorrect after the node is saved
+       */
+      if (($cached_form = form_get_cache($_POST['form_build_id'], $cached_form_state)) && isset($cached_form['#node']) || isset($cached_form['attachments'])){
+        if (module_exists('file_aliases') && module_exists('filefield_paths')) {
+          $result = db_fetch_object(db_query("SELECT * FROM {filefield_paths} WHERE type = '%s' AND field = '%s'", $cached_form['#node']->type, 'upload'));
+          $settings = array('filealias'=> unserialize($result->filealias));
+
+          foreach (element_children($form['files']) as $fid) {
+            $field = array('filename' => $form['files'][$fid]['filename']['#value'],'filepath' => $form['files'][$fid]['filepath']['#value'],'fid' => $fid);
+
+            $file_alias = filefield_paths_process_string($settings['filealias']['value'], 'node', $cached_form['#node'], $settings['filealias']);
+            $file_alias = filefield_paths_process_string($file_alias, 'field', array(0 => $field), $settings['filealias']);
+
+            if($file_alias){
+              $vsite = vsite_get_vsite();
+              if($vsite && $vsite->purl_provider != "spaces_og"){
+                $file_alias = $vsite->group->purl."/".$file_alias;
+              }
+              $form['files'][$fid]['description']['#description'] = "<small>".url($file_alias,array('absolute' => true))."</small>";
+            }
+          }
+        }
+      }
+
+    break;
+	}
+}
+
+/**
+ * Implementation of hook_nodeapi
+ *
+ * @param object $node
+ * @param string $op
+ * @param bool $teaser
+ * @param bool $page
+ */
+function os_files_nodeapi(&$node, $op, $teaser = NULL, $page = NULL){
+	switch ($op) {
+    case 'view' :
+    	
+      /**
+       * iTweak displays files nicely in the teaser and node view however it does not link to the
+       *  aliased file path since it takes over file processing early.  This code checks for a existing
+       *  file alias and if it exists it changes the file path to the correct aliased path to reduce confusion.
+       */
+      if (module_exists('itweak_upload') && module_exists('file_aliases') && isset($node->itu_files)) {
+        $tmp_node = clone $node;
+        $tmp_node->files = $tmp_node->itu_files;
+        if (($ffp = filefield_paths_get_fields($tmp_node, $op)) != FALSE) {
+          $count = array();
+          foreach ( $ffp['#files'] as &$file ) {
+            if ($ffp['#settings'][$file['name']]['filealias']['display'] == TRUE) {
+              $filefield_paths_alias = 'filefield_paths/alias/' . $file['field']['fid'];
+              if (($alias = drupal_get_path_alias($filefield_paths_alias)) != $filefield_paths_alias) {
+                //If alias exists replace it in the file description
+                $node->content['itweak_upload']['#value'] = str_replace($file['field']['filepath'], $alias, $node->content['itweak_upload']['#value']);
+                $node->content['files']['#value'] = str_replace($file['field']['filepath'], $alias, $node->content['files']['#value']);
+              }
+            }
+          }
+        }
+        unset($tmp_node);
+      }
+      
+    break;
+	}
+}
+
+/**
+ * Implements hook_elements().
+ */
+function os_files_content_elements() {
+  //Add process function to filefield elements
+  $elements['filefield_widget']['#process'] = array('os_files_filefield_process');
+
+  return $elements;
+}
+
+/**
+ * Add extra processing to filefield upload, to handle ff_paths and aliases
+ *
+ * Extra proccessing is added to the upload of files via standard cck filefield elements. This moves the file to the correct
+ * location and returns the correct aliased file path. This solves two issues, if files are orphaned they are no longer in the
+ * root of the file directory but in the directory specified by filefiled_paths, also the correct final path is displayed to the user.
+ *
+ * Assumtions Made: are that you will not use tokens in your path or alias that you need a complete node for. Since in some cases the node
+ *                  has not yet been created if you were to use node elements as tokens then the incorrect path will be displayed or the wrong
+ *                  location will be chosen for the file.
+ */
+function os_files_filefield_process($element, $edit, &$form_state, $form){
+  if(!$element['#value']['fid']) return $element;
+  
+  $node = clone($form['#node']);
+  $orig_path = $element['#value']['filepath'];
+  //Add this field to the node so we can get the settings
+  list($parent,$delta) = $element['#parents'];
+  if($parent){
+    $el_file = $element['#value'];
+    
+    //Flag for processing, normally done in node preprocess
+    if($el_file['status'] == 0) $el_file['data']['process'] = true;
+    $node->$parent = array($delta => $el_file);
+    
+    filefield_paths_node_update($node);
+   
+    $element['#value'] = $node->{$parent}[$delta];
+    //Not needed
+    unset($element['#value']['view']);
+    
+    //Adjust the preview
+    if(isset($element['preview']['#value']) && $element['#value']['filepath'] != $orig_path){
+      $element['preview']['#value'] = str_replace($orig_path,$element['#value']['filepath'],$element['preview']['#value']);
+    }
+  }
+  
+  return $element;
+}
+
+/**
+ * Implements hook_filefield_paths_process_file().
+ *
+ * When you delete one file on a node and re-upload a new file it gets a new file[id], if the files had the same name
+ * the end user expects the path to stay the same ex(site1/cv) however since the file is created and deleted in one
+ * instance the path alias still exists and you end up with paths like (site1/cv-0). The code created checks to see if
+ * the existing alias in conflict belongs to a file that is bieng removed and if so it allows the new file to claim the old files alias.
+ */
+function os_files_filefield_paths_process_file($new, $file, $settings, $node, $update) {
+  if ($new) {
+    $orig_alias = filefield_paths_process_string($settings['filealias']['value'], 'node', $node, $settings['filealias']);
+    $orig_alias = filefield_paths_process_string($orig_alias, 'field', array(0 => $file['field']), $settings['filealias']);
+
+    $path = 'filefield_paths/alias/' . $file['field']['fid'];
+    $alias = drupal_get_path_alias($path);
+
+    // Path has a different alias
+    if ($alias != $orig_alias) {
+      $old_file_path = drupal_lookup_path('source', $orig_alias);
+      if(strpos($old_file_path,'filefield_paths/alias/') === 0){
+        $n_old_fid = intval(substr($old_file_path,22));
+        $n_old_pid = db_result(db_query("SELECT pid FROM {url_alias} WHERE dst = '%s' LIMIT 1", $orig_alias));
+
+        if(!field_file_load($n_old_fid)){
+          //The file alias is orphaned and we should delete it
+          path_set_alias(NULL,$alias); //Delete unused alias
+          path_set_alias($path,$orig_alias,$n_old_pid); //Reassign old alias
+
+        }else{
+          //If the file exists and is part of the same node then rename the alias
+          $field_info = content_types($node->type);
+          if($file['module'] == 'upload'){
+            //Upload Node
+            $n_nid = db_result(@db_query("SELECT nid FROM {upload} WHERE fid = %d ",$n_old_fid));
+          }elseif($file['field']['field']['field_name']){
+            //CCK Node
+            $n_nid = db_result(@db_query("SELECT nid FROM {".current($field_info['tables'])."} WHERE ".$file['field']['field']['field_name']."_fid = %d ",$n_old_fid));
+          }
+
+          if($n_nid == $node->nid){
+            //Switch the two paths
+            $n_new_pid = db_result(db_query("SELECT pid FROM {url_alias} WHERE dst = '%s' LIMIT 1", $alias));
+            path_set_alias($path,$orig_alias,$n_old_pid); //Reassign old alias
+            path_set_alias($old_file_path,$alias,$n_new_pid); //Reassign new alias
+          }
+        }
+      }
+    }
+  }
+}
+

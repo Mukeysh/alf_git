@@ -1,0 +1,94 @@
+diff --git a/sites/all/modules/contrib/memcache/dmemcache.inc b/sites/all/modules/contrib/memcache/dmemcache.inc
+index b634c25..aabc8be 100644
+--- a/sites/all/modules/contrib/memcache/dmemcache.inc
++++ b/sites/all/modules/contrib/memcache/dmemcache.inc
+@@ -342,7 +342,7 @@ function dmemcache_object($bin = NULL, $flush = FALSE) {
+ 
+           // Using the Memcache PECL extension.
+           if ($memcache instanceof Memcache) {
+-            // When using the PECL memcache extension, we must use ->(p)connect 
++            // When using the PECL memcache extension, we must use ->(p)connect
+             // for the first connection.
+             if (!$init) {
+               if ($memcache_persistent && $memcache->pconnect($host, $port)) {
+@@ -378,6 +378,8 @@ function dmemcache_object($bin = NULL, $flush = FALSE) {
+       }
+     }
+   }
++  
++  if(empty($memcacheCache[$bin])) memcache_mark_cluster_status($cluster,false);
+ 
+   return empty($memcacheCache[$bin]) ? FALSE : $memcacheCache[$bin];
+ }
+diff --git a/sites/all/modules/contrib/memcache/memcache.inc b/sites/all/modules/contrib/memcache/memcache.inc
+index 81cb25d..0a011be 100644
+--- a/sites/all/modules/contrib/memcache/memcache.inc
++++ b/sites/all/modules/contrib/memcache/memcache.inc
+@@ -33,7 +33,8 @@ define('MEMCACHE_CONTENT_FLUSH', 'MEMCACHE_CONTENT_FLUSH');
+ function cache_get($cid, $table = 'cache') {
+   // Handle excluded bins first.
+   $bins = variable_get('memcache_bins', array());
+-  if (!is_null($table) && isset($bins[$table]) && $bins[$table] == 'database') {
++  if ((!is_null($table) && isset($bins[$table]) && $bins[$table] == 'database') ||
++      (!memcache_get_cluster_status(memcache_get_cluster($table)) && variable_get('memcache_failover','database') == 'database' )) {
+     return _cache_get($cid, $table);
+   }
+ 
+@@ -154,7 +155,7 @@ function cache_get($cid, $table = 'cache') {
+  *   The cache ID of the data to store.
+  * @param $data
+  *   The data to store in the cache. Complex data types will be automatically
+- *   serialized before insertion. Strings will be stored as plain text and 
++ *   serialized before insertion. Strings will be stored as plain text and
+  *   not serialized.
+  * @param $table
+  *   The table $table to store the data in. Valid core values are 'cache_filter',
+@@ -173,7 +174,8 @@ function cache_get($cid, $table = 'cache') {
+ function cache_set($cid, $data, $table = 'cache', $expire = CACHE_PERMANENT, $headers = NULL) {
+   // Handle database fallback first.
+   $bins = variable_get('memcache_bins', array());
+-  if (!is_null($table) && isset($bins[$table]) && $bins[$table] == 'database') {
++  if ((!is_null($table) && isset($bins[$table]) && $bins[$table] == 'database') ||
++      (!memcache_get_cluster_status(memcache_get_cluster($table)) && variable_get('memcache_failover','database') == 'database' )){
+     return _cache_set($cid, $data, $table, $expire, $headers);
+   }
+ 
+@@ -438,3 +440,37 @@ function memcache_variable_set($name, $value) {
+   // If the variables aren't cached, there's no need to do anything.
+   $conf[$name] = $value;
+ }
++
++/**
++ * Mark when a cluster is down so it is not used
++ * @param string $cluster
++ * @param bool $is_down (optional)
++ */
++function memcache_mark_cluster_status($cluster, $is_avalible = NULL){
++	static $memcache_cluster_status = array();
++	
++	if(!is_null($is_avalible)){
++		$memcache_cluster_status[$cluster] = (bool) $is_avalible;
++	}
++	
++	return isset($memcache_cluster_status[$cluster])?$memcache_cluster_status[$cluster]:true;
++}
++
++/**
++ * Get the status of a memcache cluster
++ * @param string $cluster
++ */
++function memcache_get_cluster_status($cluster){
++	return memcache_mark_cluster_status($cluster);
++}
++
++/**
++ * Return the cluster for a given table
++ */
++function memcache_get_cluster($table){
++	$memcache_bins = variable_get('memcache_bins', array('cache' => 'default'));
++	
++	$cluster = (!$table || empty($memcache_bins[$table])) ? 'default' : $memcache_bins[$table];
++	
++	return $cluster;
++}
+\ No newline at end of file

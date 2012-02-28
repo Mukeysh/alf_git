@@ -1,0 +1,14 @@
+<?php 
+/**
+ * Implementation of hook_install().
+ */
+function pathauto_extra_install() {
+	
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function pathauto_extra_uninstall() {
+	
+}

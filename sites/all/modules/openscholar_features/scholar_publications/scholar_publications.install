@@ -1,0 +1,272 @@
+<?php
+
+/**
+ * Implementation of hook_install()
+ */
+function scholar_publications_install(){
+  //update biblio to store url title on related external links
+  db_add_field($ret, 'biblio', 'biblio_url_title', _scholar_publications_add_field_biblio_url_title());
+  update_sql('INSERT INTO {biblio_fields} (name, type, size, maxsize) VALUES ("biblio_url_title", "textfield", 60, 255)');
+}
+
+function scholar_publications_enable() {
+	$weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'biblio' AND name = 'vsite'"));
+  _scholar_publications_set_system_weight($weight+15);
+}
+
+
+function _scholar_publications_set_system_weight($weight) {
+	if(!is_int($weight)) return false;
+
+  return db_query("UPDATE {system} SET weight = %d WHERE name = 'scholar_publications'", $weight);
+}
+
+/**
+ * Add the common field notes to all publication types
+ * @param $sandbox
+ */
+function scholar_publications_update_6001(&$sandbox){
+
+  $result[] =  db_query("UPDATE {biblio_field_type} SET common = 1 WHERE ftdid = %d ", 27);
+
+  return $result;
+}
+
+/**
+ * Add the common field notes to all publication types
+ * @param $sandbox
+ */
+function scholar_publications_update_6002(&$sandbox){
+  $result =  array();
+  //update visible fields for biblio types 'Working Paper' and 'Data'
+  $hide_fields = array(
+  1000 => array( 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 23, 28, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53),  //Working Paper
+  1001 => array( 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 23, 28, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 43, 46, 48), // Data
+  );
+  foreach ($hide_fields as $type_id => $field_ids){
+    foreach($field_ids as $field_id){
+      $res = db_query("UPDATE {biblio_field_type} SET visible = %d WHERE tid = %d and fid = %d", 0, $type_id, $field_id);
+    }
+  }
+  return $result;
+}
+
+/**
+ *  Update biblio field settings to seperate authors and other contributors into two fieldsets
+ *  Update the contributor data for the nodes accordingly
+ * @param $sandbox
+ */
+function scholar_publications_update_6003(&$sandbox){
+  $result =  array();
+  $s_common_string = <<<COMMON
+a:6:{s:7:"storage";N;s:9:"submitted";b:1;s:6:"values";a:7:{s:17:"hide_other_fields";i:0;s:15:"configured_flds";a:53:{i:15;a:5:{s:5:"title";s:19:"Year of Publication";s:4:"hint";s:33:"Enter YYYY, Submitted or In Press";s:6:"weight";s:3:"-45";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";s:8:"required";s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"15";}i:53;a:5:{s:5:"title";s:0:"";s:4:"hint";s:0:"";s:6:"weight";s:1:"1";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"53";}i:22;a:5:{s:5:"title";s:8:"Abstract";s:4:"hint";s:0:"";s:6:"weight";s:1:"1";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"22";}i:1;a:6:{s:5:"title";s:7:"Authors";s:4:"hint";s:0:"";s:6:"weight";s:1:"2";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";s:8:"required";s:12:"autocomplete";s:12:"autocomplete";}s:5:"ftdid";s:1:"1";s:9:"auth_type";a:5:{i:1;s:1:"1";i:2;s:1:"2";i:3;s:1:"3";i:4;s:1:"4";i:5;s:1:"5";}}i:2;a:6:{s:5:"title";s:12:"Contributors";s:4:"hint";s:0:"";s:6:"weight";s:1:"3";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:12:"autocomplete";s:12:"autocomplete";s:8:"required";i:0;}s:5:"ftdid";s:1:"2";s:9:"auth_type";a:13:{i:10;s:2:"10";i:11;s:2:"11";i:12;s:2:"12";i:13;s:2:"13";i:14;s:2:"14";i:15;s:2:"15";i:16;s:2:"16";i:17;s:2:"17";i:18;s:2:"18";i:19;s:2:"19";i:20;s:2:"20";i:21;s:2:"21";i:22;s:2:"22";}}i:3;a:6:{s:5:"title";s:16:"Tertiary Authors";s:4:"hint";s:0:"";s:6:"weight";s:1:"3";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"3";s:9:"auth_type";a:1:{i:3;s:1:"3";}}i:4;a:6:{s:5:"title";s:18:"Subsidiary Authors";s:4:"hint";s:0:"";s:6:"weight";s:1:"4";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"4";s:9:"auth_type";a:1:{i:4;s:1:"4";}}i:5;a:6:{s:5:"title";s:17:"Corporate Authors";s:4:"hint";s:0:"";s:6:"weight";s:1:"5";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"5";s:9:"auth_type";a:1:{i:5;s:1:"5";}}i:6;a:5:{s:5:"title";s:15:"Secondary Title";s:4:"hint";s:0:"";s:6:"weight";s:2:"12";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"6";}i:7;a:5:{s:5:"title";s:14:"Tertiary Title";s:4:"hint";s:0:"";s:6:"weight";s:2:"13";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"7";}i:17;a:5:{s:5:"title";s:6:"Volume";s:4:"hint";s:0:"";s:6:"weight";s:2:"14";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"17";}i:43;a:5:{s:5:"title";s:7:"Section";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"43";}i:37;a:5:{s:5:"title";s:17:"Number of Volumes";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"37";}i:28;a:5:{s:5:"title";s:5:"Issue";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"28";}i:16;a:5:{s:5:"title";s:7:"Edition";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"16";}i:18;a:5:{s:5:"title";s:6:"Number";s:4:"hint";s:0:"";s:6:"weight";s:2:"16";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"18";}i:19;a:5:{s:5:"title";s:10:"Pagination";s:4:"hint";s:0:"";s:6:"weight";s:2:"17";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"19";}i:20;a:5:{s:5:"title";s:14:"Date Published";s:4:"hint";s:9:"(mm/yyyy)";s:6:"weight";s:2:"18";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"20";}i:13;a:5:{s:5:"title";s:9:"Publisher";s:4:"hint";s:0:"";s:6:"weight";s:2:"19";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"13";}i:14;a:5:{s:5:"title";s:15:"Place Published";s:4:"hint";s:0:"";s:6:"weight";s:2:"20";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"14";}i:25;a:5:{s:5:"title";s:12:"Type of Work";s:4:"hint";s:14:"Masters Thesis";s:6:"weight";s:2:"22";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"25";}i:21;a:5:{s:5:"title";s:20:"Publication Language";s:4:"hint";s:0:"";s:6:"weight";s:2:"23";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"21";}i:12;a:5:{s:5:"title";s:25:"Other Author Affiliations";s:4:"hint";s:0:"";s:6:"weight";s:2:"24";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"12";}i:9;a:5:{s:5:"title";s:11:"ISBN Number";s:4:"hint";s:0:"";s:6:"weight";s:3:"150";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"9";}i:46;a:5:{s:5:"title";s:11:"ISSN Number";s:4:"hint";s:0:"";s:6:"weight";s:3:"150";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"46";}i:8;a:5:{s:5:"title";s:16:"Accession Number";s:4:"hint";s:0:"";s:6:"weight";s:3:"151";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:1:"8";}i:10;a:5:{s:5:"title";s:11:"Call Number";s:4:"hint";s:0:"";s:6:"weight";s:3:"152";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"10";}i:11;a:5:{s:5:"title";s:13:"Other Numbers";s:4:"hint";s:0:"";s:6:"weight";s:3:"153";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"11";}i:24;a:5:{s:5:"title";s:8:"Keywords";s:4:"hint";s:0:"";s:6:"weight";s:3:"154";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:12:"autocomplete";s:12:"autocomplete";s:8:"required";i:0;}s:5:"ftdid";s:2:"24";}i:23;a:5:{s:5:"title";s:15:"French Abstract";s:4:"hint";s:0:"";s:6:"weight";s:3:"156";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"23";}i:27;a:5:{s:5:"title";s:5:"Notes";s:4:"hint";s:0:"";s:6:"weight";s:3:"157";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"27";}i:26;a:5:{s:5:"title";s:3:"URL";s:4:"hint";s:0:"";s:6:"weight";s:3:"158";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"26";}i:47;a:5:{s:5:"title";s:3:"DOI";s:4:"hint";s:0:"";s:6:"weight";s:3:"159";s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"47";}i:29;a:5:{s:5:"title";s:13:"Reseach Notes";s:4:"hint";s:0:"";s:6:"weight";s:3:"160";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"29";}i:30;a:5:{s:5:"title";s:8:"Custom 1";s:4:"hint";s:0:"";s:6:"weight";s:3:"161";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"30";}i:31;a:5:{s:5:"title";s:8:"Custom 2";s:4:"hint";s:0:"";s:6:"weight";s:3:"162";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"31";}i:32;a:5:{s:5:"title";s:8:"Custom 3";s:4:"hint";s:0:"";s:6:"weight";s:3:"163";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"32";}i:33;a:5:{s:5:"title";s:8:"Custom 4";s:4:"hint";s:0:"";s:6:"weight";s:3:"164";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"33";}i:34;a:5:{s:5:"title";s:8:"Custom 5";s:4:"hint";s:0:"";s:6:"weight";s:3:"165";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"34";}i:35;a:5:{s:5:"title";s:8:"Custom 6";s:4:"hint";s:0:"";s:6:"weight";s:3:"167";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"35";}i:36;a:5:{s:5:"title";s:8:"Custom 7";s:4:"hint";s:0:"";s:6:"weight";s:3:"168";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"36";}i:38;a:5:{s:5:"title";s:11:"Short Title";s:4:"hint";s:0:"";s:6:"weight";s:3:"169";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"38";}i:39;a:5:{s:5:"title";s:15:"Alternate Title";s:4:"hint";s:0:"";s:6:"weight";s:3:"170";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"39";}i:40;a:5:{s:5:"title";s:16:"Translated Title";s:4:"hint";s:0:"";s:6:"weight";s:3:"170";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"40";}i:41;a:5:{s:5:"title";s:20:"Original Publication";s:4:"hint";s:0:"";s:6:"weight";s:3:"171";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"41";}i:42;a:5:{s:5:"title";s:15:"Reprint Edition";s:4:"hint";s:0:"";s:6:"weight";s:3:"172";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"42";}i:44;a:5:{s:5:"title";s:12:"Citation Key";s:4:"hint";s:0:"";s:6:"weight";s:3:"175";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"44";}i:49;a:5:{s:5:"title";s:20:"Remote Database Name";s:4:"hint";s:0:"";s:6:"weight";s:3:"176";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"49";}i:45;a:5:{s:5:"title";s:10:"COinS Data";s:4:"hint";s:36:"This will be automatically generated";s:6:"weight";s:3:"176";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"45";}i:50;a:5:{s:5:"title";s:24:"Remote Database Provider";s:4:"hint";s:0:"";s:6:"weight";s:3:"177";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"50";}i:51;a:5:{s:5:"title";s:5:"Label";s:4:"hint";s:0:"";s:6:"weight";s:3:"178";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"51";}i:48;a:5:{s:5:"title";s:14:"Author Address";s:4:"hint";s:0:"";s:6:"weight";s:3:"178";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"48";}i:52;a:5:{s:5:"title";s:11:"Access Date";s:4:"hint";s:0:"";s:6:"weight";s:3:"179";s:10:"checkboxes";a:3:{s:6:"common";i:0;s:8:"required";i:0;s:12:"autocomplete";i:0;}s:5:"ftdid";s:2:"52";}}s:2:"op";s:4:"Save";s:6:"submit";s:4:"Save";s:13:"form_build_id";s:37:"form-a8ad5d9e5246d8204cc7291b0792f9eb";s:10:"form_token";s:32:"03afb3cae48e3dcaf8d9f825e5a2f527";s:7:"form_id";s:28:"biblio_admin_types_edit_form";}s:14:"clicked_button";a:18:{s:5:"#type";s:6:"submit";s:6:"#value";s:4:"Save";s:5:"#post";a:5:{s:15:"configured_flds";a:53:{i:15;a:4:{s:5:"title";s:19:"Year of Publication";s:4:"hint";s:33:"Enter YYYY, Submitted or In Press";s:10:"checkboxes";a:2:{s:6:"common";s:6:"common";s:8:"required";s:8:"required";}s:6:"weight";s:3:"-45";}i:53;a:3:{s:5:"title";s:0:"";s:4:"hint";s:0:"";s:6:"weight";s:1:"1";}i:22;a:4:{s:5:"title";s:8:"Abstract";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:1:"1";}i:1;a:5:{s:5:"title";s:7:"Authors";s:4:"hint";s:0:"";s:9:"auth_type";a:5:{i:0;s:1:"1";i:1;s:1:"2";i:2;s:1:"3";i:3;s:1:"4";i:4;s:1:"5";}s:10:"checkboxes";a:3:{s:6:"common";s:6:"common";s:8:"required";s:8:"required";s:12:"autocomplete";s:12:"autocomplete";}s:6:"weight";s:1:"2";}i:2;a:5:{s:5:"title";s:12:"Contributors";s:4:"hint";s:0:"";s:9:"auth_type";a:13:{i:0;s:2:"10";i:1;s:2:"11";i:2;s:2:"12";i:3;s:2:"13";i:4;s:2:"14";i:5;s:2:"15";i:6;s:2:"16";i:7;s:2:"17";i:8;s:2:"18";i:9;s:2:"19";i:10;s:2:"20";i:11;s:2:"21";i:12;s:2:"22";}s:10:"checkboxes";a:2:{s:6:"common";s:6:"common";s:12:"autocomplete";s:12:"autocomplete";}s:6:"weight";s:1:"3";}i:3;a:4:{s:5:"title";s:16:"Tertiary Authors";s:4:"hint";s:0:"";s:9:"auth_type";a:1:{i:0;s:1:"3";}s:6:"weight";s:1:"3";}i:4;a:4:{s:5:"title";s:18:"Subsidiary Authors";s:4:"hint";s:0:"";s:9:"auth_type";a:1:{i:0;s:1:"4";}s:6:"weight";s:1:"4";}i:5;a:4:{s:5:"title";s:17:"Corporate Authors";s:4:"hint";s:0:"";s:9:"auth_type";a:1:{i:0;s:1:"5";}s:6:"weight";s:1:"5";}i:6;a:3:{s:5:"title";s:15:"Secondary Title";s:4:"hint";s:0:"";s:6:"weight";s:2:"12";}i:7;a:3:{s:5:"title";s:14:"Tertiary Title";s:4:"hint";s:0:"";s:6:"weight";s:2:"13";}i:17;a:3:{s:5:"title";s:6:"Volume";s:4:"hint";s:0:"";s:6:"weight";s:2:"14";}i:43;a:3:{s:5:"title";s:7:"Section";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";}i:37;a:3:{s:5:"title";s:17:"Number of Volumes";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";}i:28;a:3:{s:5:"title";s:5:"Issue";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";}i:16;a:3:{s:5:"title";s:7:"Edition";s:4:"hint";s:0:"";s:6:"weight";s:2:"15";}i:18;a:3:{s:5:"title";s:6:"Number";s:4:"hint";s:0:"";s:6:"weight";s:2:"16";}i:19;a:3:{s:5:"title";s:10:"Pagination";s:4:"hint";s:0:"";s:6:"weight";s:2:"17";}i:20;a:3:{s:5:"title";s:14:"Date Published";s:4:"hint";s:9:"(mm/yyyy)";s:6:"weight";s:2:"18";}i:13;a:3:{s:5:"title";s:9:"Publisher";s:4:"hint";s:0:"";s:6:"weight";s:2:"19";}i:14;a:3:{s:5:"title";s:15:"Place Published";s:4:"hint";s:0:"";s:6:"weight";s:2:"20";}i:25;a:3:{s:5:"title";s:12:"Type of Work";s:4:"hint";s:14:"Masters Thesis";s:6:"weight";s:2:"22";}i:21;a:3:{s:5:"title";s:20:"Publication Language";s:4:"hint";s:0:"";s:6:"weight";s:2:"23";}i:12;a:3:{s:5:"title";s:25:"Other Author Affiliations";s:4:"hint";s:0:"";s:6:"weight";s:2:"24";}i:9;a:4:{s:5:"title";s:11:"ISBN Number";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"150";}i:46;a:3:{s:5:"title";s:11:"ISSN Number";s:4:"hint";s:0:"";s:6:"weight";s:3:"150";}i:8;a:4:{s:5:"title";s:16:"Accession Number";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"151";}i:10;a:4:{s:5:"title";s:11:"Call Number";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"152";}i:11;a:4:{s:5:"title";s:13:"Other Numbers";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"153";}i:24;a:4:{s:5:"title";s:8:"Keywords";s:4:"hint";s:0:"";s:10:"checkboxes";a:2:{s:6:"common";s:6:"common";s:12:"autocomplete";s:12:"autocomplete";}s:6:"weight";s:3:"154";}i:23;a:3:{s:5:"title";s:15:"French Abstract";s:4:"hint";s:0:"";s:6:"weight";s:3:"156";}i:27;a:4:{s:5:"title";s:5:"Notes";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"157";}i:26;a:4:{s:5:"title";s:3:"URL";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"158";}i:47;a:4:{s:5:"title";s:3:"DOI";s:4:"hint";s:0:"";s:10:"checkboxes";a:1:{s:6:"common";s:6:"common";}s:6:"weight";s:3:"159";}i:29;a:3:{s:5:"title";s:13:"Reseach Notes";s:4:"hint";s:0:"";s:6:"weight";s:3:"160";}i:30;a:3:{s:5:"title";s:8:"Custom 1";s:4:"hint";s:0:"";s:6:"weight";s:3:"161";}i:31;a:3:{s:5:"title";s:8:"Custom 2";s:4:"hint";s:0:"";s:6:"weight";s:3:"162";}i:32;a:3:{s:5:"title";s:8:"Custom 3";s:4:"hint";s:0:"";s:6:"weight";s:3:"163";}i:33;a:3:{s:5:"title";s:8:"Custom 4";s:4:"hint";s:0:"";s:6:"weight";s:3:"164";}i:34;a:3:{s:5:"title";s:8:"Custom 5";s:4:"hint";s:0:"";s:6:"weight";s:3:"165";}i:35;a:3:{s:5:"title";s:8:"Custom 6";s:4:"hint";s:0:"";s:6:"weight";s:3:"167";}i:36;a:3:{s:5:"title";s:8:"Custom 7";s:4:"hint";s:0:"";s:6:"weight";s:3:"168";}i:38;a:3:{s:5:"title";s:11:"Short Title";s:4:"hint";s:0:"";s:6:"weight";s:3:"169";}i:39;a:3:{s:5:"title";s:15:"Alternate Title";s:4:"hint";s:0:"";s:6:"weight";s:3:"170";}i:40;a:3:{s:5:"title";s:16:"Translated Title";s:4:"hint";s:0:"";s:6:"weight";s:3:"170";}i:41;a:3:{s:5:"title";s:20:"Original Publication";s:4:"hint";s:0:"";s:6:"weight";s:3:"171";}i:42;a:3:{s:5:"title";s:15:"Reprint Edition";s:4:"hint";s:0:"";s:6:"weight";s:3:"172";}i:44;a:3:{s:5:"title";s:12:"Citation Key";s:4:"hint";s:0:"";s:6:"weight";s:3:"175";}i:49;a:3:{s:5:"title";s:20:"Remote Database Name";s:4:"hint";s:0:"";s:6:"weight";s:3:"176";}i:45;a:3:{s:5:"title";s:10:"COinS Data";s:4:"hint";s:36:"This will be automatically generated";s:6:"weight";s:3:"176";}i:50;a:3:{s:5:"title";s:24:"Remote Database Provider";s:4:"hint";s:0:"";s:6:"weight";s:3:"177";}i:51;a:3:{s:5:"title";s:5:"Label";s:4:"hint";s:0:"";s:6:"weight";s:3:"178";}i:48;a:3:{s:5:"title";s:14:"Author Address";s:4:"hint";s:0:"";s:6:"weight";s:3:"178";}i:52;a:3:{s:5:"title";s:11:"Access Date";s:4:"hint";s:0:"";s:6:"weight";s:3:"179";}}s:2:"op";s:4:"Save";s:13:"form_build_id";s:37:"form-290964395af25fac72c94913e61d1305";s:10:"form_token";s:32:"03afb3cae48e3dcaf8d9f825e5a2f527";s:7:"form_id";s:28:"biblio_admin_types_edit_form";}s:11:"#programmed";b:0;s:5:"#tree";b:0;s:8:"#parents";a:1:{i:0;s:6:"submit";}s:14:"#array_parents";a:1:{i:0;s:6:"submit";}s:7:"#weight";d:0.0040000000000000000832667268468867405317723751068115234375;s:10:"#processed";b:0;s:12:"#description";N;s:11:"#attributes";a:0:{}s:9:"#required";b:0;s:6:"#input";b:1;s:5:"#name";s:2:"op";s:12:"#button_type";s:6:"submit";s:25:"#executes_submit_callback";b:1;s:8:"#process";a:1:{i:0;s:16:"form_expand_ahah";}s:3:"#id";s:11:"edit-submit";}s:13:"process_input";b:1;s:8:"redirect";N;}
+COMMON;
+  include_once(drupal_get_path('module','biblio')."/biblio.admin.inc");
+  drupal_execute('biblio_admin_types_edit_form',unserialize(trim($s_common_string)));
+  //now update the contributor data for the nodes according the field changes above
+  db_query("UPDATE {biblio_contributor} SET auth_category = %d WHERE auth_type > %d", 2, 5);
+  return $result;
+}
+
+/**
+ *  Update the biblio config
+ */
+function scholar_publications_update_6004(&$sandbox){
+  $res = array();
+  $res[0] = array(
+      'success' => false,
+      'query' => 'Unable to locate biblio_settings.inc',
+    );
+
+  if(!file_exists(drupal_get_path('module', 'scholar_publications') .'/includes/biblio_settings.inc')) return;
+
+  list($biblio_field_type, $biblio_field_type_data, $biblio_contributor_type, $biblio_contributor_type_data) = include(drupal_get_path('module', 'scholar_publications') .'/includes/biblio_settings.inc');
+
+  db_query('DELETE FROM {biblio_field_type}');
+  foreach($biblio_field_type as $type){
+    drupal_write_record('biblio_field_type', $type);
+  }
+
+  db_query('DELETE FROM {biblio_field_type_data}');
+  foreach($biblio_field_type_data as $type_data){
+    drupal_write_record('biblio_field_type_data', $type_data);
+  }
+
+  db_query('DELETE FROM {biblio_contributor_type}');
+  foreach($biblio_contributor_type as $contrib_type){
+    drupal_write_record('biblio_contributor_type', $contrib_type);
+  }
+
+  db_query('DELETE FROM {biblio_contributor_type_data}');
+  foreach($biblio_contributor_type_data as $contrib_type_data){
+    //Run the query manually to override the serials
+    db_query("INSERT INTO {biblio_contributor_type_data} (auth_type, title, hint) VALUES ( %d, '%s', '%s')",array($contrib_type_data['auth_type'],$contrib_type_data['title'],$contrib_type_data['hint']));
+  }
+
+  $res[0] = array(
+      'success' => true,
+      'query' => 'Biblio settings have been updated',
+    );
+
+  return $res;
+}
+
+/**
+ *  Update the biblio config
+ */
+function scholar_publications_update_6005(&$sandbox){
+	//Update the biblio settings again
+	$res = scholar_publications_update_6004($sandbox);
+
+	//This needs to be set to use as the auto increment
+	variable_set('biblio_last_ftdid', 491);
+
+	$res[] = array(
+      'success' => true,
+      'query' => 'Updated biblio last ftid field',
+    );
+
+  return $res;
+}
+
+function scholar_publications_update_6006(&$sandbox){
+
+  $res = array();
+
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "scholar_publications" ');
+  while ($row = db_fetch_object($result)) {
+    $value = unserialize($row->value);
+
+    foreach ($value as $key => $data) {
+      switch ($key){
+          case "style":
+            $varname = "biblio_style";
+          break;
+          case "sort":
+            $varname = "biblio_sort";
+          break;
+          case "sort_tabs":
+            $varname = "biblio_sort_tabs";
+          break;
+          case "order":
+            $varname = "biblio_order";
+          break;
+          case "export_links":
+            $varname = "biblio_export_links";
+          break;
+          case "google_link":
+            $varname = "biblio_google_link";
+          break;
+          case "no_publication_date":
+            $varname = "biblio_no_year_text";
+          break;
+          case "note_in_teaser":
+            $varname = "scholar_publication_note_in_teaser";
+          break;
+          case "link_title_url":
+            $varname = "biblio_link_title_url";
+          break;
+          case "author_links":
+            $varname = "biblio_author_links";
+          break;
+          case "rowsperpage":
+            $varname = $key;
+          break;
+        }
+        db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', '%s', '%s')", $row->type, $row->sid, $varname, serialize($data));
+    }
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Publication Settings',
+    );
+
+  return $res;
+
+}
+
+function scholar_publications_update_6007(&$sandbox){
+
+  $res = array();
+
+  if (module_exists('bkn')){
+    drupal_uninstall_module("bkn");
+    $res[] = array(
+      'success' => true,
+      'query' => 'Uninstalled BKN Module',
+    );
+  }
+
+  return $res;
+
+}
+
+function scholar_publications_update_6008(&$sandbox) {
+  $res = array();
+
+  imagecache_preset_flush(array('presetname' => 'book_cover'));
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'ImageCache cleared.',
+  );
+
+  return $res;
+}
+
+function scholar_publications_update_6009(&$sandbox) {
+  // run through context overrides and replace the views block with our new one
+  $res = array();
+
+  $q = db_query("SELECT id, object_id, value FROM {spaces_overrides} WHERE type = 'og' AND object_type = 'context'");
+  while ($r = db_fetch_array($q)) {
+    $r['value'] = unserialize($r['value']);
+    $old_block = &$r['value']['blocks']['views-publication_types-block_1'];
+    if ($old_block['region']) {
+      $widgets = scholar_publications_vsite_widgets();
+      $r['value']['blocks']['scholar_publications-pub_by_type'] = $widgets['scholar_publications-pub_by_type'];
+      $r['value']['blocks']['scholar_publications-pub_by_type']['region'] = $old_block['region'];
+      $r['value']['blocks']['scholar_publications-pub_by_type']['weight'] = $old_block['weight'];
+      unset($r['value']['blocks']['views-publication_types-block_1']);
+      db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE id = %d AND object_id = '%s' AND object_type = 'context'",
+              serialize($r['value']), $r['id'], $r['object_id']);
+    }
+  }
+
+  $res[] = array('success' => true, 'query' => 'Now using new Publication Types block.');
+
+  return $res;
+}
+
+/**
+ * helper function stores definition of biblio_url_title field so other functions can use same def.
+ */
+function _scholar_publications_add_field_biblio_url_title() {
+  return array('type' => 'varchar', 'length' => '255', 'description' => 'Title of link to external URL', );
+}
+
+/**
+ * implementation of hook_update_N
+ * adds biblio_url_title column to biblio table
+ */
+function scholar_publications_update_6010($sandbox) {
+  $ret = array();
+  db_add_field($ret, 'biblio', 'biblio_url_title', _scholar_publications_add_field_biblio_url_title());
+  $ret[] = update_sql('INSERT INTO {biblio_fields} (name, type, size, maxsize) VALUES ("biblio_url_title", "textfield", 60, 255)');
+  
+  return $ret;
+}
+
+/**
+ * implementation of hook_schema_alter
+ * registers addition of biblio_url_title
+ */
+function scholar_publications_schema_alter(&$schema) {
+  $schema['biblio']['fields']['biblio_url_title'] = _scholar_publications_add_field_biblio_url_title(); 
+}

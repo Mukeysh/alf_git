@@ -1,0 +1,252 @@
+<?php
+
+include_once('vsite_support.features.inc');
+
+function vsite_support_init() {
+  drupal_add_css(drupal_get_path('module', 'vsite_support') . '/theme/vsite_support.css');
+}
+
+/**
+ * hook menu
+ */
+function vsite_support_menu() {
+  $items = array();
+
+  $items['cp/support'] = array(
+    'title' => 'Support',
+    'page callback' => 'contact_site_page',
+    'file' => 'contact.pages.inc',
+    'file path' => drupal_get_path('module', 'contact'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 70,
+  );
+
+  if (module_exists('contact')) {
+    $items['cp/support/contact'] = array(
+      'title' => 'Contact Us',
+      'page callback' => 'contact_site_page',
+      'file' => 'contact.pages.inc',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'file path' => drupal_get_path('module', 'contact'),
+      'weight' => 10,
+    );
+
+    $items['cp/support/help'] = array(
+      'title' => 'Help',
+      'page callback' => 'vsite_support_user_doc',
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 20,
+    );
+
+    $items['contact_owner'] = array(
+      'title' => 'Contact',
+      'page callback' => 'vsite_support_site_contact',
+      'page arguments' => array(1),
+      'type' => MENU_CALLBACK,
+      //'menu_name' => variable_get('scholar_primary_menu','features'),
+      'access callback' => 'vsite_support_site_contact_access',
+      'file' => 'contact.pages.inc',
+      'file path' => drupal_get_path('module', 'contact'),
+    );
+  }
+
+  // make them all part of 'cp' menu
+  foreach ($items as $path => $item) {
+    if (!isset($item['menu_name'])) $items[$path]['menu_name'] = 'cp';
+    if (!isset($item['access callback'])) $items[$path]['access callback'] = 'cp_access_cp';
+  }
+
+  // View main help.
+  $items['about'] = array(
+    'page callback' => 'advanced_help_topic_page',
+    'page arguments' => array('vsitehelp', 'Scholar-Web-Sites-Project-Documentation'),
+    'access arguments' => array('view advanced help topic'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Contact form that contacts the site owner
+ * @return contact_page
+ */
+function vsite_support_site_contact() {
+  if (!($vsite = vsite_get_vsite()) || !($user = user_load($vsite->group->uid))) return MENU_ACCESS_DENIED;
+
+  $contact_anon = $vsite->controllers->variable->get('vsite_users_contact_anonymous');
+  if ($contact_anon === 0 && !user_is_logged_in()) {
+    $output = t('You need to be logged in in order to send mail to this user.');
+  }
+  elseif (!flood_is_allowed('contact', variable_get('contact_hourly_threshold', 3))) {
+    $output = t('You cannot contact more than %number users per hour. Please try again later.', array('%number' => variable_get('contact_hourly_threshold', 3)));
+  }
+  else {
+    drupal_set_title("Contact Site Owner");
+    $output = drupal_get_form('vsite_support_contact_mail_owner', $user);
+  }
+  return $output;
+}
+
+function vsite_support_contact_mail_owner(&$form_state, $recipient) {
+  global $user;
+  $form['#token'] = $user->name . $user->mail;
+  $form['recipient'] = array('#type' => 'value', '#value' => $recipient);
+  if ($user->mail) {
+    $form['from'] = array('#type' => 'item',
+      '#title' => t('From'),
+      '#value' => theme('username', $user) .' &lt;'. check_plain($user->mail) .'&gt;',
+    );
+  }
+  else {
+    $form['name'] = array(
+      '#type' => 'item',
+      '#title' => t('From'),
+      '#value' => theme('username', $user),
+    );
+    
+    $form['sender_firstname'] = array(
+      '#type' => 'textfield',
+      '#title' => t('First name'),
+      '#required' => TRUE,
+    );
+    
+    $form['sender_lastname'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last name'),
+      '#required' => TRUE,
+    );
+    
+    $form['from'] = array(
+      '#type' => 'textfield',
+      '#title' => t('E-Mail Address'),
+      '#required' => TRUE,
+    );
+  }
+
+  if(($user_profile = content_profile_load('vsite_users_profile',$recipient->uid)) && is_array($user_profile->vsite_users_first_name[0])){
+    //Does this user have a user profile? with their name?
+    $recipient->name = $user_profile->vsite_users_first_name[0]['value']." ".$user_profile->vsite_users_last_name[0]['value'];
+  }elseif (($vsite = vsite_get_vsite()) && strlen($vsite->group->title)){
+    $recipient->name = $vsite->group->title;
+  }
+
+  $form['to'] = array('#type' => 'item',
+    '#title' => t('To'),
+    '#value' => theme('username', $recipient),
+  );
+  $form['subject'] = array('#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#maxlength' => 50,
+    '#required' => TRUE,
+  );
+  $form['message'] = array('#type' => 'textarea',
+    '#title' => t('Message'),
+    '#rows' => 15,
+    '#required' => TRUE,
+  );
+  $form['copy'] = array('#type' => 'checkbox',
+    '#title' => t('Send yourself a copy.'),
+  );
+  $form['submit'] = array('#type' => 'submit',
+    '#value' => t('Send e-mail'),
+  );
+  return $form;
+}
+
+/**
+ * Process the personal contact page form submission.
+ */
+function vsite_support_contact_mail_owner_submit($form, &$form_state) {
+  global $user, $language;
+
+  $account = $form_state['values']['recipient'];
+  $vsite = vsite_get_vsite();
+
+  // Send from the current user to the requested user.
+  $to = $account->mail;
+  $from = $user->mail;
+  if (!$from) {
+    if (!strlen($form_state['values']['from']) || !preg_match('/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,7})+$/', $form_state['values']['from'])) {
+      drupal_set_message(t('You must provide a valid e-mail address.'));
+      return;
+    }
+    $from = $form_state['values']['from'];
+  }
+
+  // Save both users and all form values for email composition.
+  $values = $form_state['values'];
+  $values['account'] = $account;
+  $values['user'] = $user;
+  $values['vsite'] = $vsite;
+
+  // Send the e-mail in the requested user language.
+  drupal_mail('vsite_support', 'user_mail', $to, user_preferred_language($account), $values, $from);
+
+  // Send a copy if requested, using current page language.
+  if ($form_state['values']['copy']) {
+    drupal_mail('vsite_support', 'user_copy', $from, $language, $values, $from);
+  }
+
+  flood_register_event('contact');
+  watchdog('mail', '%name-from sent %name-to an e-mail.', array('%name-from' => $user->name, '%name-to' => $account->name));
+  drupal_set_message(t('The message has been sent.'));
+
+  // Back to the home page
+  $form_state['redirect'] = "home";
+}
+
+/**
+ * Check settings to see if you should display
+ * @return contact_page
+ */
+function vsite_support_site_contact_access() {
+  if (!($vsite = vsite_get_vsite()) || !($user = user_load($vsite->group->uid))) return FALSE;
+
+  return TRUE;
+
+  $contact_anon = $vsite->controllers->variable->get('vsite_users_contact_anonymous');
+  // there was a contact form var here, but I don't know where it's set from
+  return ($contact_anon !== 0 || user_is_logged_in());
+}
+
+/**
+ * Implementation of hook_mail().
+ */
+function vsite_support_mail($key, &$message, $params){
+  $language = $message['language'];
+  switch ($key) {
+    case 'user_mail' :
+    case 'user_copy' :
+      $user = $params['user'];
+      $account = $params['account'];
+      $vsite = $params['vsite'];
+      $message['subject'] = $params['subject'] .' [via ' . variable_get('site_name', 'Drupal') . ']';
+      $message['body'][] = $params['message'];
+      $message['body'][] = "\n\n---------------";
+
+      $message['body'][] = t("This message was sent to you from \"!site\" on behalf of !name through your website contact form (!form-url).", array(
+        '!name' => ($user->name) ? $user->name : $params['sender_firstname'] . ' ' . $params['sender_lastname'] . ' (' .$message['from'] . ')', 
+        '!form-url' => url($_GET['q'], array(
+          'absolute' => TRUE, 
+          'language' => $language 
+        )), 
+        '!site' => variable_get('site_name', 'Drupal') 
+      ), $language->language);
+      $message['body'][] = t("If you don't want to receive such e-mails, you can change your settings at !url.", array(
+        '!url' => $vsite -> get_absolute_url("cp/settings/site") 
+      ), $language->language);
+      break;
+  }
+}
+
+/**
+ * menu page callback for cp/support/help
+ * 
+ * returns advanced help's html for User-Documentation page
+ **/
+function vsite_support_user_doc() {
+  $link_opts = array('purl' => array('disabled' => TRUE), 'query' => array('popup'=>1));
+  $content = "<div class=\"view-vsite-support\"><p>Click " . l('here', 'help/vsitehelp/User-Documentation', $link_opts) . " to view the User Documentation help page.<p></div>";
+  return $content;
+}

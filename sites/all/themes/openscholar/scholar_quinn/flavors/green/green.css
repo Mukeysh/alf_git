@@ -1,0 +1,44 @@
+html,body {
+  background: #697a64;
+  }
+
+h2, h2.title {
+  color: #adad84;
+  }
+
+#sidebar-first a,
+#sidebar-first a:visited,
+#sidebar-second a,
+#sidebar-second a:visited,
+#header a,
+#header a:visited,
+#header,
+#header h1 a,
+#header h1 a:visited {
+  color: #fff;
+  }
+
+#content-main {
+  -moz-box-shadow: 0 3px 2em #666;
+  -webkit-box-shadow: 0 3px 2em #666;
+  box-shadow: 0 3px 2em #666;
+  }
+
+#sidebar-first a:hover,
+#sidebar-second a:hover,
+#header h1 a:hover {
+  background: #EEF788;
+  color: #333;
+  }
+
+#sidebar-first a.active,
+#sidebar-first .active-trail a,
+#sidebar-second a.active,
+#sidebar-second .active-trail a {
+  color: #444;
+  background: #D7E07B;
+  }
+  
+.term-head {
+color: #DDD;
+}

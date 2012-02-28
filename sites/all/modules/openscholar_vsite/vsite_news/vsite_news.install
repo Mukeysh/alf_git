@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function vsite_news_install() {
+
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function vsite_news_uninstall() {
+
+}
+
+/**
+ * Lets take into account all the schema changes activity made
+ * @param unknown_type $sandbox
+ */
+function vsite_news_update_6001(&$sandbox) {
+  
+  db_query("ALTER TABLE `activity` ADD `eid` INT NULL COMMENT 'Entity ID used to maintain the relationship between activity and the entity that created the activity' ");
+  db_query(" ALTER TABLE `activity` ADD INDEX ( `eid` )  ");
+  db_query(" ALTER TABLE `activity` ADD INDEX ( `created` )  ");
+  
+  db_query("ALTER TABLE `activity_targets` ADD `language` VARCHAR( 12 ) NOT NULL DEFAULT 'en' COMMENT 'The IS0-3166 name of the langauge for the associated message.'");
+  db_query(" ALTER TABLE `activity_targets` DROP PRIMARY KEY , ADD PRIMARY KEY ( `aid` , `uid` , `language` ) ");
+  db_query(" ALTER TABLE `activity_targets` ADD INDEX ( `amid` )  ");
+  
+  
+  return array();
+}
+
+function vsite_news_update_6002(&$sandbox){
+  
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+  
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "access" ');
+  while ($row = db_fetch_object($result)) {
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'vsite_setting_access', '%s')", $row->type, $row->sid, $row->value);
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the News Access Settings',
+    );
+  
+  return $res;
+  
+}

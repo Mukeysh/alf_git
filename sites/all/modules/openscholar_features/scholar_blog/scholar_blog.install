@@ -1,0 +1,66 @@
+<?php
+
+function scholar_blog_enable() {
+  
+  //Disable blog module
+  $return = array();
+  scholar_blog_update_6001($return);
+}
+
+
+function scholar_blog_update_6001(&$sandbox){
+  
+  $res = array();
+  module_rebuild_cache();
+  
+  // Uninstall blog module if need
+  if(module_exists('blog')){
+    
+    module_disable(array('blog')); //Disables but does not uninstall
+    
+    $res[] = array(
+      'success' => true,
+      'query' => 'Disabled blog module',
+    );
+    
+    
+  }
+  
+  
+  return $res;
+  
+}
+
+function scholar_blog_update_6002(&$sandbox){
+  
+  $res = array();
+  
+  // Enable better_formats module if need
+  if(!module_exists('better_formats')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('better_formats'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed better_formats module and enabled it',
+    );
+    
+  }
+  
+  // Enable vsite_comments module if need
+  if(!module_exists('vsite_comments')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('vsite_comments'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed vsite_comments module and enabled it',
+    );
+    
+  }
+  
+  return $res;
+  
+}

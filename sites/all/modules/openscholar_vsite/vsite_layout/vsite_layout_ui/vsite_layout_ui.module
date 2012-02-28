@@ -1,0 +1,166 @@
+<?php
+
+/**
+ * Define the themes used for the layout portion of the CP
+ */
+function vsite_layout_ui_theme() {
+  return array(
+    //The layout page
+    'vsite_layout_ui_layout' => array(
+      'template' => 'vsite_layout_ui-layout',
+      'path' => drupal_get_path('module', 'vsite_layout_ui') . '/theme',
+      'arguments' => array('regions' => NULL, 's_page_type' => ''),
+    ),
+
+    'vsite_layout_ui_layout_widgets' => array(
+      'template' => 'vsite_layout_ui-layout-widgets',
+      'arguments' => array('wgts' => array(), 'wgts_id' => NULL, 'wgts_class' => NULL, 'region_name' => NULL),
+      'path' => drupal_get_path('module', 'vsite_layout_ui') . '/theme'
+    ),
+
+    'vsite_layout_ui_tagged_widgets' => array(
+      'template' => 'vsite_layout_ui-tagged-widgets',
+      'arguments' => array('wgts' => array(), 'wgts_id' => NULL, 'wgts_class' => NULL, 'region_name' => NULL, 'wgts_tags' => array()),
+      'path' => drupal_get_path('module', 'vsite_layout_ui') . '/theme'
+    ),
+
+    'vsite_layout_ui_cp_widget' => array(
+      'template' => 'vsite_layout_ui-cp-widget',
+      'arguments' => array('s_widget_key' => NULL, 'w' => NULL),
+      'path' => drupal_get_path('module', 'vsite_layout_ui') . '/theme'
+    ),
+  );
+}
+
+/**
+ * Define the Menu Entries for the Cp Layout Management
+ */
+function vsite_layout_ui_menu() {
+  $items = array();
+
+  $items['cp/build/layout'] = array(
+    'title' => "Layout",
+    'page callback' => 'vsite_layout_ui_layout',
+    'type' => MENU_LOCAL_TASK,
+    'menu_name' => 'cp',
+    'access callback' => 'cp_access_cp',
+    'file path' => drupal_get_path('module', 'vsite_layout_ui') . '/includes',
+    'file' => 'vsite_layout_ui.inc',
+    'weight' => 10,
+  );
+
+  $items["cp/build/layout/region_widgets_js"] =
+  $items["cp/build/region_widgets_js"] = array(
+    'page callback' => 'vsite_layout_ui_region_widgets_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file path' => drupal_get_path('module', 'vsite_layout_ui') . '/includes',
+    'file' => 'vsite_layout_ui.inc',
+  );
+  $items["cp/build/layout/top_widgets_js"] =
+  $items["cp/build/top_widgets_js"] = array(
+    'page callback' => 'vsite_layout_ui_top_widgets_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file path' => drupal_get_path('module', 'vsite_layout_ui') . '/includes',
+    'file' => 'vsite_layout_ui.inc',
+  );
+
+  $items['cp/build/layout/%ctools_js/%/delete'] = array(
+    'title' => 'Delete this Widget',
+    'page callback' => 'vsite_layout_ui_delete_modal',
+    'page arguments' => array(3, 4),
+    'access callback' => 'spaces_access_admin',
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+
+function vsite_layout_ui_delete_modal($js, $delta) {
+  ctools_include('form');
+  $box = boxes_load($delta);
+  $form_state = array('box' => $box);
+
+  if (!$js) {
+    return ctools_build_form('vsite_layout_ui_delete_box_confirm_form', $form_state);
+  }
+
+  ctools_include('modal');
+  ctools_include('ajax');
+
+  $form_state += array(
+    'ajax' => TRUE,
+    'no_redirect' => TRUE,
+    'title' => t('Delete Widget: @title', array('@title' => $box->description)),
+  );
+
+  $output = ctools_modal_form_wrapper('vsite_layout_ui_delete_box_confirm_form', $form_state);
+
+  if (empty($output)) {
+    $output = array();
+    $output[] = ctools_modal_command_dismiss();
+  }
+  else {
+    $output[] = ctools_ajax_command_after('#modal-content #edit-submit','<input class="form-submit close" onClick="$(\'div.modal-header a.close\').click(); return false;" value="Cancel" />');
+  }
+
+  if (is_array($form_state['js commands'])) {
+    $output = array_merge($output, $form_state['js commands']);
+  }
+
+  ctools_ajax_render($output);
+}
+
+function vsite_layout_ui_delete_box_confirm_form($form_state) {
+  $vsite = vsite_get_vsite();
+  $ctx = $vsite->controllers->context->get();
+  $form = array();
+
+  $form['text'] = array(
+    '#type' => 'markup',
+    '#value' => t('Are you sure you want to delete this widget?<br>Doing so will delete this widget from all sections that use it.<br>'),
+  );
+
+  $form['buttons'] = array(
+    'yes' => array(
+      '#type' => 'submit',
+      '#value' => t('Yes'),
+    ),
+    'no' => array(
+      '#type' => 'button',
+      '#value' => t('Nevermind'),
+      '#attributes' => array(
+        'onclick' => '$(\'div.modal-header a.close\').click(); return false;',
+      )
+    ),
+  );
+
+  $form['#submit'][] = 'vsite_layout_ui_delete_box_confirm_submit';
+
+  return $form;
+}
+
+function vsite_layout_ui_delete_box_confirm_submit(&$form, &$form_state) {
+  $vsite = vsite_get_vsite();
+  if (!$vsite) return;
+  $box = $form_state['box'];
+  $ctx = $vsite->controllers->context->get();
+  $delta = 'boxes-'.$box->delta;
+
+  foreach ($ctx as $id => &$ct) {
+    if (strpos($id, 'reaction:block:') === FALSE) continue;
+    unset($ct['blocks'][$delta]);
+    $vsite->controllers->context->set($id, $ct);
+  }
+
+  if (strpos($delta, 'og-'.$vsite->group->nid) !== FALSE) {
+    // this is a space specific instance. delete it forever
+    $vsite->controllers->boxes->del($box->delta);
+  }
+
+  $form_state['js commands'] = array(
+    ctools_ajax_command_remove('#'.$delta),
+  );
+}

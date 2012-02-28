@@ -1,0 +1,35 @@
+diff --git a/oembedembedly.module b/oembedembedly.module
+index d468481..1cba13b 100644
+--- a/oembedembedly.module
++++ b/oembedembedly.module
+@@ -78,4 +78,29 @@ function oembedembedly_admin() {
+     '#description'   => t('This option defines whether providers should be enabled by default or not.'),
+   );
+   return system_settings_form($form);
++}
++
++/**
++ * Implement hook_oembedprovider_alter().
++ *
++ * This is to workaround embed.ly's nonstandard oembed descriptions.
++ */
++function oembedembedly_oembedprovider_alter(&$providers) {
++
++  // oEmbed standard dictates that wildcards can only be used for subdomains in
++  // URL schemes. embed.ly breaks this rule, which causes unmatchable domains.
++  foreach ($providers as $host => $patterns) {
++
++    // When the first character is * such as *youtube.com.
++    if (strpos($host, '*') === 0) {
++      $new_host = drupal_substr($host, 1);
++      if (!empty($providers[$new_host])) {
++        $providers[$new_host] = array_merge($providers[$new_host], $patterns);
++      }
++      else {
++        $providers[$new_host] = $patterns;
++      }
++      unset($providers[$host]);
++    }
++  }
+ }
+\ No newline at end of file

@@ -1,0 +1,54 @@
+.department-economics #page {
+     margin-top: 50px;
+}
+
+.department-economics #block-osh_departments-dept_banner {
+     background: url("../images/navBarBg.png") repeat-x;
+     height: 38px;
+     left: 0px;
+     position: absolute;
+     top: 0px;
+     width: 100%;
+     z-index: 5;
+}
+
+.cp-toolbar-full #block-osh_departments-dept_banner, .cp-toolbar-mini #block-osh_departments-dept_banner  {
+ top: 42px;
+}
+
+.cp-toolbar-mini #block-osh_departments-dept_banner, .cp-toolbar-mini #block-osh_departments-dept_banner  {
+ top: 0px;
+}
+
+.admin-menu #block-osh_departments-dept_banner {
+ top: 21px;
+}
+
+.department-economics #header-top .content ul {
+background: url("../images/ecommDeptLogo.png") no-repeat;
+     padding-top: 8px;
+     width: 980px;
+margin-left:auto;
+margin-right:auto;
+  height: 38px;
+     text-align: right;
+}
+
+.department-economics #header-top .content ul li a {
+     color: #500303;
+     font-size: 13px;
+     font-style: normal;
+     padding: 11px;
+     text-decoration: none;
+     font-family: arial;
+}
+
+.department-economics #header-top .content ul li a:hover {
+     background: #DDDDDD;
+     height: 38px;
+}
+
+#header-top span.ext {
+     display: none;
+     visibility: hidden;
+}

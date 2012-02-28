@@ -1,0 +1,56 @@
+<?php
+
+// $Id;
+
+/**
+ * Implementation of hook_requirements
+ * Enter description here ...
+ * @param unknown_type $phase
+ */
+function sword_meta_requirements($phase) {
+	$reqs = array();
+	
+	if ($phase == "install") {
+		//check for SimpleXL, curl, zip
+		
+		$libs = array(
+		  'zip_read'=>'zip',
+		  'curl_init'=>'CURL',
+		  'simplexml_load_file'=>'SimpleXML',
+		);
+		
+		$missing = array();
+		
+		foreach( $libs as $function => $library ) {
+			if (!function_exists($function)) {
+				$missing[] = $library;
+			}
+		}
+		
+		if ( count($missing) > 0 ) {
+			$reqs['sword_meta'] = array(
+				'title' => t('SWORD missing required libraries.'),
+        'description' => t('SWORD could not be installed.  The following php extensions were missing: ' . implode(', ', $missing)),
+        'severity' => REQUIREMENT_ERROR,
+			);
+		}
+		
+	}
+	
+	return $reqs;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function sword_meta_install() {
+	
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sword_meta_uninstall() {
+	
+}
+

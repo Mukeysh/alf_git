@@ -1,0 +1,90 @@
+<?php
+
+include_once('scholar_events_signup.features.inc');
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function scholar_events_signup_menu_alter(&$items) {
+  // Remove the signups tabs from the user account page which 
+  // come from the views below. Disable them.
+  $views_defaults = variable_get('views_defaults', array());
+  $disabled = array(
+    'signup_available_signups',
+    'signup_current_signups',
+  );
+  $set = FALSE;
+  foreach ($disabled as $view_name) {
+    if (empty($views_defaults[$view_name])) {
+      $set = TRUE;
+      $views_defaults[$view_name] = TRUE;
+    }
+  }
+  if ($set) {
+    variable_set('views_defaults', $views_defaults);
+  }
+
+}
+
+/**
+ * implementation of hook_strongarm
+ */
+
+function scholar_events_signup_strongarm() {
+  $conf = array();
+  $conf['signup_node_default_state_event'] = "allowed_off";
+  $conf['signup_date_field_event'] = "field_date";
+  $conf['signup_close_early'] = "1";
+  $conf['signup_date_format'] = "small";
+  $conf['signup_form_location'] = "node";
+  $conf['signup_fieldset_collapsed'] = "1";
+  $conf['signup_display_signup_user_list'] = "embed-view-tab";
+  $conf['signup_display_signup_admin_list'] = "signup";
+  $conf['signup_user_list_view'] = "signup_user_list:default";
+  $conf['signup_admin_list_view'] = "signup_user_vbo_admin_list:default";
+
+  $conf["vertical_tabs_forms"]["event_node_form"] = array('signup' => FALSE);
+  return $conf;
+}
+
+
+
+/**
+ * Implementation of _signup_menu_access
+ */
+function scholar_events_signup_menu_access($node, $menu_type) {
+  // vsite admin can do almost anything besides sign up other users
+  // (because currently you cant sign up annonymous users.
+  vsite_include('vsiteapi');
+  if ($vsite = vsite_get_vsite()){
+    if ($vsite -> access_admin()){
+      if ($menu_type === 'add'){
+        return FALSE;
+      }
+      
+      return TRUE;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_form_alter
+ */
+function scholar_events_signup_form_alter(&$form, &$form_state, $form_id){
+  // remove token stuff from the following forms
+  switch ($form_id) {
+    case 'signup_node_settings_form' :
+      unset($form['signup_confirmation_token_fieldset']);
+      unset($form['signup_reminder_token_fieldset']);
+      break;
+    case 'signup_broadcast_form' :
+      unset($form['message_tokens_fieldset']);
+      break;
+    case 2 :
+      echo "i equals 2";
+      break;
+  }
+
+
+}
+

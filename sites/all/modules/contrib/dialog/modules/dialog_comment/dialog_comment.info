@@ -1,0 +1,6 @@
+; $Id$
+name = Dialog Comment
+description = Provides Dialog integration for the core comment module.
+core = 6.x
+dependencies[] = dialog
+dependencies[] = comment

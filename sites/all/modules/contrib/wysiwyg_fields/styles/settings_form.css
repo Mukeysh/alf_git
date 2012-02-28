@@ -1,0 +1,12 @@
+/**
+ * @file
+ */
+
+.wysiwyg_fields_icons {
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+#edit-wysiwyg-fields-icon-upload-wrapper {
+  display: block;
+}

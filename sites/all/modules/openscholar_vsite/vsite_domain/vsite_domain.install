@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implementaton of hook_enable().
+ */
+function vsite_domain_enable() {
+  // Now that vsites are enabled clear the cached processors
+  // This will allow vsite_domain etc to add to the ctools cache
+  cache_clear_all('plugins:purl:processor','cache');
+}
+
+function vsite_domain_install() {
+  //Set the default domain typically the one you are installing with, otherwise you will need to change this in the settings
+  variable_set('purl_base_domain','http://'.str_replace('http://','',$_SERVER['HTTP_HOST']));
+}
+
+function vsite_domain_update_6001(&$sandbox) {
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  if (db_table_exists('spaces_settings')) {
+    $result = db_query("SELECT * FROM {spaces_settings} WHERE id = 'generic'");
+    while ($row = db_fetch_object($result)) {
+      $value = unserialize($row->value);
+
+      db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', 'vsite_domain_name', '%s')", $row->type, $row->sid, serialize($value['vsite_domain']));
+
+    }
+    $res[] = array('success' => true,
+                   'query' => 'Vsite Domain Settings Migrated.');
+  }
+
+  return $res;
+}

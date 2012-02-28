@@ -1,0 +1,131 @@
+
+div.ctools-dropdown div.ctools-dropdown-container,
+div.ctools-dropdown div.ctools-dropdown-container {
+  right: -13px;
+}
+
+#biblio-node div.ctools-dropdown div.ctools-dropdown-container {
+  right: auto;
+  left: 0;
+ }
+
+/* the "Admin/Actions" link */
+.os-links .vsite-admin a.ctools-dropdown-link {
+  position: absolute;
+  font-size: 11px;
+  font-family: 'helvetica neue', helvetica, arial, sans-serif;
+  text-align: left;
+  text-indent: -999em;
+}
+
+.page-node .node .os-links .vsite-admin a.ctools-dropdown-link,
+.page-biocv .node .os-links .vsite-admin a.ctools-dropdown-link   {
+  position: static;
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: bold;
+  font-style: normal;
+  color:#b0c6fb;
+}
+  
+.node .os-links .vsite-admin a.ctools-dropdown-link:hover {
+  text-decoration: underline;
+  }
+
+.node:hover .vsite-admin a.ctools-dropdown-link,
+.block:hover .vsite-admin a.ctools-dropdown-link,
+.view:hover > .os-links .vsite-admin a.ctools-dropdown-link {
+  background-position: 0 -123px;
+  }
+
+.node,
+.block,
+.view {
+  position: relative;
+}  
+
+.os-links {
+  height: 18px;
+  position: absolute;
+  right: 0;
+  top: 0px;
+  width: 14px;
+  padding: 0 0 5px 5px;
+  z-index: 2;
+}
+
+.block .node .os-links {
+	right: 15px;
+}
+
+.block .title ~.content .node .os-links {
+	right: 0;
+}
+  
+.node-teaser .os-links {
+  top: auto; 
+}
+
+.page-node .os-links,
+.page-biocv .os-links {
+  width: auto;
+}
+
+.node-teaser .os-links .vsite-admin .ctools-dropdown-link-wrapper,
+.block .os-links .vsite-admin .ctools-dropdown-link-wrapper,
+.view > .os-links .vsite-admin .ctools-dropdown-link-wrapper {
+  display:none;
+}
+
+.node:hover .os-links .vsite-admin .ctools-dropdown-link-wrapper,
+.block:hover > .os-links .vsite-admin .ctools-dropdown-link-wrapper,
+.view:hover > .os-links .vsite-admin .ctools-dropdown-link-wrapper {
+  display:block;
+}
+
+.node-teaser.os-links-trail {
+  border: 1px dashed black;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+}
+
+.node-teaser.os-links-trail .node-inner {
+  padding: 2px;
+}
+
+.os-links-trail h2,
+.os-links-trail h3,
+.os-links-trail h4 {
+	margin-top: 0;
+}
+
+.os-links-outline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  outline: 1px dashed black;
+  display: none;
+  z-index: 0;
+}
+
+.os-links-outline > div {
+	position: relative;
+}
+
+*:hover > .os-links:hover + .os-links-outline {
+	display: block;
+}
+
+/* fixes for nodes in blocks */
+.os-links ~.content .node,
+.os-links ~.views-row .node {
+	padding-top: 0;
+}
+
+.os-links ~.content .node-inner,
+.os-links ~.views-row .node-inner {
+	padding-top: 0;
+}

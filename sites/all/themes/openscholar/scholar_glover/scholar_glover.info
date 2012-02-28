@@ -1,0 +1,12 @@
+name        = Glover
+description = A clean fixed layout design - white background with a single black stripe for the menu area, and large serif font.
+flavor_name = "Black"
+plugins[vsite_design][flavor] = flavors
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-glover.css
+scripts[]            = scholar_glover.js

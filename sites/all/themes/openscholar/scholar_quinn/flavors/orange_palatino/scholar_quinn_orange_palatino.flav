@@ -1,0 +1,5 @@
+name = Orange Palatino
+description = An Orange Version with Palatino type - of the scholor_quinn theme
+screenshot = screenshot.png
+
+css[] = orange_palatino.css

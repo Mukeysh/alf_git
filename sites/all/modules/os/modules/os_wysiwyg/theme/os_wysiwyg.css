@@ -1,0 +1,11 @@
+/* Disables body backgrounds that could get picked up from theme css */
+html, body#tinymce{
+  background: #fff !important;
+}
+
+/* disallows overriding the body padding and margin by included themes
+#tinymce {
+  min-width: 0 !important;
+  margin: 5px !important;
+  padding: 0px !important;
+}

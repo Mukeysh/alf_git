@@ -1,0 +1,29 @@
+<?php
+
+function vsite_ga_update_6001(&$sandbox) {
+  
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  variable_set('vsite_ga_google_analytics_id', variable_get('vsite_ga_global_id', ''));
+  variable_del('vsite_ga_global_id');
+  
+  if (db_table_exists('spaces_settings')) {
+    $result = db_query("SELECT * FROM {spaces_settings} WHERE id = 'generic'");
+    while ($row = db_fetch_object($result)) {
+      $value = unserialize($row->value);
+
+      db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', 'vsite_ga_google_analytics_id', '%s')", $row->type, $row->sid, serialize($value['google_analytics_id']));
+    }
+    $res[] = array(
+    	'success' => true,
+      'query' => 'Google Analytics settings migrated.'
+    );
+  }
+
+  return $res;
+}

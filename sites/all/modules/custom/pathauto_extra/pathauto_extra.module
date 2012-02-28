@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * implementation of hook_menu()
+ * provides a page for ajax to call so we can retrieve info from drupal
+ */
+function pathauto_extra_menu() {
+  $items['pathauto_extra/alias_js'] = array(
+    'page callback' => 'pathauto_extra_alias_js',
+    'type' => 'MENU_CALLBACK', 
+    'access arguments' => array('access content'), 
+  );
+  return $items;
+}
+
+/**
+ * implementation of hook_form_alter()
+ * attaches javascript to node edit forms
+ */
+function pathauto_extra_form_alter(&$form, $form_state, $form_id) {
+  if (( isset($form['type']) && isset($form['#node']) && $form['type']['#value'] . '_node_form' == $form_id ) ||     //node/add or node/edit
+    ( isset($form_state['post']['form_id']) && $form_state['post']['form_id'] == arg(2) . '_node_form' )) {          //back to form for validation
+      
+    drupal_add_js(drupal_get_path('module', 'pathauto_extra') . '/pathauto_extra.js');
+  }
+}
+
+/**
+ * @function pathauto_extra_alias_js()
+ * 
+ * gets the pattern for formatting urls for this node type, tries to apply it
+ * returns expected url alias.
+ */
+function pathauto_extra_alias_js() {
+  $path = _pathauto_extra_make_path($_GET['gid'], $_GET['type'], $_GET['title']);
+  if ($path) {
+    $json = array('status' => TRUE, 'data' => $path);
+  } else {
+    $json = array('status' => FALSE, 'data' => null);
+  }
+    
+  drupal_json($json);
+}
+
+/**
+ * Enter description here ...
+ * @param gid
+ * @param type
+ */
+function _pathauto_extra_make_path($gid, $type, $title) {
+  //get pattern for this node type
+  $pattern = trim(variable_get('pathauto_node_' . $type . '_pattern', FALSE));
+  if (empty($pattern)) {
+    $pattern = trim(variable_get('pathauto_node_pattern', FALSE));
+  }
+  
+  //if applicable, process this pattern for tokens
+  if (isset($pattern) && strlen($pattern) > 0 ) {
+    //Fake a simple node object to pass to path auto
+    $node = array(
+      'title' => $title,
+      'type' => $type,
+      'spaces_og' => array('gid' => $gid),
+    );
+    $node = (object)$node;
+    module_load_include('inc', 'node', 'node.pages');
+    node_object_prepare($node);
+    
+    //let pathauto apply tokens to path given our fake node
+    module_load_include('inc', 'pathauto');
+    $placeholders = pathauto_get_placeholders('node', $node);
+    $path = pathauto_create_alias('node', 'return', $placeholders, null, null, $node->type, null);
+  }
+  return $path;
+}
+
+/**
+* implementation of hook_preproces_page
+* adds tokenizable variables to page's javascript, so pathauto_ajax.js can use them.
+*/
+function pathauto_extra_preprocess_page(&$variables) {
+  if (arg(0) == 'node' && arg(1) == 'add' && arg(2)) {
+    $vsite=vsite_get_vsite();
+    $data = array( 'pathauto_extra' => array(
+      'type' => arg(2),
+      'gid' => $vsite->id,
+      'make_alias' => TRUE,
+    ));
+       
+    drupal_add_js($data, 'setting');
+  }
+}

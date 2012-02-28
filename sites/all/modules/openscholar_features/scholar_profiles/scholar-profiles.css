@@ -1,0 +1,20 @@
+.node-type-person h2.title, .node-type-person h3, .node-type-person h4, .node-type-person p {
+  margin:0;
+  }
+
+.page-people #content-main .views-row {
+  margin-bottom: 0;
+  }
+
+.node-type-person .flL {
+  margin: .3em 1.5em 1.5em 0;
+  }
+
+#content .node-type-person ul.inline {
+  padding: 0;
+  margin: 0;
+  }
+
+.node-type-person ul.inline li {
+  margin-right: .3em;
+  }

@@ -1,0 +1,44 @@
+#extradiv {
+  background-image: url('images/fabric-strip-mesh.png');
+  -moz-box-shadow: -5px 0 20px #999;
+  -webkit-box-shadow: -5px 0 20px #999;
+  box-shadow: -5px 0 20px #999;
+  }
+
+body {
+  background-color: #fff;
+  }
+
+#navbar {
+  background-image: url('images/menu-strip-mesh.png');
+  }
+
+a, a:visited {
+  color:#A8AF57;
+  }
+
+#content-area .wrap {
+  background: #ededed;
+  }
+
+#header,
+#header h1,
+#header h2,
+#header h3,
+#header a,
+#header a:visited,
+#header h1 a,
+#header h1 a:visited,
+#navbar li a,
+#navbar li a:visited {
+  color: #393933;
+  }
+
+#navbar li a:hover,
+#navbar li a.active,
+#navbar .active-trail a {
+  background: #e6e8cf;
+  color: #000;
+  }
+
+

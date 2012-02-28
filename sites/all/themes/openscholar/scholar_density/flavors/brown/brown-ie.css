@@ -1,0 +1,26 @@
+#footer, #extradiv {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#C13F1717,endColorstr=#C13F1717)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#C13F1717,endColorstr=#C13F1717);   /* IE6 & 7 */
+      zoom: 1;
+}
+
+#sidebar-first {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#7FDDDFAE,endColorstr=#7FDDDFAE)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#7FDDDFAE,endColorstr=#7FDDDFAE);   /* IE6 & 7 */
+      zoom: 1;
+}
+
+#block-vsite_menus-features ul.menu li.active-trail {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#DB3F1717,endColorstr=#DB3F1717)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#DB3F1717,endColorstr=#DB3F1717);   /* IE6 & 7 */
+      zoom: 1;
+}
+.node-teaser {
+background: transparent;
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#9BF8FAD1,endColorstr=#9BF8FAD1)"; /* IE8 */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#9BF8FAD1,endColorstr=#9BF8FAD1);   /* IE6 & 7 */
+      zoom: 1;
+}

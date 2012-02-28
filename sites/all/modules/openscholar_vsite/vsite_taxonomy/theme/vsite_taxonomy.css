@@ -1,0 +1,185 @@
+#vsite-taxonomy-wrapper {
+  clear: both;
+  padding-bottom: 1em;
+  margin-top: 2em;
+  }
+
+#vsite-taxonomy-wrapper .row {
+  clear: both;
+  padding-bottom: 1.5em;
+  margin-bottom: 1.5em;
+  border-bottom: 2px solid #dddddd;
+  }
+
+#vsite-taxonomy-wrapper ul.vsite-taxonomy-terms .item-list {
+  border: none;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  -moz-box-shadow:none;
+  -webkit-box-shadow:none;
+  box-shadow:none;
+  }
+
+#vsite-taxonomy-wrapper h3 {
+  font-size: 16px;
+  margin-bottom: .5em;
+  border-bottom: 1px solid #dddddd;
+  height: 22px;
+  }
+
+#vsite-taxonomy-wrapper .vsite-taxonomy-terms {
+  clear: both
+  }
+
+#vsite-taxonomy-wrapper .item-list ul.vsite-taxonomy-terms li,
+#vsite-taxonomy-wrapper ul.vsite-taxonomy-terms .item-list li,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy ul li {
+  list-style: none;
+  margin: 0;
+  border-bottom: 1px solid #d9d9d9;
+  padding:0 !important;
+  }
+
+#vsite-taxonomy-wrapper ul.vsite-taxonomy-terms ul.admin li,
+#vsite-taxonomy-wrapper ul.vsite-taxonomy-terms .item-list li li {
+  border:none;
+  }
+
+#vsite-taxonomy-wrapper .block-vsite_taxonomy ul li {
+  padding-left: 0;
+  }
+
+#vsite-taxonomy-wrapper .term-head {
+  padding: 7px 0 7px 7px;
+  font-weight: bold;
+  }
+
+#vsite-taxonomy-wrapper .sidebar .term-head {
+  font-size: .9em;
+  }
+
+#vsite-taxonomy-wrapper li li .term-head {
+  font-weight: normal;
+  }
+
+#vsite-taxonomy-wrapper li li li .term-head {
+  font-size: .9em;
+  line-height: 1.3em;
+  }
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul .term-head {
+  padding-left: 25px;
+  }
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms li ul ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul ul .term-head {
+  padding-left: 45px;
+  }
+
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms li ul ul ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul ul ul .term-head {
+  padding-left: 65px;
+  }
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms li ul ul ul ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul ul ul ul .term-head {
+  padding-left: 85px;
+  }
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms li ul ul ul ul ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul ul ul ul ul .term-head {
+  padding-left: 105px;
+  }
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms li ul ul ul ul ul ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul ul ul ul ul ul .term-head {
+  padding-left: 125px;
+  }
+
+#vsite-taxonomy-wrapper .item-list .vsite-taxonomy-terms li ul ul ul ul ul ul ul .term-head,
+#vsite-taxonomy-wrapper .block-vsite_taxonomy li ul ul ul ul ul ul ul .term-head {
+  padding-left: 145px;
+  }
+
+#vsite-taxonomy-wrapper .vsite-taxonomy-terms li a {
+  color: #000;
+  }
+
+#vsite-taxonomy-wrapper ul.vsite-taxonomy-terms li .term-head a:hover {
+  text-decoration: underline;
+  color:#1c4fad;
+  }
+
+#vsite-taxonomy-wrapper ul.admin,
+#vsite-taxonomy-wrapper .term-head ul.admin {
+  float: right;
+  padding-right: 40px;
+  padding: 0 10px 0 0 !important;
+  margin: 0;
+  margin-top: 10px !important;
+  background: transparent;
+  text-align: right;
+  }
+
+#vsite-taxonomy-wrapper .term-head ul.admin {
+  display:none;
+  }
+
+#vsite-taxonomy-wrapper .term-head:hover ul.admin {
+  display:block;
+  }
+
+#vsite-taxonomy-wrapper .term-head ul.admin {
+  margin-top: 0 !important;
+  }
+
+#vsite-taxonomy-wrapper li li ul.admin {
+  margin-right: 0;
+  }
+
+#vsite-taxonomy-wrapper ul.admin li,
+#vsite-taxonomy-wrapper .term-head ul.admin li {
+  float:left;
+  margin-left: 7px !important;
+  display:inline;
+  padding:0;
+  }
+
+#vsite-taxonomy-wrapper ul.admin li a,
+#vsite-taxonomy-wrapper .term-head ul.admin li a {
+  margin-bottom: 0;
+  font-size: 12px;
+  }
+
+#vsite-taxonomy-wrapper .add {
+  clear:both;
+ }
+
+#vsite-taxonomy-wrapper .term-head:hover {
+  background-color: #f5f5f5;
+  }
+
+#vsite-taxonomy-wrapper .description {
+  margin: 0;
+  padding: 0;
+  }
+
+#vsite-taxonomy-wrapper .addcategory {
+  clear: both;
+  text-align:right;
+  }
+
+#vsite-taxonomy-wrapper #block-vsite_taxonomy-vsite_taxonomy0 {
+  border: none;
+  padding-top: 0;
+  margin-top: 0;
+  }
+  
+div.indentation {
+	height: 20px;
+	width: 20px;
+	float: left;
+}

@@ -1,0 +1,57 @@
+Index: sites/all/modules/contrib/file_aliases/file_aliases.module
+===================================================================
+--- sites/all/modules/contrib/file_aliases/file_aliases.module	(revision 2596)
++++ sites/all/modules/contrib/file_aliases/file_aliases.module	(working copy)
+@@ -196,3 +196,37 @@
+     'path' => drupal_get_path('module', 'file_aliases') . '/includes',
+   );
+ }
++
++/**
++ * Implementation of hook_form_alter()
++ **/
++function file_aliases_form_alter(&$form, $form_state, $form_id) {    
++  if (isset($form['type']) && isset($form['#node'])
++  && ($form_id == $form['type']['#value'] .'_node_form')) {
++    
++  	if (($ffp = filefield_paths_get_fields($form['#node'], $op)) == FALSE) {
++      return;
++    }
++
++    $count = array();
++    foreach ($ffp['#files'] as &$file) {
++      if ($ffp['#settings'][$file['name']]['filealias']['display'] == TRUE) {
++        $filefield_paths_alias = 'filefield_paths/alias/' . $file['field']['fid'];
++        if (($alias = drupal_get_path_alias($filefield_paths_alias)) != $filefield_paths_alias) {
++          // Calculate relative path.
++          $path = (variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC) == FILE_DOWNLOADS_PUBLIC) ? '' : '../../';
++          if (empty($path)) {
++            foreach (explode('/', file_directory_path()) as $dir) {
++              $path .= '../';
++            }
++          }
++          
++          // Invoke file_aliases_hook_nodeform_alter().
++          if (function_exists($function = 'file_aliases_' . $file['module'] . '_nodeform_alter')) {
++            $function($form, $file, $path, $alias, $count);
++          }
++        }
++      }
++    }   
++  }
++}
+Index: sites/all/modules/contrib/file_aliases/modules/upload.inc
+===================================================================
+--- sites/all/modules/contrib/file_aliases/modules/upload.inc	(revision 2596)
++++ sites/all/modules/contrib/file_aliases/modules/upload.inc	(working copy)
+@@ -27,3 +27,10 @@
+ function file_aliases_upload_views_data_alter(&$data) {
+   $data['node']['upload_fid']['field']['handler'] = 'file_aliases_views_handler_field_upload_fid';
+ }
++
++/**
++ * Implements file_aliases_hook_nodeform_alter().
++ */
++function file_aliases_upload_nodeform_alter(&$form, &$file, &$path, &$alias, &$count) {
++  $form['attachments']['wrapper']['files'][$file['field']['fid']]['description']['#description'] = str_replace($file['field']['filepath'], $alias, $form['attachments']['wrapper']['files'][$file['field']['fid']]['description']['#description']);
++}

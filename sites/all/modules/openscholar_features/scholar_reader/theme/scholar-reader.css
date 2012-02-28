@@ -1,0 +1,40 @@
+.view-scholar-reader h3.title {
+  margin-bottom: 1.5em;
+  }
+
+.view-scholar-reader .node-type-feed .views-row {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 1.5em;
+  }
+
+.node-type-feed .views-field-title {
+  font-weight: bold;
+  font-size: 1.07em;
+  }
+
+.node-type-feed .views-field-description {
+  margin-top: .5em;
+  }
+
+#block-scholar_reader-my_twitter_feed li,
+.box-os_boxes_twitterfeed li {
+  clear:both;
+  margin-bottom: 1.5em;
+  }
+
+#block-scholar_reader-my_twitter_feed img,
+.box-os_boxes_twitterfeed img {
+  float:left;
+  margin: 0 .7em .1em 0;
+  }
+
+.sidebar #block-scholar_reader-my_twitter_feed a,
+.sidebar .box-os_boxes_twitterfeed a {
+  display:inline !important;
+  }
+
+.sidebar #block-scholar_reader-my_twitter_feed li,
+.sidebar .box-os_boxes_twitterfeed li {
+  padding-top: 10px;
+  border-top: 1px dashed #ccc;
+  }

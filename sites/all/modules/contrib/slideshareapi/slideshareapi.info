@@ -1,0 +1,4 @@
+name = slideshareapi
+description = api modules for slideshare 
+core = 6.x
+

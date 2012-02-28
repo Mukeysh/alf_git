@@ -1,0 +1,22 @@
+Index: apachesolr_biblio.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/apachesolr_biblio/apachesolr_biblio.module,v
+retrieving revision 1.1.2.2
+diff -u -p -r1.1.2.2 apachesolr_biblio.module
+--- apachesolr_biblio.module	23 Nov 2009 15:58:21 -0000	1.1.2.2
++++ apachesolr_biblio.module	8 Jun 2010 14:55:16 -0000
+@@ -263,6 +316,14 @@ function apachesolr_biblio_block($op = '
+         }
+ 
+         $facets = apachesolr_biblio_apachesolr_facets();
++        $biblio_year = $response->response->facet_counts->facet_fields->ss_biblio_year;
++        if($biblio_year) {
++          foreach($biblio_year as $property => $value) {
++            $biblio_year = _biblio_text_year($property);
++            unset($response->response->facet_counts->facet_fields->ss_biblio_year->$property);
++            $response->response->facet_counts->facet_fields->ss_biblio_year->$biblio_year = $value;
++          }
++        }
+         return apachesolr_facet_block($response, $query, $module, $delta, $delta, t('Filter by !field', array('!field' => $facets[$delta]['name'])));
+       }
+       break;

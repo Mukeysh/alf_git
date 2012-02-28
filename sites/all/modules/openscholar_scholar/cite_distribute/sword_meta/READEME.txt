@@ -1,0 +1,10 @@
+sword_meta.module
+
+Author: Jon Sagotsky <jsagotsky@iq.harvard.edu>
+
+This module allows cite_distribute to deliver SWORD content.  Site admins can
+enter any number of SWORD enabled destinations, which are presented to the user
+whenever biblio content is created.
+
+Requires: swordapp-php-library (http://php.swordapp.org) 1.0+
+          which in turn requires php extensions: zip, curl, simplexml

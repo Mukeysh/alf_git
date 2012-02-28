@@ -1,0 +1,41 @@
+<?php
+
+include_once('scholar_blog.features.inc');
+
+/**
+ * Implementation of hook_context_links_alter().
+ */
+function scholar_blog_context_links_alter(&$links) {
+  if (!empty($links['blog'])) {
+    $links['blog']['query'] = drupal_get_destination();
+  }
+}
+
+/**
+ * hook link_alter (admin at the end of links)
+ */
+function scholar_blog_link_alter(&$links, $node){
+
+  if (isset($links['blog_usernames_blog'])) {
+    unset($links['blog_usernames_blog']);
+  }
+}
+
+/**
+ * Implement hook menu
+ */
+function scholar_blog_menu(){
+  $items = array();
+  
+  $items['features/scholar_blog'] = array(
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('scholar_blog_settings'),
+    'access callback' => module_exists('spaces') ? 'spaces_access_admin' : 'user_access',
+    'access arguments' => module_exists('spaces') ? array() : array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'scholar_blog.pages.inc',
+  );
+  
+  return $items;
+}

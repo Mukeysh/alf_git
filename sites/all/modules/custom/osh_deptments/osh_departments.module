@@ -1,0 +1,129 @@
+<?php
+
+define('OSH_DEPARTMENTS_VOCAB_NAME', 'Affiliation / Department' );
+
+function osh_departments_init(){
+  //dpm(os_departments_get_department_context());
+}
+
+/**
+ * list of Harvard departments that are supported
+ */
+function osh_departments_departments_info(){
+  $departments = array();
+  $departments['economics'] = array(
+    'key'  => 'economics',
+    'name' => 'Department of Economics',
+  );
+  
+  return $departments;
+
+}
+
+
+/**
+ * Implementation of hook_block().
+ */
+function osh_departments_block($op = 'list', $delta = 0) {
+  switch ($op) {
+    case 'list':
+      $info = array(
+        'dept_banner' => array('info' => t('OS: Department specific banner')),
+      );
+      return $info;
+    case 'view':
+      return _osh_departments_block_dept_banner();
+      break;
+  }
+}
+
+/**
+ * the department block view
+ */
+function _osh_departments_block_dept_banner(){
+  $block = array();
+  module_load_include('inc', 'osh_departments', 'osh_departments.block');
+  
+  $block['subject'] = t('');
+  
+  $deps = os_departments_get_department_context();
+  $dep = array_shift($deps);
+  
+  $function = "_osh_departments_block_{$dep}_banner_view";
+  if (function_exists($function)) {
+    $block['content'] = call_user_func($function);
+  }
+  
+
+  
+  return $block;
+}
+
+/**
+ * hook preprocess page
+ */
+function osh_departments_preprocess_page(&$vars){
+  $deps = os_departments_get_department_context();
+  if ($dep = array_shift($deps)) {
+    drupal_add_css(drupal_get_path('module', 'osh_departments') . '/css/' . $dep . '.css');
+    // add department specific css file
+    
+    // add department specific body class
+    $vars['body_classes'] .= ' department-' . $dep;
+  }
+}
+
+/**
+ * Implements hook_context_load_alter
+ */
+function osh_departments_context_load_alter(&$context) {
+  if ($context->name === 'vsite-section-public' && isset($context->reactions['block'])) {
+    $context->reactions['block']['blocks']['osh_departments-dept_banner'] = array(
+      'module' => 'osh_departments',
+      'delta' => 'dept_banner',
+      'region' => 'header_top',
+      'weight' => '0',
+    );
+  }
+}
+
+/**
+ * Returns an array of department names this vsite is tagged/categorized with
+ */
+function os_departments_get_department_context(){
+  $ret = array();
+  $vsite = vsite_get_vsite();
+  if ($vsite){  //@todo only in public view of the viste actually
+    $node = $vsite -> group;
+    os_include('os.taxonomy');
+    $vid = os_taxonomy_get_vid(OSH_DEPARTMENTS_VOCAB_NAME);
+    
+    $terms = taxonomy_node_get_terms_by_vocabulary($node, $vid, 'name');
+
+    $supported_depts = osh_departments_departments_info();
+
+    foreach($supported_depts as $key => $dep ){
+
+      if(array_key_exists($dep['name'], $terms)){
+        
+        array_push($ret,$key);
+      }
+    }
+    
+  }
+
+  return $ret;
+}
+
+
+function os_departments_get_department_key_by_name($name){
+  $ret = NULL;
+  $all_depts = osh_departments_departments_info();
+  foreach ( $all_depts as $key => $dept ) {
+    if ($dept->name === $name) {
+      return $key;
+    }
+  }
+  
+  return $ret;
+}

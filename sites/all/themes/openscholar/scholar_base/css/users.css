@@ -1,0 +1,127 @@
+/* USERS SECTION */
+
+.section-user #page {
+  margin-top: 10%;
+  }
+
+.section-user .wrap,
+.section-users .wrap,
+.page-site-register .wrap,
+.section-user #content-area .hg-container,
+.section-users #content-area .hg-container,
+.page-site-register #content-area .hg-container {
+ width: 540px;
+ margin: 0 auto;
+ }
+
+.section-user #content-area .hg-container,
+.section-users #content-area .hg-container,
+.page-site-register #content-area .hg-container {
+ padding: 15px 0 !important;
+ background: #fff;
+ -moz-border-radius: 4px;
+ -webkit-border-radius: 4px;
+ }
+
+.section-user #content-area .hg-container {
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+  }
+
+.section-user #content-main,
+.section-users #content-main,
+.page-site-register #content-main {
+  border: none !important;
+  -moz-border-radius: 0 !important;
+  -webkit-border-radius:0 !important;
+  border-radius:0 !important;
+  background: transparent !important;
+  }
+
+body.page-site-register #content-main {
+  padding: 0 !important;
+  }
+
+#edit-name-wrapper,
+#edit-pass-wrapper,
+.section-cp #edit-mail-wrapper,
+.section-cp #edit-pass-pass1-wrapper,
+.section-cp #edit-pass-pass2-wrapper {
+  display:inline-block;
+  vertical-align: top;
+  width: 48%;
+  margin: 0 5px 0 0;
+  }
+
+.section-cp #edit-pass-wrapper {
+  width: 100%;
+  margin: 0;
+  display:block;
+  }
+
+#edit-pass-wrapper {
+  margin: 0;
+  }
+
+#edit-name-wrapper input.form-text,
+#edit-pass-wrapper input.form-text {
+  width: 99%;
+  }
+
+.section-user .footer-login,
+.section-users .footer-login,
+.page-site-register .footer-login {
+  display:none;
+  }
+
+.section-user input.form-submit,
+.section-users input.form-submit,
+.page-site-register input.form-submit {
+  display:block;
+  margin: 0 0 0 auto;
+  }
+
+.section-user h2.title,
+.section-users h2.title,
+.page-site-register h2.title {
+  display:none;
+  }
+
+.section-user div.tabs ul.primary li a,
+.section-users div.tabs ul.primary li a,
+.page-site-register div.tabs ul.primary li a {
+  font-weight: normal;
+  font-size: .8em;
+  }
+
+.section-user fieldset,
+.section-users fieldset,
+.page-site-register fieldset{
+  padding: 0;
+  border: none;
+  background: transparent;
+  }
+
+.section-user div.tabs,
+.section-users div.tabs,
+.page-site-register div.tabs {
+  height: auto;
+  }
+
+.section-user h3,
+.section-users h3,
+.page-site-register h3 {
+  font-size: 1.1em;
+  }
+
+
+form#user-profile-form {
+  clear: both;
+  padding-top: 1.5em;
+  }
+
+#vsite-users-title-items th, #vsite-users-title-items td, #vsite-users-title-items tr.even, #vsite-users-title-items tr.odd {
+  border: none;
+  background: #fff;
+  padding: 0;
+  }

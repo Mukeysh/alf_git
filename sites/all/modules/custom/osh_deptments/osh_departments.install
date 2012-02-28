@@ -1,0 +1,90 @@
+<?php
+
+function osh_departments_enable(){
+  _osh_departments_config_econ();
+}
+
+function osh_departments_update_6001(&$sandbox){
+  $res = array();
+
+  _osh_departments_config_econ();
+  $res[] = array(
+    'success' => true,
+    'query' => 'Configured Harvard Department taxonomy ',
+  );
+    
+  return $res;
+}
+
+function _osh_departments_config_econ(){
+  os_include('os.taxonomy');
+  
+  $vid = os_taxonomy_get_vid(OSH_DEPARTMENTS_VOCAB_NAME);
+  
+  // dep of economics first
+  $e_tid = os_taxonomy_add_term($vid, 'Department of Economics');
+  $e_nids = _os_taxonomy_econ_nids();
+  
+  foreach($e_nids as $e_nid){
+    //sanity check if node exists
+    $sql = "SELECT nid,vid FROM {node} WHERE nid = {$e_nid}";
+    if (($a_result = db_fetch_array(db_query($sql)))){
+      os_taxonomy_assign_nid_tid($a_result['nid'], $e_tid, $a_result['vid']);
+    }
+  }
+  
+  // add some more terms in the department vocab
+  $deps = array(
+    'Department of African and African American Studies',
+    'Department of Anthropology',
+    'Department of Government',
+    'Department of History',
+    'Department of the History of Science',
+    'Department of Psychology',
+    'Department of Sociology',
+  );
+  
+  foreach($deps as $d){
+    os_taxonomy_add_term($vid, $d);
+  }
+}
+
+/**
+ * node nids for econ vsite in production
+ */
+function _os_taxonomy_econ_nids(){
+  return array(
+    17487, //rhornbeck
+    17493, //asimsek
+    17492, //apallais
+    17488, //ribragimov
+    17486, //ebenmelech
+    16028, //gopinath
+    16015, //chamberlain
+    18051, //sen
+    8267,  //Nathan Nunn
+    8231,  //Colin D. Sullivan
+    8228,  //Tomasz Strzalecki
+    6908,  //Jan Zilinsky
+    15272, //weitzman
+    16013, //jstock
+    13903, //melitz
+    13868, //glewis
+    13327, //mkremer
+    13326, //Kenneth Rogoff
+    11866, // Dale Jorgenson
+    11844, //Raj Chetty
+    14611, //alroth
+    11413, //Guido Imbens,
+    11860, //Richard B. Freeman
+    9713,  //Oliver Hart
+    8276, //Eric Chaney
+    11865, //Richard Cooper
+    11851, //David Cutler
+    9270, //John Campbell
+    8452, //Drew Fudenberg
+    8780, //Pol Antràs
+    8211, // Suan Athey
+  );
+}
+

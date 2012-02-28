@@ -1,0 +1,38 @@
+Index: biblio_style_chicago.inc
+===================================================================
+--- biblio_style_chicago.inc	(revision 4839)
++++ biblio_style_chicago.inc	(working copy)
+@@ -107,9 +107,12 @@
+       if (!empty($node->biblio_issue))      // issue
+       $output .=  ", no. " . $node->biblio_issue;
+ 
+-      if (!empty($node->biblio_year))      // year
+-      $output .= " (" . $node->biblio_year . ")";
+-
++      if(in_array($node->biblio_type,array(105,106)) && strtotime($node->biblio_date)){ //Newspaper or Mag and the full date is set
++      	$output .= ", " . date("F j, Y",strtotime($node->biblio_date)) ;
++      }elseif (!empty($node->biblio_year)){      // year
++        $output .= " (" . $node->biblio_year . ")";
++      }
++      
+       if (!empty($node->biblio_pages))      // pages
+       {
+         if (!empty($node->biblio_year) || !empty($node->biblio_volume) || !empty($node->biblio_issue) || !empty($node->biblio_alternate_title) || !empty($node->biblio_secondary_title)) // only add ": " if either year, volume, issue, abbrev_journal or publication isn't empty
+Index: biblio_style_ama.inc
+===================================================================
+--- biblio_style_ama.inc	(revision 4839)
++++ biblio_style_ama.inc	(working copy)
+@@ -101,8 +101,11 @@
+         if (!empty($node->biblio_issue))      // issue (=day)
+         $output .= " " . $node->biblio_issue;
+ 
+-        if (!empty($node->biblio_year))      // year
+-        $output .= ", " . $node->biblio_year;
++	      if(strtotime($node->biblio_date)){ //Newspaper or Mag and the full date is set
++	        $output .= ", " . date("F j, Y",strtotime($node->biblio_date)) ;
++	      }elseif (!empty($node->biblio_year)){      // year
++	        $output .= " (" . $node->biblio_year . ")";
++	      }
+       }
+       else // journal article (or a magazine article with volume numbers)
+       {

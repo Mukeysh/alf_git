@@ -1,0 +1,22 @@
+body > div {
+ -moz-border-radius: 3px 3px 3px 3px;
+ -moz-box-shadow: 0pt 3px 1em #CCCCCC;
+background: none repeat scroll 0% 0% #FFFFFF;
+border: 1px solid #E5E5E4;
+margin-left: auto;
+margin-right: auto;
+padding: 0pt 10px;
+width: 85%;
+font-family:helvetica;
+font-size:.9em;
+ color:#444;
+line-height:19px;
+padding:18px;
+ 	
+}
+
+body > div > h1:first-child  {border-bottom:1px solid #444;font-size:1.3em; }
+
+h1.book-heading {font-size:1.1em;}
+	
+.itu-attachments {display:none;}

@@ -1,0 +1,18 @@
+
+#header {padding:0px;}
+
+
+#sidebar-first {
+  width: 221px;
+right: 173px;
+ margin: 0;
+  left: 0;
+  margin-right: -100%;
+  }
+
+#content-main, #sidebar-first, #sidebar-second {
+    margin-bottom: -20000px;
+    padding-bottom: 20010px;
+
+}
+

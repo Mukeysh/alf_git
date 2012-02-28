@@ -1,0 +1,6 @@
+; $Id$
+name = Dialog User
+description = Provides Dialog integration for the core user module.
+core = 6.x
+dependencies[] = dialog
+dependencies[] = comment

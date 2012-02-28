@@ -1,0 +1,155 @@
+<?php
+
+
+
+function vsite_design_update_6000(&$sandbox){
+
+  $ret = array();
+  $my_themes = array(
+    "scholar_theme_01" => "scholar_airstream",
+    "scholar_theme_02" => "scholar_redhead",
+    "scholar_theme_03" => "scholar_stripy",
+    "scholar_theme_04" => "scholar_quinn",
+    "scholar_theme_05" => "scholar_collector",
+    "scholar_theme_06" => "scholar_eloquent",
+    "scholar_theme_07" => "scholar_weft",
+    "scholar_theme_08" => "scholar_density",
+    "scholar_theme_09" => "scholar_burroughs",
+    "scholar_theme_10" => "scholar_cayley",
+    "scholar_theme_11" => "scholar_nortony",
+    "scholar_theme_12" => "scholar_bigpic",
+    "qualitative_methods" => "scholar_bunchy"
+  );
+
+  // install new themes
+  foreach ( $my_themes as $old => $new ) {
+    system_theme_data();
+    db_query("UPDATE {system} SET status = 1 WHERE type = 'theme' and name = '%s'", $new);
+  }
+
+  // update themes in og table
+  foreach ( $my_themes as $old => $new ) {
+    db_query("UPDATE {og} SET og_theme = '%s' WHERE og_theme = '%s'", $new, $old);
+  }
+
+  // update spaces_settings
+  $result = db_query("SELECT * FROM {spaces_settings} WHERE (id='theme' OR id='layout') ");
+  while ( $data = db_fetch_object($result) ) {
+    $old_value = unserialize($data->value);
+    $old_theme = is_array($old_value) ? $old_value['maintheme'] : $old_value;
+
+    if ($data->id == 'theme') {
+
+
+      $new_value = array(
+        'maintheme' => $old_theme,
+        'flavor' => is_array($old_value) ? $old_value['flavor'] : ''
+      );
+
+      if (array_key_exists($old_theme, $my_themes)) {
+        $new_value['maintheme'] = $my_themes[$old_theme];
+      }
+
+      $new_value = serialize($new_value);
+      db_query("UPDATE {spaces_settings} SET value = '%s' WHERE sid = '%d' and id = 'theme'", $new_value, $data->sid);
+    }
+    else if ($data->id == 'layout') {
+      $new_value = array();
+      foreach ( $old_value as $old_key => $value ) {
+        if (array_key_exists($old_key, $my_themes)){
+          $new_value[$my_themes[$old_key]] = $value;
+        }
+        else {
+          $new_value[$old_key] = $value;
+        }
+
+      }
+      $new_value = serialize($new_value);
+      db_query("UPDATE {spaces_settings} SET value = '%s' WHERE sid = '%d' and id='layout'", $new_value, $data->sid);
+    }
+
+
+
+  }
+
+  return $ret;
+
+}
+
+
+function vsite_design_update_6001(&$sandbox){
+
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "theme" ');
+  while ($row = db_fetch_object($result)) {
+  	$a_value = unserialize($row->value);
+  	if($a_value['maintheme']){
+      db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'vsite_design_maintheme', '%s')", $row->type, $row->sid, serialize($a_value['maintheme']));
+  	  if($a_value['flavor']){
+        db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'vsite_design_%s_flavor', '%s')", $row->type, $row->sid, $a_value['maintheme'], serialize($a_value['flavor']));
+      }
+  	}
+    
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the Theme Settings',
+    );
+
+  return $res;
+
+}
+
+function vsite_design_update_6002(&$sandbox) {
+  $res = array();
+  
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+
+  if (db_table_exists('spaces_settings')) {
+    $result = db_query("SELECT * FROM {spaces_settings} WHERE id = 'generic'");
+    while ($row = db_fetch_object($result)) {
+      $value = unserialize($row->value);
+
+      db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', 'vsite_design_disable_shield', '%s')", $row->type, $row->sid, serialize($value['disable_shield']));
+      db_query("INSERT INTO {spaces_overrides} VALUES ('%s', '%s', 'variable', 'vsite_design_shield', '%s')", $row->type, $row->sid, serialize($value['shield']));
+
+    }
+    $res[] = array(
+    	'success' => true,
+      'query' => 'Vsite Design Settings Migrated.'
+    );
+  }
+
+  return $res;
+}
+
+function vsite_design_update_6003(&$sandbox) {
+	
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Overrdide table does not exist, aborting till spaces updates are run.');
+    return $res;
+  }
+  
+  // shield settings were moved into vsite_shields
+  db_query("UPDATE {variable} SET name = 'vsite_shields_shield' WHERE name = 'vsite_design_shield'");
+  db_query("UPDATE {variable} SET name = 'vsite_shields_disable_shield' WHERE name = 'vsite_design_disable_shield'");
+  db_query("UPDATE {spaces_overrides} SET object_id = 'vsite_shields_shield' WHERE object_id = 'vsite_design_shield'");
+  db_query("UPDATE {spaces_overrides} SET object_id = 'vsite_shields_disable_shield' WHERE object_id = 'vsite_design_disable_shields'");
+  drupal_install_modules(array('vsite_shields'));
+
+  $res[] = array(
+    'success' => true,
+    'query' => 'Shields settings moved from vsite_design to vsite_shield');
+
+  return $res;
+}

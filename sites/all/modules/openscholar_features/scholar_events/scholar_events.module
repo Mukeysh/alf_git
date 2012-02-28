@@ -1,0 +1,83 @@
+<?php
+
+include_once('scholar_events.features.inc');
+
+/**
+ * Implementation of hook_block().
+ */
+function scholar_events_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array('mini' => array('info' => t('Mini Calendar - A small calendar used to display your sites upcoming events')));
+    default:
+      $function = "_scholar_events_block_{$delta}";
+      if (function_exists($function)) {
+        return $function($op, $edit);
+      }
+  }
+}
+
+/**
+ * Block: contextual mini calendar block
+ */
+function _scholar_events_block_mini($op, $edit) {
+  if ($op == 'view') {
+  	//Always make sure this is included
+  	drupal_add_css(drupal_get_path('module', 'litecal') .'/litecal.css');
+    $block = array();
+    
+    // if in a node view, get date from the cck field
+    // otherwise now();
+    $current_node = menu_get_object('node');
+    if($current_node && $current_node->field_date){
+    	$date = date_convert($node->field_date[0]['value'], DATE_ISO, DATE_OBJECT);
+    }
+    
+    $date = $date ? $date : date_now();
+    if ($date) {
+      $year = date_format($date, 'Y');
+      $month = date_format($date, 'm');
+      $args = "$year-$month";
+      $block['content'] = views_embed_view('scholar_events', 'block_1', $args);
+    }
+    return $block;
+  }
+}
+
+
+/**
+ * hook vsite_widgets
+ */
+function scholar_events_vsite_widgets(){
+  $items = array();
+  
+  /**
+   * this needs some work
+   * because the block view expect a date argument
+   * see _scholar_events_block_mini() above
+   **/
+  $items['scholar_events-mini'] = array(
+      'module' => 'scholar_events',
+      'delta' => 'mini',
+      'weight' => 20,
+      'region' => false,
+      'label' => 'Mini calendar',
+      //This is not cached because the content changes based on the node you are viewing
+    );
+      
+  $items['views-scholar_events_upcoming-block_1'] = array(
+      'module' => 'views',
+      'delta' => 'scholar_events_upcoming-block_1',
+      'weight' => 21,
+      'region' => false,
+      'status' => '0',
+      'label' => 'Upcoming events',
+      'type' => 'context_ui',
+      'cache' => BLOCK_CACHE_CONTENT_CACHE,
+      'cache_keys' => array(
+        'node' => array('event' => 'event'),
+        'os_og' => array('current' => 'current'),
+      ),
+    );
+  return $items;
+}

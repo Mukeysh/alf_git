@@ -1,0 +1,11 @@
+<?php
+
+/**
+ * Implementaton of hook_enable().
+ */
+function os_views_content_cache_enable() {
+  // Weight scholar to be after spaces_og
+  $weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name IN('spaces','spaces_og','views_content_cache') ORDER BY weight DESC LIMIT 1 "));
+  db_query("UPDATE {system} SET weight = %d WHERE name = 'os_blocks_content_cache'", ($weight + 10));
+  // all vsite* modules have weight higher than vsite // TODO
+}

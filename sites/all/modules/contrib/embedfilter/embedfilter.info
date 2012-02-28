@@ -1,0 +1,3 @@
+name = Embed filter
+description = Allows for safe embedding of object, embed and script tags in posts, and adds an embedded code block.
+core = 6.x

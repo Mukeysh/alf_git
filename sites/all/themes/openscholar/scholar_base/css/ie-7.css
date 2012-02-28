@@ -1,0 +1,74 @@
+.item-list ul.context-links li,
+.empty-content p,
+.empty-content .item-list ul.context-links li,
+.ahah-progress .throbber,
+.column,
+p.copy #powered-link,
+.flL,
+.flR,
+p.copy a.footer-login,
+.img-flL,
+.img-flR,
+body.cp-toolbar-mini #top ul.links li,
+#header .column {
+  display: inline;
+  }
+
+/* Fix for IE7 */
+#header-left {
+  margin-left: expression(
+   document.all['header-main'].offsetWidth * -1 +
+   parseFloat(document.all['header-main'].currentStyle.paddingLeft) +
+   parseFloat(document.all['header-left'].currentStyle.paddingLeft) +
+   parseFloat(document.all['header-left'].currentStyle.paddingRight)
+   );
+  }
+
+/* Fix for IE7 */
+#sidebar-first {
+  left: 0;
+  margin-left: expression(
+   document.all['content-main'].offsetWidth * -1 +
+   parseFloat(document.all['content-main'].currentStyle.paddingLeft) +
+   parseFloat(document.all['sidebar-first'].currentStyle.paddingLeft) +
+   parseFloat(document.all['sidebar-first'].currentStyle.paddingRight)
+   );
+  }
+
+ul.menu li.leaf {
+  list-style-image: none;
+  }
+
+#vsite-widgets-search-form input#edit-search {
+  width: 90%;
+  }
+
+#vsite-widgets-search-form input#edit-submit {
+  font-size: 0px;
+  display:block;
+  line-height: 0px;
+  }
+
+ul.primary,
+ul.secondary {
+  _width: auto; /* Reset to auto width for IE6 */
+  }
+
+ul.primary li,
+ul.secondary li {
+  _width: 100px; /* Reset to auto width for IE6 */
+  }
+
+ul.primary li a,
+ul.primary li a:visted {
+  _background: #DDDDDD;
+  }
+
+ul.primary li.active a {
+  _background: #ffffff;
+  }
+
+* html .clearfix,
+* html .clear-block {
+	height: 1%;
+  }

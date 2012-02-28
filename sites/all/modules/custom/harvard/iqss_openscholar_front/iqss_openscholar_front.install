@@ -1,0 +1,22 @@
+<?php
+
+function iqss_openscholar_front_update_6001(&$sandbox){
+
+  $res = array();
+  
+  // Enable jcarousel module if need
+  if(!module_exists('jcarousel')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('jcarousel'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed jcarousel module and enabled it',
+    );
+    
+  }
+  
+  return $res;
+  
+}

@@ -1,0 +1,17 @@
+/* Sage*/
+
+body {
+  background:#97A089;
+  }
+
+body.navbar-off #page {
+  background-image:url('images/body-bg-alt-sage.png');
+  }
+
+#navbar {
+  background-image: url('images/nav-sage.png');
+  }
+
+a, a:visited {
+  color: #627840;
+  }

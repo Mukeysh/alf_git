@@ -1,0 +1,496 @@
+<?php
+//$Id: repec_meta.module,v 1.4 2009/06/10 15:26:55 jweiner Exp $ 
+
+/**
+* @file
+*  This is a custom module to allow the RePEc respository to collect metadata from posted content, 
+*  such as research papers and articles.
+*/
+global $base_url;
+DEFINE(BASE_URL, $base_url);
+
+/**
+ * Implementation of hook_cite_distribute_register()
+ * registers this module's repository information with the
+ * core cite distribute API database
+ */
+function repec_meta_cite_distribute_register(){
+ $module_info[] = array(
+  'name'          => 'repec_meta',
+  'repository'    => 'RePEc',
+  'file'          => 'multiple', 
+  'dynamic_paths' => TRUE, 
+  'callback'	  => '_check_index',
+  );
+  return $module_info;
+}
+
+/**
+* Implementation of hook_menu()
+*/
+function repec_meta_menu() {
+  $items = array();
+   
+  $items['admin/settings/cite_distribute/repec_meta/config'] = array(
+  'title' => t('RePEc'),
+  'type' => MENU_LOCAL_TASK ,
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('repec_meta_config'),
+  'file' => 'repec_meta.admin.inc',
+  'file path' =>  $path_inc = drupal_get_path('module', 'repec_meta'),	
+  'weight' => 3,
+  'access callback' => user_access('administer cite distribute'),
+  );  
+  
+  $items['admin/settings/cite_distribute/repec_meta/config/defaults'] = array(
+  'title' => t('RePEc Template Mappings'),
+  'type' => MENU_LOCAL_TASK ,
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('repec_meta_templates'),
+  'file' => 'repec_meta.admin.inc',
+  'file path' =>  $path_inc = drupal_get_path('module', 'repec_meta'),
+  'weight' => -9,
+  'access callback' => user_access('administer cite distribute'),
+  ); 
+  
+  $items['admin/settings/cite_distribute/repec_meta/config/fields'] = array(
+  'type' => MENU_LOCAL_TASK ,
+  'title' => t('RePEc Manage Fields'),
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('repec_meta_fields'),
+  'file' => 'repec_meta.admin.inc',
+  'file path' =>  $path_inc = drupal_get_path('module', 'repec_meta'),
+  'weight' => -8,
+  'access callback' => user_access('administer cite distribute')
+  );
+  
+ return $items;
+}
+  
+/**
+* Implementation of hook_perm()
+*/
+function repec_meta_perm(){
+  return array('submit repec widget');
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function repec_meta_nodeapi(&$node, $op, $a3){
+  switch ($op){
+    case 'validate':
+      //in validate, $a3 is $form
+      if($node -> type == "biblio" && $node->repec_meta ) {
+		foreach ($a3['#post']['biblio_contributors'] as $bc) {
+			foreach ($bc as $author) {
+				if ( isset($author['name']) && strlen($author['name'])>0 ) {
+					/* an author has been set */
+					return;
+				}
+			}
+		}
+		form_set_error('biblio_contributors', t('At least one author is required for RePEc distribtuion'));
+      } 
+      
+  }
+}
+
+
+/**
+* repec_meta_templates_submit()
+* @return updates repec_biblio_types table, if successful returns message function
+*/
+function repec_meta_templates_submit($form_id, $form_values) {
+  
+  //creating an array of [b]iblio types from query
+  $sql_biblio = db_query("SELECT * FROM {biblio_types}");
+  while ($data = db_fetch_object($sql_biblio)){
+  	$b[$data->tid] = $data->name; 
+  }
+  
+  //creating an array of [r]epec types from query
+  $sql_repec = db_query("SELECT * FROM {repec_types}");
+  while ($data = db_fetch_object($sql_repec)){
+  	$r[$data->tid] = $data->type; 
+  }
+  
+  //updating repec_biblio_types table from form values
+  foreach ($form_values as $bid => $rid){
+  	$sql_update = db_query("UPDATE {repec_biblio_types} SET bid = %d, b_type = '%s', rid = %d, r_type = '%s'
+  	WHERE bid = %d ", $bid, $b[$bid], $rid,$r[$rid], $bid);
+  }
+  
+  //if updates successful return function repec_meta_msg() to display message
+  if ($sql_update){
+  	return repec_meta_msg($msg = 'saved');
+  } 
+}
+  
+/**
+ * repec_meta_fields_submit()
+ * @param unknown_type $form_id
+ * @param unknown_type $form_values
+ */
+function repec_meta_fields_submit($form_id, $form_values) {
+  foreach ($form_values as $type => $value) {
+    //clear $data_req array for each loop
+    $data_req = array();
+
+    //get list of required fields for specifc repec type
+    $sql_req = db_query("SELECT * FROM {repec_type_details} WHERE type = '%s' AND required = %d", $type,1);
+
+    //create array of required fields
+    while ($data = db_fetch_object($sql_req)){
+      $data_req[] = $data->identifier;
+    }
+
+    if (is_array($value)){
+      //clear the $identifier array for each loop
+      $identifier = array();
+
+      foreach ($value AS $t => $v) {
+        //capture the key of the $value array and spilt the
+        //string into an array using 3 underscores as a seperator
+        $act_ident = explode('___', $t );
+
+        //create an array called $identifier from the fields that the
+        //user has selected from the form, these will be fields to exclude
+        $identifier[] = $act_ident[1];
+      }
+
+      //get list of identifier values from database table for specific repec type
+      $sql = db_query("SELECT * FROM {repec_type_details} WHERE type = '%s'", $type);
+      while ($data = db_fetch_object($sql)) {
+        //determine whether to set active value to 0 or 1
+        $off_on = (in_array($data->identifier, $identifier)) ? 0 : 1;
+        //if field is not required, then process the next sql statement
+        $req = (in_array($data->identifier, $data_req)) ? TRUE : FALSE;
+        if (!$req){
+          $sql_update = db_query("UPDATE {repec_type_details} SET active = %d
+  					WHERE type = '%s'
+  					AND identifier  = '%s'", $off_on, $type, $data->identifier);
+        }
+      }
+    }
+
+    //safety measure which writes '1' to the active collumn of all required fields in table
+    reset($data_req);
+    foreach($data_req AS $key => $val) {
+      $sql_req = db_query("UPDATE {repec_type_details} SET active = %d
+  		 WHERE type = '%s' 
+  		 AND identifier  = '%s'", 1, $type, $val);
+    }
+    //repec type loop end bracket - will continue to next repec type
+  }
+  return repec_meta_msg($msg = 'saved');
+}
+
+/**
+ * repec_meta_api
+ * generate repec data for all (or a limited number of?) nodes without repec data
+ * this is called by cron.  also exposed so other mods can control when repec stuff gets generated
+ */
+function repec_meta_api() {
+	cite_distribute_mode_controller(NULL, "repec_meta", "api");
+}
+  
+/**
+* repec_meta_msg()
+* Returns a confirmation message to user 
+* @param $msg -Tells this function which message to display
+* @param $checkmode -  If not null, then will pass the current mode that the module is running in
+*/
+function repec_meta_msg($msg, $checkmode= NULL){  
+  switch($msg){
+   	case 'saved': drupal_set_message(t('The changes have been saved.'));
+  			break;	
+   	case 'repec_submit': drupal_set_message(t('This content has been saved to RePEc.'));
+  			break;		
+  }
+}
+  
+/**
+* repec_meta_template_names()
+* @return	Returns "friendly" or more readable names for RePEc templates
+*/
+function repec_meta_template_names($tid){ 
+  $sql = db_query("SELECT name FROM {repec_types} WHERE tid = %d", $tid);
+  $friendly_name = db_result($sql);
+  	
+  return $friendly_name;	
+}
+ 
+/**
+* repec_meta_format_date()
+* @param $property is the biblio formatted date
+* @return returns a formatted date for repec form biblo (from 'mm/yyyy' to 'yyyy-mm')
+*/
+function repec_meta_format_date($property){  
+  $fd = explode('/', $property);
+  $repec_fd = $fd[1] . '-' . $fd[0];
+  
+  return $repec_fd;
+}
+
+/**
+* Implementation of hook_cite_distribute_template()
+*/
+function repec_meta_cite_distribute_template($node, $module_mode, $iteration = NULL){
+
+  //gather two of the module's system variables need for this function
+  $archive_code = variable_get('repec_meta_archive_code','');
+  $archive_url = variable_get('repec_meta_archive_url','');
+  $archive_path = variable_get('repec_meta_archive_path','');
+  $inst_name = variable_get('repec_meta_inst_name','');
+
+  $sql_template = db_query("SELECT * FROM {repec_biblio_types} WHERE bid = %d", $node->biblio_type);
+  while ($result = db_fetch_object($sql_template)) {
+    $template_id = $result->rid;
+    $template_type = $result->r_type;
+  }
+
+  //call the function to make the template!!!
+  $template = repec_meta_template_process($node, $template_id, $template_type, $archive_code);
+
+  //using http creating files as the template type, underscore, node type
+  $filepath = $archive_path . $template_type . '/';
+  
+  //if being utilized for multiple openscholar installations, prefix filename 
+  //with the scholar type to prevent file name conflicts
+  global $conf;
+  $filename = $template_type . '_' .$node->nid . '.rdf';
+
+  $make_template = array(
+  'template' => $template,
+  'filepath' => $filepath,
+  'filename' => $filename,
+  );
+  //unset node for "api" mode loops, there are no loops in "per_submission" mode
+  unset($node);
+
+  return $make_template;
+}
+
+/**
+ * repec_meta_template_process($node, $template_id)
+ * 
+ * @param $node object
+ * @param $template_id is the type of template to generate
+ * @return This function generates the RDF file text
+ */
+function repec_meta_template_process($node, $template_id, $template_type, $archive_code){
+
+  $handle = 'RePEc:' . $archive_code . ':' . $template_type . ':' .  $node->nid;  
+  $path = 'node/'. $node -> nid;  //using $node->nid notation here because pathauto changes URL when title changes
+  
+  //get node's URL
+  if (module_exists('vsite') && (count($node->og_groups) == 1)){
+    $vsite = spaces_load('og', key($node->og_groups));
+    $file_url = $vsite->get_absolute_url() . $path;
+  }
+  elseif(module_exists('vsite') && (count($node->og_groups) > 1)){
+    //this should not happen
+    error_log("Alert: repec_meta has detected that node {$node->nid} belongs to multiple groups");
+    $vsite = vsite_get_vsite();    
+    $file_url = ( $vsite ) ? $vsite->get_absolute_url() . $path : '';
+  }
+  else{
+    $file_url = BASE_URL . '/' . $path;
+  }
+  
+  $template = '';
+
+  $sql_make_template = db_query("SELECT * FROM {repec_type_details} WHERE tid = %d AND active = %d ORDER BY
+  weight ASC", $template_id, 1);
+
+  while ($t_data = db_fetch_object($sql_make_template)) {
+
+  	switch($t_data->identifier) {
+    case 'Template-Type':
+      $template .= $t_data->identifier . ': ' . $t_data->data . "\n";
+      break;
+
+    case 'Author-Name':
+      //removes link html tags, for example '<a href='
+      $author_names = $t_data->data;
+      $author_names = strip_tags($author_names);
+      $property = $t_data->data;
+      if (strlen($property)){
+        $names = $node->$property;
+
+        if ($names) {
+          foreach ($names[1] AS $val){
+            $template .= $t_data->identifier . ': ' . $val['name']  . "\n";
+          }
+        }
+      }
+
+      //if no authors added to biblio node, added blank line to template file
+      //repec requires this line to be in the template. There SHOULD always
+      //be at least one author or contributor listed however
+      else {$template .= $t_data->identifier . ': ' . '' . "\n";}
+      break;
+
+    //formatting biblio date to repec date format (yyyy-mm)
+    case 'Creation-Date':
+      $property = $t_data->data;
+      if (strlen($property)){
+        $repec_date = repec_meta_format_date($node->$property);
+        $template .= $t_data->identifier . ': ' . $repec_date . "\n";
+      }
+      break;
+      
+    case 'File-URL':
+      $template .= $t_data->identifier . ': ' . $file_url . "\n";
+      break;
+
+    case 'File-Format':
+      // $template .= $t_data->identifier . ': ' . 'Application/pdf' . "\n";
+	  break;
+	  
+    case 'Handle':
+      $template .= $t_data->identifier . ': ' . $handle . "\n";
+      break;
+
+    case 'Keywords':
+      if(is_array($node->biblio_keywords)){
+        $template .= $t_data->identifier . ': ' .  implode(',', $node->biblio_keywords). "\n";
+      }
+      break;
+
+    case 'Pages':
+      $template .= $t_data->identifier . ': ' . $node->biblio_pages . "\n";
+      break;
+
+    case 'Title':
+      $property = $t_data->data;
+      $template .= $t_data->identifier . ': ' . trim($node->$property) . "\n";
+      break;
+    
+    case 'Editor-Name':
+    	$property = $t_data->data;
+    	foreach($node->$property as $bc) {
+    		/* List all editors.  Editors are repeatable */
+    		foreach ($bc as $editor) {
+    			$template .= $t_data->identifier . ':' . $editor['name'] . "\n";
+    		}
+    	}
+      break;
+      
+      
+  /* Several types (below) need indication that they were published by another 
+   * source so repec can link to that source instead of assuming we published the
+   * paper/book/whatever.
+   */ 
+    case 'Journal':
+    case 'Provider-Name':
+    case 'Publisher':
+    	$property = $t_data->data;
+    	if (isset($node->$property) && strlen($node->$property) > 0) {
+	    	
+    		$template .= 'Publication-Status: Published in ' . $node->$property;
+
+    	  foreach(array('volume', 'issue', 'pages') as $extra) {
+    	  	$e = 'biblio_' . $extra;
+      		if (isset($node->$e) && strlen($node->$e) > 0) {
+        		$template .= ' ' . $extra . ' ' . $node->$e;
+      		}
+    		}
+    		$template .= "\n"; 
+	    	
+    	}
+    	break;
+    	
+
+    default: 
+      $property = $t_data->data;
+      if (strlen($property)){
+        $template .= $t_data->identifier . ': ' . $node->$property . "\n";
+      }
+    }
+  }
+
+  return $template;
+}
+
+/*
+ *  @function _check_index
+ * ensures that archive and series indexes exist.  
+ * instead of callback, maybe this could happen in repec_meta_cite_distribute_template?
+ */
+function _check_index() {
+  //gather two of the module's system variables need for this function
+  $archive_code = variable_get('repec_meta_archive_code','');
+  $archive_url = variable_get('repec_meta_archive_url','');
+  $archive_path = variable_get('repec_meta_archive_path','');
+  $inst_name = variable_get('repec_meta_inst_name','');
+  $maintainer_email = variable_get('repec_meta_maintainer_email', '');
+  $maintainer_name = variable_get('repec_meta_maintainer_name', '');
+  $provider_institution = variable_get('repec_meta_provider_institution', '');
+  $provider_homepage = variable_get('repec_meta_provider_homepage', '');
+  
+  $filepath = $archive_path; // . $template_type . '/';
+  $arch = $archive_code . 'arch.rdf';
+  $seri = $archive_code . 'seri.rdf';
+  
+  if (!file_exists($filepath.$arch)) {
+	$archive  = "Template-type: ReDIF-Archive 1.0\n";
+	$archive .= 'Handle: RePEc:' . $archive_code . "\n";
+	$archive .= 'Name: ' . "Harvard IQSS" . "\n";
+	$archive .= 'Maintainer-Email: ' . $maintainer_email . "\n";
+	$archive .= 'Description: ' . $inst_name . "\n";
+	$archive .= 'URL: ' . $archive_url . "\n"; 
+	file_put_contents($filepath.$arch, $archive);
+  }
+  
+  if (!file_exists($filepath.$seri)) {
+  	$series = '';
+  	
+  	/* get repec types */
+  	$query = "SELECT type,name FROM {repec_types}";
+  	$result = db_query($query);
+  	while ($r = db_fetch_array($result)) {
+  		
+  		/* map result type to redif type */
+  		switch ($r['type']) {
+  			case 'bookch': 
+  				$redif_type = "Chapter";
+  				break;
+  			case 'booktm': 
+  				$redif_type = "Book";
+  				break;
+  			case 'journl': 
+  				$redif_type = "Article";
+  				break;
+  			case 'sftwre': 
+  				$redif_type = "Software";
+  				break;
+  			case 'wpaper': 
+  				$redif_type = "Paper";
+  				break;
+  		}
+  		
+  		$series .= "Template-type: ReDIF-Series 1.0\n";		
+		$series .= 'Name: ' . 'IQSS ' . $r['name'] . ' Series' . "\n";
+		$series .= 'Provider-Name: ' . $inst_name . "\n"; 
+		$series .= 'Provider-Homepage: ' . $provider_homepage . "\n";
+		$series .= 'Provider-Institution:  ' . $provider_institution . "\n"; 
+		$series .= 'Maintainer-Name: ' . $maintainer_name . "\n";
+		$series .= 'Maintainer-Email: ' . $maintainer_email . "\n";
+		$series .= 'Type: ' . 'ReDIF-' . $redif_type . "\n";
+    $series .= 'Handle: ' . 'RePEc:' . $archive_code . ':' . $r['type'] . "\n";
+  	
+  		/*
+  	 	* Other series options:
+  	 	* Order-Email, Order-Homepage, Order-Postal, Price, Restriction, Maintainer-Phone, Maintainer-Fax, Editor-Name, Editor-Email, Notification, ISSN
+  	 	* http://ideas.repec.org/t/seritemplate.html
+  	 	*/
+  		
+  		$series .= "\n";
+  	}
+  	
+  	file_put_contents($filepath.$seri, $series);
+  }
+
+}

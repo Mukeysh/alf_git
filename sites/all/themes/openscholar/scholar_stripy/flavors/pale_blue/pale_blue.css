@@ -1,0 +1,17 @@
+/* Pale Blue*/
+
+body {
+  background:#AAB7C5;
+  }
+
+body.navbar-off #page {
+  background-image:url('images/body-bg-alt-paleblue.png');
+  }
+
+#navbar {
+  background-image: url('images/nav-paleblue.png');
+  }
+
+a, a:visited {
+  color: #658ab2;
+  }

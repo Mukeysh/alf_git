@@ -1,0 +1,4 @@
+name = Creative Commons
+description = Allows users to add Creative Commons license to selected content.
+package = Licenses
+core = 6.x

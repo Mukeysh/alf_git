@@ -1,0 +1,92 @@
+<?php
+
+
+function scholar_events_update_6001(&$sandbox){
+  
+  $res = array();
+  module_rebuild_cache();
+  
+  // Enable openscholar_front module if need
+  if(!module_exists('signup')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('signup'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed signup module and enabled it',
+    );
+    
+  }
+  
+  if(!module_exists('signup_confirm_email')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('signup_confirm_email'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed signup_confirm_email module and enabled it',
+    );
+    
+  }
+  
+  if(!module_exists('scholar_events_signup')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('scholar_events_signup'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed scholar_events_signup module and enabled it',
+    );
+    
+  }
+  
+  return $res;
+  
+}
+
+
+function scholar_events_update_6002(&$sandbox){
+  
+  $res = array();
+  module_rebuild_cache();
+  
+  // Enable openscholar_front module if need
+  if(!module_exists('calendar')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_uninstall_module(array('calendar'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Calendar module was uninstalled',
+    );
+    
+  }
+  
+  return $res;
+  
+}
+
+function scholar_events_update_6003(&$sandbox){
+  
+  $res = array();
+  module_rebuild_cache();
+  
+  if(!module_exists('crayon')){
+    
+    include_once('includes/install.inc');
+    
+    drupal_install_modules(array('crayon'));
+    $res[] = array(
+      'success' => true,
+      'query' => 'Installed crayon module and enabled it',
+    );
+    
+  }
+  
+  return $res;
+  
+}

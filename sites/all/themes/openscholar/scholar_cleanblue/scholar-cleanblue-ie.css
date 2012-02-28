@@ -1,0 +1,45 @@
+#sidebar-first {
+	left: -215px;
+	}
+
+
+#navbar {
+
+  padding: 0 0 0 5px;
+  }
+
+#navbar li a  {
+  line-height: 27px;
+  text-transform:uppercase;
+ font-weight:normal;
+  font-size: 12px;
+
+}
+
+#navbar li a:hover,
+#navbar li.active-trail a {
+padding: 6px 15px 6px 15px;
+
+}
+:root #navbar li a:hover,
+:root #navbar li.active-trail a
+{padding: 7px 15px 7px 15px\0;}
+
+
+#navbar li a.active {
+   padding: 6px 15px 7px 15px;
+}
+
+:root #navbar li a.active
+{padding: 7px 15px 7px 15px\0;}
+
+
+
+#sidebar-first #block-vsite_menus-features li a {
+  line-height: 25px;
+  text-transform:uppercase;
+font-weight:normal;
+  font-size: 12px;
+
+}
+

@@ -1,0 +1,11 @@
+--- ../apachesolr_biblio/apachesolr_biblio.features.inc	2011-04-15 11:50:03.000000000 -0400
++++ apachesolr_biblio.features.inc	2011-04-15 12:19:04.000000000 -0400
+@@ -14,7 +14,7 @@ function apachesolr_biblio_features_expo
+   // Add biblio module as a dependency.
+   $export['dependencies']['features'] = 'biblio';
+   foreach ($data as $fid => $field) {
+-    if ($solr_field = apachesolr_biblio_get_field($fid)) {
++    if ($solr_field = apachesolr_biblio_get_field(null, $fid)) {
+       $export['features']['apachesolr_biblio_field'][$solr_field['name']] = $solr_field['name'];
+     }
+   } 

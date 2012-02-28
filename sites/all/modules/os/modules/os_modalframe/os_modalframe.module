@@ -1,0 +1,226 @@
+<?php
+include_once('os_modalframe.features.inc');
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ * Don't delete this one.
+ * Delete the one in os_modalframe.features.inc after exporting!
+ */
+function os_modalframe_ctools_plugin_api($module, $api) {
+  if ($module == 'boxes' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+  elseif ($module == "boxes" && $api == "box") {
+    return array("version" => 1);
+  }
+  elseif ($module == "strongarm" && $api == "strongarm") {
+    return array("version" => 1);
+  }
+}
+
+/**
+ * Run the necessary function for modalframe handling.
+ * This needs to be done before preprocess functions are run.
+ */
+function os_modalframe_init() {
+  if (isset($_GET['modal'])) {
+    modalframe_child_js();
+    if (isset($_POST['op'])) {
+      // form submission
+
+      if (strpos($_GET['q'], 'nojs')) {
+        // change GET[q] so we go through the ajax process
+        $_GET['q'] = str_replace('nojs', 'ajax', $_GET['q']);
+      }
+    }
+  }
+}
+
+function os_modalframe_menu() {
+  $items = array();
+  $items['cp/os-modalframe/%'] = array(
+    'title' => 'Configure this Widget',
+    'page callback' => 'os_modalframe_box_form',
+    'page arguments' => array(2),
+    'access callback' => 'os_boxes_cp_layout_configurable',
+    'access arguments' => array(2),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function os_modalframe_box_form($delta) {
+  $box = boxes_load($delta);
+  if (!$box) {
+    $delta = str_replace('boxes_add__', '', $delta);
+    $box = boxes_factory($delta);
+    $box->delta = os_boxes_create_delta();
+  }
+
+  $form_state['box'] = $box;
+  return drupal_build_form('boxes_box_form', $form_state);
+}
+
+/**
+ * Implementation of hook_boxes_plugins().
+ */
+function os_modalframe_boxes_plugins() {
+  $info = array();
+  $path = drupal_get_path('module', 'os_modalframe') .'/plugins';
+
+  $info['os_boxes_modalframe'] = array(
+    'handler' => array(
+      'class' => 'os_boxes_modalframe',
+      'file' => 'os_boxes_modalframe.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_default',
+    ),
+    'factory_path' => '',
+    'access' => "cp_access_cp",
+  );
+
+  $info['os_boxes_modal_image'] = array(
+    'title' => 'Single Image',
+    'description' => 'Single Image',
+    'tags' => array('Media'),
+    'handler' => array(
+      'class' => 'os_boxes_modalframe_image',
+      'file' => 'os_boxes_modalframe_image.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_modalframe',
+    ),
+    'factory_path' => 'node/add/modal-image',
+    'access' => "cp_access_cp",
+  );
+
+  $info['os_boxes_modal_sitelogo'] = array(
+    'description' => 'Site Logo',
+    'tags' => array('Misc'),
+  	'region' => 'header_left',
+    'handler' => array(
+      'class' => 'os_boxes_modal_sitelogo',
+      'file' => 'os_boxes_modal_sitelogo.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_modalframe',
+    ),
+    'access' => "cp_access_cp",
+  );
+
+  $info['os_boxes_modal_siteinfo'] = array(
+    'description' => 'Site Info',
+    'tags' => array('Misc'),
+    'region' => 'header_main',
+    'handler' => array(
+      'class' => 'os_boxes_modal_siteinfo',
+      'file' => 'os_boxes_modal_siteinfo.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_modalframe',
+    ),
+    'access' => "cp_access_cp",
+  );
+
+  $info['os_boxes_simple'] = array(
+    'title' => 'Custom text/html',
+    'description' => 'Custom text/html',
+    'tags' => array('Content'),
+    'handler' => array(
+      'class' => 'os_modal_wysiwyg',
+      'file' => 'os_modal_wysiwyg.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_modalframe',
+    ),
+    'factory_path' => 'cp/os-modalframe/boxes_add__os_boxes_simple',
+    'access' => "cp_access_cp",
+  );
+
+  $info['os_modal_tabbed'] = array(
+    'title' => 'Tabs',
+    'description' => 'Widgets as Tabs',
+    'tags' => array('Misc'),
+    'handler' => array(
+      'class' => 'os_modal_tabbed',
+      'file' => 'os_modal_tabbed.inc',
+      'path' => $path,
+      'parent' => 'os_boxes_modalframe',
+    ),
+    'module dependencies' => array("quicktabs"),
+    'factory_path' => 'cp/os-modalframe/boxes_add__os_modal_tabbed',
+    'access' => 'cp_access_cp',
+  );
+
+  return $info;
+}
+
+
+function os_modalframe_form_alter(&$form, &$form_state) {
+  if (isset($_GET['modal'])) {
+    if (isset($_GET['box'])) {
+      $box = boxes_load($_GET['box']);
+      if (empty($box)) {
+        // GET[box] wasn't a delta. must be a plugin key
+        $box = boxes_factory($_GET['box']);
+      }
+
+      $box->form_alter($form, $form_state);
+    }
+
+    // common to every modal form
+    if (isset($form['buttons']['submit'])) {
+      // the spaces_og submit handler breaks the modalframe closing
+      if (is_array($form['buttons']['submit']['#submit'])) {
+        $form['buttons']['submit']['#submit'] = array_diff($form['buttons']['submit']['#submit'], array('spaces_og_form_group_submit'));
+      }
+      $form['buttons']['submit']['#submit'][] = 'os_modalframe_form_submit';
+    }
+    else {
+      $form['#submit'][] = 'os_modalframe_form_submit';
+    }
+
+    modalframe_child_js();
+  }
+}
+
+function os_modalframe_form_submit(&$form, &$form_state) {
+  ctools_include('plugins');
+	$box_class = ctools_plugin_load_class('boxes', 'plugins', $form_state['values']['box']['plugin_key'], 'handler');
+	if ($box_class && is_callable("{$box_class}::submit")) {
+		$box = call_user_func(array($box_class,'submit'), $form, $form_state);
+
+    ctools_include('ajax');
+    ctools_include('modal');
+    if ($_GET['source'] == 'dropdown') {
+      // coming from layout dropdown
+      $args = array(
+        ctools_ajax_command_before('#scholarlayout-top-widgets .scholarlayout-item:nth-child(2)', theme('vsite_layout_ui_cp_widget', 'boxes-'.$box->delta, os_boxes_get_vsite_widget($box))),
+    		array('command' => 'updateLayoutForm', 'warning' => true),
+      );
+    }
+    elseif ($_GET['source'] != 'cp_layout') {
+      // coming from anywhere but cp layout form
+      $args = array(
+        ctools_ajax_command_reload(),
+      );
+    }
+	}
+
+  modalframe_child_js();
+  modalframe_close_dialog($args);
+  modalframe_form_submit($form, $form_state);
+  $form['#redirect'] = false;
+}
+
+function os_modalframe_vsite_admin_link_alter(&$links, $type, $object) {
+  $items = array();
+  if ($type == 'block' && $object->module == 'boxes' && ($box = boxes_load($object->delta)) && ($vsite = vsite_get_vsite())) {
+    $modalframe = 'os_boxes_modalframe';
+    // if the class doesn't exist, this is obviously not a modalframe box
+    if (class_exists($modalframe) && ($box instanceof $modalframe)) {
+      foreach ($links as &$l) {
+        if ($l['admin_type'] == 'config') {
+          $l['href'] = $box->get_config_path();
+          $l['attributes']['class'] = 'vsite-modal-link';
+        }
+      }
+    }
+  }
+}

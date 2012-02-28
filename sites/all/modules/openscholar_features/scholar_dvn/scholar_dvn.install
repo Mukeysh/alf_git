@@ -1,0 +1,46 @@
+<?php
+
+
+function scholar_dvn_update_6001(&$sandbox){
+
+  $res = array();
+
+  if(!db_table_exists('spaces_overrides')){
+    $res['#abort'] = array('success' => FALSE, 'query' => 'Spaces Override table does not exist, aborting until Spaces is updated to version 3.');
+    return $res;
+  }
+
+  $settings = array();
+  $result = db_query('SELECT * FROM {spaces_settings} WHERE id LIKE "scholar_dvn" ');
+  while ($row = db_fetch_object($result)) {
+    $value = unserialize($row -> value);
+    // there is only one system variable here: dvn_alias
+    db_query("INSERT INTO {spaces_overrides} (type, id, object_type, object_id, value) VALUES ('%s', '%s', 'variable', 'scholar_dvn_dvn_alias', '%s')", $row->type, $row->sid, serialize($value['scholar_dvn_dvn_alias']));
+  }
+  $res[] = array(
+      'success' => true,
+      'query' => 'Migrated the DVN Settings',
+    );
+
+  return $res;
+
+}
+
+function scholar_dvn_update_6002(&$sandbox) {
+  // add base path to existing dvn's
+
+  $base_url = 'http://dvn.iq.harvard.edu/dvn/dv/';
+  $q = db_query("SELECT value, id FROM {spaces_overrides} WHERE object_type = 'variable' AND object_id = 'scholar_dvn_dvn_alias'");
+  while ($r = db_fetch_object($q)) {
+    $r->value = unserialize($r->value);
+    if (strpos($r->value, 'http:') === FALSE) {
+      db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE id = %d AND object_type = 'variable' AND object_id = 'scholar_dvn_dvn_alias'", serialize($base_url.$r->value), $r->id);
+    }
+  }
+  $res[] = array(
+    'success' => true,
+    'query' => 'Added base url to existing dvn aliases.',
+  );
+
+  return $res;
+}

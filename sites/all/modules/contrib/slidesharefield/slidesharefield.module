@@ -1,0 +1,230 @@
+<?php
+
+
+/**
+ * @file
+ * Enables CCK FileField integration with Slideshare.net.
+ */
+include_once dirname(__FILE__) . '/slidesharefield.field.inc';
+
+/**
+ * Implementation of hook_theme().
+ */
+function slidesharefield_theme($existing, $type, $theme, $path){
+  return array(
+      'slidesharefield_widget' => array(
+          'arguments' => array(
+              'element' => NULL
+          )
+      ),
+      'slidesharefield_formatter_slideshare' => array(
+          'arguments' => array(
+              'element' => NULL
+          )
+      ),
+      'slidesharefield_formatter_slideshare_thumbnail' => array(
+          'arguments' => array(
+              'element' => NULL
+          )
+      ),
+      'slidesharefield_formatter_slideshare_thumb_popup' => array(
+        'arguments' => array(
+          'element' => NULL,
+        ),
+      ),
+  );
+}
+
+function theme_slidesharefield_formatter_slideshare_thumbnail($element){
+  if (is_array($element['#item']['data'])) {
+    $data = $element['#item']['data'];
+    $slideid = $data['slideshare_doc_id'];
+    $res = slideshare_slideshare("get_slideshow", array(
+        'slideshow_id' => $slideid
+    ));
+
+    $status = $res[0]['STATUS'];
+    if ($status == '2')
+      return '<img src="' . $res[0]['THUMBNAILURL'] . '" />';
+    else if ($status == '0')
+      return "The file " . $res[0]['TITLE'] . " is queued for conversion.";
+    else if ($status == '1')
+      return "The file " . $res[0]['TITLE'] . " under conversion process.";
+    else if ($status == '3')
+      return "The file is under conversion failed.";
+    else
+      "The file conversion process failed";
+  }
+}
+
+function theme_slidesharefield_formatter_slideshare_thumb_popup($element) {
+  if (is_array($element['#item']['data'])) {
+    $data = $element['#item']['data'];
+    $slideid = $data['slideshare_doc_id'];
+    $res = slideshare_slideshare("get_slideshow", array(
+        'slideshow_id' => $slideid
+    ));
+
+
+    preg_match_all('|src="(.+?)"|', $res[0]['EMBED'], $matches);
+    $embed = $matches[1][0];
+
+    $status = $res[0]['STATUS'];
+    if ($status == '2')
+      return '<a href="'.$embed.'" rel="shadowbox"><img src="' . $res[0]['THUMBNAILURL'] . '" width="215"/></a>';
+    else if ($status == '0')
+      return "The file " . $res[0]['TITLE'] . " is queued for conversion.";
+    else if ($status == '1')
+      return "The file " . $res[0]['TITLE'] . " under conversion process.";
+    else if ($status == '3')
+      return "The file is under conversion failed.";
+    else
+      return "The file conversion process failed";
+  }
+  return 'Failure getting the thumbnail';
+}
+
+/**
+ * FormAPI theme function. Theme the output of an image field.
+ */
+function theme_slidesharefield_widget(&$element){
+  return theme('form_element', $element, $element['#children']);
+}
+
+function theme_slidesharefield_formatter_slideshare($element){
+  if (is_array($element['#item']['data'])) {
+    $data = $element['#item']['data'];
+    $slideid = $data['slideshare_doc_id'];
+    $res = slideshare_slideshare("get_slideshow", array(
+        'slideshow_id' => $slideid
+    ));
+
+    $status = $res[0]['STATUS'];
+    if ($status == '2') {
+      $matches = explode('><', $res[0]['EMBED']);
+      foreach ($matches as &$m) {
+        if (substr($m, 0, 1) != '<') {
+          $m = '<'.$m;
+        }
+        if (substr($m, -1, 1) !== '>') {
+          $m .= '>';
+        }
+      }
+      $matches[2] = preg_replace('|>(.*?)<|', '>Download PDF<', $matches[2]);
+      $link = $matches[1].$matches[2].$matches[3];
+      $output = $matches[0].$matches[4].$matches[5].$matches[6].$matches[7].$matches[8].$matches[9].$matches[10].$link.$matches[12];
+      return str_replace(array('425', '355'), array('595', '497'), $output);
+    }
+    else if ($status == '0')
+      return "The file " . $res[0]['TITLE'] . " is queued for conversion.";
+    else if ($status == '1')
+      return "The file " . $res[0]['TITLE'] . " under conversion process.";
+    else if ($status == '3')
+      return "The file is under conversion failed.";
+    else
+      "The file conversion process failed";
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function slidesharefield_nodeapi(&$node, $op, $teaser, $page){
+  switch ($op) {
+    case 'presave' :
+
+      foreach ( $node as $node_key => $node_value ) {
+        if (strpos($node_key, 'field_') !== FALSE) {
+          $field = content_fields($node_key, $node->type);
+          if ($field['widget']['module'] == 'slidesharefield') {
+            unset($_SESSION['scribfield_removed_files']);
+            // see slidesharefield_widget_process() for sets.
+
+
+            foreach ( $node->{$node_key} as $field_delta => $field_value ) {
+              if (! empty($node->{$node_key}[$field_delta]['filepath']) && empty($node->{$node_key}[$field_delta]['data']['slideshare_doc_id'])) {
+                $response_xml = slidesharefield_api_upload($node->{$node_key}[$field_delta]['filepath']);
+
+                $data = $response_xml[0]['SLIDESHOWID'];
+                if ($data) {
+                  $node->{$node_key}[$field_delta]['data']['slideshare_doc_id'] = $data;
+
+                  drupal_set_message(t('@filepath has been uploaded to Slideshare.net.', array(
+                      '@filepath' => $node->{$node_key}[$field_delta]['filepath']
+                  )));
+                }
+                else {
+                  drupal_set_message(t('@filepath could not be uploaded to Slideshare.net', array(
+                      '@filepath' => $node->{$node_key}[$field_delta]['filepath']
+                  )), 'error');
+                }
+              }
+            }
+          }
+        }
+      }
+
+      break;
+
+    case 'delete' :
+      foreach ( $node as $node_key => $node_value ) {
+        if (strpos($node_key, 'field_') !== FALSE) {
+          $field = content_fields($node_key, $node->type);
+          if ($field['widget']['module'] == 'slidesharefield') {
+            foreach ( $node->{$node_key} as $field_delta => $field_value ) {
+              if (! empty($node->{$node_key}[$field_delta]['filepath']) && ! empty($node->{$node_key}[$field_delta]['data']['slideshare_doc_id'])) {
+                $res = slideshare_slideshare("delete_slideshow", array(
+                    'slideshow_id' => $node->{$node_key}[$field_delta]['data']['slideshare_doc_id']
+                ));
+              }
+            }
+          }
+        }
+      }
+
+      if (isset($files_were_uploaded_to_slideshare_so_warn_the_user_mmkay)) {
+        drupal_set_message(t('Files were uploaded to Slideshare.net: you\'ll need to manually remove them from Slideshare\'s "My Uploads".'), 'warning');
+      }
+
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_form_[form_id]_alter().
+ */
+function slidesharefield_form_content_field_overview_form_alter(&$form, &$form_state){
+  $form['#submit'][] = 'slidesharefield_form_content_field_overview_submit';
+}
+
+/**
+ * Submit handler to set a new slidesharefield's formatter to "Slide Share".
+ */
+function slidesharefield_form_content_field_overview_submit(&$form, &$form_state){
+  if (isset($form_state['fields_added']['_add_new_field']) && isset($form['#type_name'])) {
+    $field = content_fields($form_state['fields_added']['_add_new_field'], $form['#type_name']);
+    if ($field['widget']['module'] == 'slidesharefield') {
+      foreach ( $field['display_settings'] as $display_type => $display_settings ) {
+        if ($field['display_settings'][$display_type]['format'] == 'default') {
+          $field['display_settings'][$display_type]['format'] = 'slideshare';
+        }
+      }
+
+      content_field_instance_update($field);
+    }
+  }
+}
+
+/**
+ * Uses Slideshare's docs.upload API function to send uploaded file along.
+ */
+function slidesharefield_api_upload($file){
+  $filename = end(explode('/', $file));
+  global $base_url;
+  $file = $base_url . '/' . $file;
+  $params['slideshow_title'] = $filename;
+  $params['upload_url'] = $file;
+  $res = slideshare_slideshare("upload_slideshow", $params);
+  return $res;
+}
+

@@ -1,0 +1,207 @@
+/* $Id: modal.css,v 1.6 2009/07/10 17:40:09 merlinofchaos Exp $ */
+
+/* CTools popup */
+
+#modalContent {
+  top: 0 !important;
+  position: fixed !important;
+  }
+
+#modalBackdrop {
+  background: blue;
+  }
+
+#wysiwyg_imagefield-dialog {
+  color: #000;
+  padding: 20px 0 0 25px;
+  margin: 0;
+  border: none;
+  text-align: left;
+  background: #fff;
+  -moz-box-shadow: 0 .5em 3em rgba(0,0,0,0.6);
+  -webkit-box-shadow: 0 .5em 3em rgba(0,0,0,0.6);
+  box-shadow: 0 .5em 3em rgba(0,0,0,0.6);
+}
+  
+div.ctools-modal-content {
+  color: #000;
+  margin: 0;
+  text-align: left;
+  background: #fff;
+  -moz-box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 26px rgba(0, 0, 0, 0.5);
+  height: 100% !important;
+}
+
+
+#modal-content {
+ padding: 20px 0 20px 25px;
+  }
+
+div.ctools-modal-content .modal-title {
+  color: #626161;
+  font-size:20px;
+  }
+
+div.ctools-modal-content .modal-header {
+  background: url('../../cp_theme/images/modalHeaderBg.gif') repeat-x;
+ height:45px;
+ padding:10px;
+  }
+
+div.ctools-modal-content .modal-header a {
+float:right;
+color: transparent;
+background: url('../../cp_theme/images/icon-close-window.png') no-repeat;
+width:30px;
+height:30px;
+  }
+
+
+div.ctools-modal-content .modal-content {
+  padding: 12px 12px 0 12px;
+  overflow: auto;
+  width: 575px;
+  height: 400px;
+  }
+  
+div.ctools-modal-content .modal-form {
+}
+
+div.ctools-modal-content a.close:hover {
+  text-decoration: none;
+}
+
+div.ctools-modal-content a.close img {
+display: none;
+    position: relative;
+    top: 1px;
+   }
+
+div.ctools-modal-content .modal-content .modal-throbber-wrapper {
+  text-align: center;
+}
+
+div.ctools-modal-content .modal-content .modal-throbber-wrapper img {
+  margin-top: 160px;
+}
+
+/** modal forms CSS **/
+
+div.ctools-modal-content .form-item label.option {
+  width: auto;
+  float: none;
+}
+
+div.ctools-modal-content .form-item .description {
+  clear: left;
+}
+
+div.ctools-modal-content .form-item .description .tips {
+  margin-left: 2em;
+}
+
+div.ctools-modal-content .no-float .form-item * {
+  float: none;
+}
+
+div.ctools-modal-content .modal-form .no-float label  {
+  width: auto;
+}
+
+
+
+div.ctools-modal-content fieldset {
+  padding-bottom: 10px;
+  clear: left;
+}
+
+div.ctools-modal-content #edit-settings-front-node-options-wrapper .form-checkboxes .form-item {
+  float: left;
+  margin-right: 7px;
+  }
+
+div.ctools-modal-content .resizable-textarea {
+  width: auto;
+  margin-left: 15em;
+  margin-right: 5em;
+}
+
+
+#modalContent {
+  padding: 0 23px 35px 40px;
+  background: transparent;
+  }
+
+#ctools-left, #ctools-right, #ctools-bottom {
+  position: absolute;
+  }
+
+
+#ctools-right {
+  left: auto;
+  right: 0;
+  background-position: 100% 100%;
+  width: 23px;
+  bottom: -6px;
+  }
+
+/** SLIDESHOW STYLE SELECTION RADIOS **/
+	
+.form-radios.thumbnails {margin-top:10px;}
+	
+#edit-style--wrapper img,
+#edit-style--light-wrapper img { 
+display:block;
+}
+	
+#edit-style--wrapper { 
+float:left;	
+margin-right:20px;
+}
+	
+#edit-style--light-wrapper {
+margin-bottom:0;
+}
+
+#edit-style--light-wrapper.form-item {display:inline-block;}
+
+.form-submit {float:left;}
+
+  /** contrib/modalframe/css/modalframe.parent.css OVERRIDE **/
+ 	
+  .modalframe .ui-dialog-titlebar {
+    background-color: #f1f1f1;
+    border-bottom: 3px solid #c4c2c2;
+    cursor: move;
+    height: 26px;
+    position: relative;
+    white-space: nowrap;
+}
+
+.modalframe .ui-dialog-title {
+   color: #626161;
+    font-size: 20px;
+    margin: 0.6em 0.5em;
+}
+
+.modalframe {
+    background-color: #FFFFFF;
+    border: none;
+    color: #000000;
+}
+
+.modalframe .ui-dialog-titlebar-close, .modalframe .ui-dialog-titlebar a.ui-state-hover, .modalframe .ui-dialog-titlebar a.ui-state-focus  {
+    background: url("../../cp_theme/images/icon-close-window.png") no-repeat scroll 0 0 transparent;
+    display: block;
+    height: 30px;
+    margin: 10px 8px 2px 0.5em;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width:30px;
+}
+
+

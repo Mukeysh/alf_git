@@ -1,0 +1,340 @@
+<?php
+
+/**
+ * Implemenation of hook_menu()
+ * @return unknown
+ */
+function scholarregister_menu(){
+  $items = array();
+  $items['site/register'] = array(
+    'title' => 'Create your web site',
+    'page callback' => 'scholarregister_form_process',
+    'file' => 'scholarregister.pages.inc',
+    'access callback' => 'scholarregister_form_access',
+  );
+
+  $items['scholarregister/domain_js'] = array(
+    'title' => 'Create your web site',
+    'page callback' => 'scholarregister_domain_js',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['scholarregister/mail_js'] = array(
+    'title' => 'Create your web site',
+    'page callback' => 'scholarregister_mail_js',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['scholarregister/name_js'] = array(
+    'title' => 'Create your web site',
+    'page callback' => 'scholarregister_name_js',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Scholar register form access
+ *@return boolean
+ */
+function scholarregister_form_access(){
+  return scholarregister_vsite_exists_access();
+}
+
+/**
+ * Determine whether to redirect user or load form when trying to access registration form
+ */
+function scholarregister_form_process(){
+  global $user;
+
+  //check if user should be re-directed somewhere
+  if (!scholarregister_vsite_exists_access()){
+    return drupal_goto(_scholarregister_get_redirect(vsite_get_vsite_by_owner($user->uid)));  //redirect user away from the form
+  }
+
+  return drupal_get_form('scholarregister_signup_form'); //load the form
+}
+
+/**
+ * Handles access rules for when site owner is attempting to create a another site
+ * @return  boolean
+ */
+function scholarregister_vsite_exists_access($vsites = false){
+
+	if(!$vsites){
+		global $user;
+		$vsites = vsite_get_vsite_by_owner($user->uid);
+	}
+
+	//if user has permissions to create sites, return true
+  if (!user_access("create openscholar site on behalf of others") &&
+      !user_access("create own openscholar site")) {
+    return false;
+  }
+
+  //user owns one or more sites
+  if (count($vsites) >= variable_get('openscholar_vsites_per_user', 1)){
+  	//check whether user can create multiple sites
+    return user_access("create openscholar site on behalf of others");
+  }
+
+  return true;
+}
+
+/**
+ * Private function - Provides redirect path and message for certain regstration form access conditions
+ * @param  $vsites array created from vsite_get_vsite_by_owner()
+ */
+function _scholarregister_get_redirect($vsites = array()){
+  switch (count($vsites)){
+    case 0:
+      //This should not happen unless $vsites was not passed properly or is empty array
+      error_log('scholarregister_get_redirect() was called with an empty array as the first argument');
+      return null;
+      break;
+
+    case 1:
+      global $base_url;
+      drupal_set_message(t('You already have a registered web site.' . l(' Go there now.', $vsites[0] ->get_absolute_url())));
+      return $base_url;
+      break;
+
+    default:
+      drupal_set_message(t('You have already registered the maximum number of web sites.' ));
+      return 'user';
+      break;
+  }
+}
+
+/**
+ * ajax callback for name
+ */
+function scholarregister_name_js() {
+  $name = $_POST ['ctools_changed'];
+
+  if ($error = scholarregister_validate_name($name)){
+  	$user = user_load(array('name' => $name));
+  	if(!user_access("create openscholar site on behalf of others") || !$user || count(vsite_get_vsite_by_owner($user->uid)) >= variable_get('openscholar_vsites_per_user', 1)){
+      scholarregister_ctools_message('#name-suffix', $error, 'error');
+  	}else{
+  		scholarregister_ctools_message('#name-suffix', "Notice: This user already exists and has ".count(vsite_get_vsite_by_owner($user->uid))." sites. ".l("Click here","site/register",array("query" => array("register_for" => $user->uid)))." to create a site for them.", 'error');
+  	}
+  }
+  // username is available
+  scholarregister_ctools_message('#name-suffix', "available", 'status');
+}
+
+/**
+ * ajax callback for mail
+ */
+function scholarregister_mail_js() {
+  $mail = $_POST['ctools_changed'];
+  if ($error = scholarregister_validate_mail($mail)){
+      scholarregister_ctools_message('#mail-suffix', $error, 'error');
+  }
+
+  scholarregister_ctools_message('#mail-suffix', "available", 'status');
+}
+
+/**
+ * ajax callback for domain
+ */
+function scholarregister_domain_js() {
+  $domain = $_POST['ctools_changed'];
+
+  if ($error = scholarregister_validate_domain($domain)){
+    scholarregister_ctools_message('#domain-suffix', $error, 'error');
+  }
+  // ok then .. it's good and available
+  scholarregister_ctools_message('#domain-suffix', "available", 'status'); // exits
+}
+
+/**
+ * Name validation
+ * @param $mail - username entered in the form
+ */
+function scholarregister_validate_name($name){
+  if ($error = user_validate_name($name)){
+    return $error;
+  }
+  elseif (_scholarregister_domain_exists($name) || _scholarregister_name_exists($name)){
+    return "username \"$name\" is taken";
+  }
+}
+
+/**
+ * Email validation
+ * @param $mail - email address entered in the form
+ */
+function scholarregister_validate_mail($mail) {
+  // Validate the e-mail address:
+  if ($error = user_validate_mail($mail)) {
+    $mail = trim($mail);
+    if ($error = user_validate_mail($mail)) {
+      return $error;
+    }
+  }
+  elseif (_scholarregister_mail_exists($mail)){
+  	$user = user_load(array('mail' => $mail));
+  	if(!user_access("create openscholar site on behalf of others") || !$user || count(vsite_get_vsite_by_owner($user->uid)) >= variable_get('openscholar_vsites_per_user', 1)){
+  		return "The e-mail address \"$mail\" already exists";
+  	}
+  }
+}
+
+/**
+ * Domain validation
+ * @param $domain - domain entered in the form
+ */
+function scholarregister_validate_domain($domain){
+  $modifier = array(
+  'provider' => 'spaces_og',
+  'value' => $domain,
+  'id' => null,
+  );
+
+  // Check to see if domain suffix is taken
+   if (_scholarregister_domain_exists($domain)){
+    return "The domain \"$domain\" is already taken";
+  }
+  // Validate the domain suffix
+   elseif (!purl_validate($modifier)){
+    return "The domain \"$domain\" is invalid";
+  }
+}
+
+/**
+ * wrapper function for executing ajax commands
+ * @param $id  the html selector (id)
+ * @param $message the message to insert on the div with id=$id
+ * @param $class  the class to apply to the div
+ */
+function scholarregister_ctools_message($id, $message, $class = 'error'){
+  ctools_include ( 'ajax' );
+  ctools_add_js ( 'ajax-responder' );
+  $commands = array ();
+  $commands [] = ctools_ajax_command_html ( $id, $message);
+  $commands [] = ctools_ajax_command_attr($id, 'class', $class);
+  ctools_ajax_render ( $commands );
+}
+
+
+function scholarregister_notify_user($vsite, $user){
+  global $language;
+  $params = array();
+  $from = variable_get('site_mail', ini_get('sendmail_from'));
+
+     //add vsite and user object
+   $params['vsite'] = $vsite;
+   $params['user'] = $user;
+   $params['subject'] = t("An OpenScholar web site has been created for you", array(
+    '!site_name' => variable_get('site_name', 'OpenScholar')
+  ));
+
+  $scholar_site_url =  $site_url = url($vsite -> group -> purl, $options = array('absolute' => TRUE));
+  $timestamp = time();
+
+  $msg_variables = array(
+    '!username' => $user->name,
+    '!site' => variable_get('site_name', 'OpenScholar'),
+    '!scholar_site_url' => $scholar_site_url,
+    '!login_url' => user_pass_reset_url($user),
+    '!site_login_uri' => url($vsite -> group -> purl . '/home', array('absolute' => TRUE)),
+    '!uri' => $base_url,
+    '!uri_brief' => preg_replace('!^https?://!', '', $base_url),
+    '!mailto' => $user->mail,
+    '!date' => format_date(time(), 'medium', '', NULL, $message['language']->language),
+    '!login_uri' => url('user', array(
+      'absolute' => TRUE,
+      'language' => $message['language']
+    )),
+    '!site_url' => url($vsite -> group -> purl),
+    '!edit_uri' => url('user/' . $user->uid . '/edit', array(
+      'absolute' => TRUE,
+      'language' => $message['language']
+    )),
+    '!scholar_edit_url' => url("/user/{$user->uid}/edit", array('absolute' => TRUE)),
+    '!password' => $password
+  );
+
+  //detemine if user is creating first site or additional site, send appropriate message
+  $body = (count(vsite_get_vsite_by_owner($user -> uid)) > 1) ?
+
+   t("Hi !username,\n\nYour new web site at !site has been activated. Your web site url is !scholar_site_url\n\nYou will be able to log into your site at !site_login_uri with username:\n\n!username\n\nWe hope you will enjoy your new web site.\n\nSincerely,\nThe !site Team", $msg_variables)
+   :t(variable_get('openscholar_register_email_message', _scholarregister_get_default_mail_message()), $msg_variables);
+
+  $params['body'] = $body;
+  if (! drupal_mail('scholarregister', 'scholar-register-notify', $user->mail, $language, $params, $from)) {
+    drupal_set_message(t('Error sending notification mail to user.'), 'error');
+  }
+}
+
+/**
+ * Implementation of hook_mail()
+ */
+function scholarregister_mail($key, &$message, $params) {
+  $message['subject'] = $params['subject'];
+  $message['body'] = $params['body'];
+
+  //these values be used with any mail alter hooks
+ $message['vsite'] = $params['vsite'];
+ $message['user'] = $params['user'];
+}
+
+
+/** Private functions **/
+
+function _scholarregister_domain_exists($domain){
+  // check domain availability
+  $query = "SELECT value FROM {purl} WHERE value='%s'";
+  $existing_purl = db_result(db_query($query, $domain));
+
+  return $existing_purl ? TRUE : FALSE;
+}
+
+function _scholarregister_name_exists($name){
+  // check domain availability
+  $query = "SELECT name FROM {users} WHERE name='%s'";
+  $existing_name = db_result(db_query($query, $name));
+
+  return $existing_name ? TRUE : FALSE;
+}
+
+function _scholarregister_mail_exists($mail){
+  // check domain availability
+  $query = "SELECT mail FROM {users} WHERE mail='%s'";
+  $existing_mail = db_result(db_query($query, $mail));
+
+  return $existing_mail ? TRUE : FALSE;
+}
+
+/**
+ * Implementation of hook_scholarregister_message()
+ * @return the message shown after a successful  web site registration
+ */
+function scholarregister_message($form, $domain){
+  global $user, $base_url;
+
+  $word_replace = user_access("create openscholar site on behalf of others") ? 'the' : 'your';
+
+  $message  = '<div id="success-message" class="status">';
+  $message .= '<p>Success! ' . ucfirst($word_replace) . ' new site has been created.</p>';
+  $message .= '<p>The url of ' . $word_replace . ' site is ' . $base_url . '/' . $domain . ' ' . l(t("Go there now"), $base_url . '/' . $domain) . '</p>';
+  if (in_array('anonymous user', $user -> roles)){
+    $message .= '<p>Check your email account for further details on how to login in to start adding features and content.</p>';
+  }
+  $message .= '</div>';
+
+  //give other modules a chance to alter message
+  module_invoke_all('scholarregister_message',  $message, $form, $domain);
+  return $message;
+}
+
+
+function _scholarregister_get_default_mail_message(){
+  return "Hi !username,\n\nYour new web site at !site has been activated.\n\nYour web site url is !scholar_site_url\nYou may now log in by clicking on this link or copying and pasting it in your browser: \n\n !login_url \n\nThis is a one-time login, so it can be used only once. After logging in, you will be redirected to !scholar_edit_url so you can change your password. Once you have set your own password, you will be able to log in at !site_login_uri as username:\n\n!username\n\nWe hope you will enjoy your new web site.\n\nSincerely,\nThe !site Team";
+}

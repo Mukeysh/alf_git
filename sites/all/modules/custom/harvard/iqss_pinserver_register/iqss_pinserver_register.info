@@ -1,0 +1,7 @@
+name = IQSS Pinserver Register
+description = "This module user the pinserver module to modify the scholar registration process."
+dependencies[] = "scholarregister"
+dependencies[] = "pinserver"
+package = "OpenScholar Harvard"
+core = 6.x
+version = "6.x-beta14"

@@ -1,0 +1,12 @@
+diff --git a/sites/all/modules/contrib/disqus/disqus.module b/sites/all/modules/contrib/disqus/disqus.module
+index b1c042d..008226b 100644
+--- a/sites/all/modules/contrib/disqus/disqus.module
++++ b/sites/all/modules/contrib/disqus/disqus.module
+@@ -249,7 +249,6 @@ function disqus_link($type, $node = NULL, $teaser = FALSE) {
+     if (!empty($types[$node->type]) && user_access('view disqus comments') && !empty($domain)) {
+       // Construct the path and inject it into the links area.
+       $path = url("node/$node->nid", array(
+-        'alias' => TRUE,
+         'absolute' => TRUE,
+       ));
+       $links['disqus_comments'] = array(

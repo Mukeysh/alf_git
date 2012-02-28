@@ -1,0 +1,227 @@
+
+.tabs {
+  background-color: transparent;
+  float: none;
+  margin: 0 0 10px 0;
+  padding: 0;
+}
+
+/* Primary */
+.tabs ul.primary,
+#content .tabs ul.primary {
+  margin: 0 0 20px 0;
+  padding: 0;
+  width: 100%;
+  height: 1.4em;
+  }
+
+.tabs ul.primary li,
+#content .tabs ul.primary li {
+  border-style: none;
+  float: left;
+  list-style: none;
+  margin: 0 1px 0 0;
+  padding: 0;
+  }
+
+.tabs ul.primary li a:link,
+.tabs ul.primary li a:visited {
+  background-color: transparent;
+  border: none;
+  font-weight: bold;
+  margin: 0;
+  padding: 0 0 6px 0;
+  text-decoration: none;
+  white-space: nowrap;
+  }
+
+.tabs ul.primary li a:link,
+.tabs ul.primary li a:visited {
+  border: none;
+  font-weight: normal;
+  padding: 5px 10px;
+}
+
+.tabs ul.primary li.active a,
+.tabs ul.primary li a.active:link,
+.tabs ul.primary li a.active:visited,
+.tabs ul.primary li.active a:hover,
+.tabs ul.primary li.active a:focus  {
+  border: none;
+  padding: 5px 10px;
+}
+
+.tabs ul.primary li a:hover,
+.tabs ul.primary li a:focus  {
+  border-bottom: none;
+  text-decoration: underline;
+}
+
+/* Secondary */
+.tabs ul.secondary {
+  clear: both;
+  float: left;
+  margin: -10px 0 20px 0;
+  padding: 0 10px;
+  text-transform: lowercase;
+  width: 100%;
+}
+
+.tabs ul.secondary li {
+  border-style: none;
+  display: inline;
+  float: left;
+  list-style: none;
+  margin: 0 1px 0 0;
+  padding: 0;
+}
+
+.tabs ul.secondary li a:link,
+.tabs ul.secondary li a:visited {
+  background-color: transparent;
+  border: none;
+  float: left;
+  font-weight:  normal;
+  margin: 0 20px 0px 0;
+  padding: 0 0 6px 0;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tabs ul.secondary li a:hover,
+.tabs ul.secondary li a:focus {
+  padding: 0 0 2px 0;
+}
+
+.tabs ul.secondary li a.active:link,
+.tabs ul.secondary li a.active:visited {
+  padding: 0 0 2px 0;
+}
+
+
+/*****************************/
+
+.tabs ul.primary {
+  border-bottom: none;
+}
+
+.tabs ul.primary li a:link,
+.tabs ul.primary li a:visited {
+  background-color: transparent;
+  color: #000;
+}
+
+.tabs ul.primary li a:link,
+.tabs ul.primary li a:visited {
+  background: #e3e3e3;
+  color: #666;
+}
+
+.tabs ul.primary li.active a,
+.tabs ul.primary li a.active:link,
+.tabs ul.primary li a.active:visited,
+.tabs ul.primary li.active a:hover,
+.tabs ul.primary li.active a:focus  {
+  background: #cecece;
+  color: #000;
+}
+
+.tabs ul.primary li a:hover,
+.tabs ul.primary li a:focus  {
+  color: #000;
+}
+
+/* Secondary */
+.tabs ul.secondary {
+  border-bottom: none;
+}
+
+.tabs ul.secondary li a:link,
+.tabs ul.secondary li a:visited {
+  color: #999;
+}
+
+.tabs ul.secondary li a:hover,
+.tabs ul.secondary li a:focus {
+  border-bottom: 1px solid #ddd;
+  color: #777;
+}
+
+.tabs ul.secondary li a.active:link,
+.tabs ul.secondary li a.active:visited {
+  border-bottom: 2px solid #ddd;
+  color: #000;
+}
+
+/**	 QUICK TABS**/
+	
+div.quicktabs_main {
+background: url('../images/quickTabsContainerBg.png') repeat-x;
+padding:10px;
+-moz-margin-top: 0px;
+margin-top: 1px;
+	}
+	
+.quicktabs_tabs {
+margin-left: -2px;
+}
+
+.quicktabs_tabs ul {
+width:100%;
+
+}
+
+ul.quicktabs_tabs li {
+list-style: none;
+display: inline;
+margin: 0;
+}
+
+.quicktabs_tabs li a {
+text-decoration: none;
+padding: 3px 12px;
+background: #DDD;
+ -moz-border-radius-topleft :4px;
+ -moz-border-radius-topright: 4px;
+-webkit-border-top-left-radius:4px;
+ -webkit-border-top-right-radius:4px;
+border-top-left-radius: 4px;
+border-top-right-radius: 4px;
+font-style:normal;
+border:1px solid #888;
+border-bottom:none;
+}
+
+.quicktabs_tabs li a:link, .quicktabs_tabs li a:visited, #tablist li a:visited {
+color: #444;
+}
+
+.quicktabs_tabs li a:hover {
+color: #FFF;
+background: #888;
+}
+
+.quicktabs_tabs li.active a {
+color: #FFF;
+background: #888;
+border:1px solid #888;
+border-bottom:none;
+}
+
+.quicktabs_tabpage .os-links:nth-of-type(1) {
+    height: 18px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 0;
+    padding-top: 0;
+    position: absolute;
+    right: -25px;
+    top: 0;
+    width: 14px;
+    z-index: 2;
+}
+
+
+.box-os_modal_tabbed h3.title {
+	margin-bottom: 0.5em;
+}

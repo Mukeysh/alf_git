@@ -1,0 +1,15 @@
+#sidebar-first {
+	left: -215px;
+	}
+	
+
+	
+#sidebar-first #block-vsite_menus-features li a, #sidebar-second #block-vsite_menus-features li a {
+  line-height: 25px;
+  text-transform:uppercase;
+ font-weight:normal;
+  font-size: 12px;
+vertical-align: top; 
+position: relative; 
+top: -8px;
+}

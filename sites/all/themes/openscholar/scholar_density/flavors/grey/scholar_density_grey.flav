@@ -1,0 +1,6 @@
+name = Grey
+description = A Grey Version of the scholor-theme-08 theme
+screenshot = screenshot.png
+
+css[] = grey.css
+conditional-css[if lt IE 9][all][] = grey-ie.css

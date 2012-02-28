@@ -1,0 +1,15 @@
+diff --git a/sites/all/modules/contrib/biblio/biblio_theme.inc b/sites/all/modules/contrib/biblio/biblio_theme.inc
+index 0556db0..0b48a18 100644
+--- a/sites/all/modules/contrib/biblio/biblio_theme.inc
++++ b/sites/all/modules/contrib/biblio/biblio_theme.inc
+@@ -442,7 +442,9 @@ function theme_biblio_format_authors($contributors, $options, $inline = false)
+   if (empty($options['numberOfAuthorsTriggeringEtAl']))  $options['numberOfAuthorsTriggeringEtAl'] = $authorCount;
+ 
+   if (empty($options['includeNumberOfAuthors']))  $options['includeNumberOfAuthors'] = $authorCount;
+-
++  
++  $options['numberOfAuthorsTriggeringEtAl'] = variable_get('biblio_contributors_numberofauthors', $options['numberOfAuthorsTriggeringEtAl']);
++    
+   foreach($contributors as $rank => $author)
+   {
+     if (empty($author['name'])) continue;

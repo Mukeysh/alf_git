@@ -1,0 +1,168 @@
+<?php
+
+/**
+ * Implementation of hook_rules_action_info().
+ */
+function radioactivity_rules_rules_action_info() {
+  
+  $info = array();
+  
+  $info['radioactivity_rules_action_load_decay_profile'] = array(
+      'label' => t('Load a decay profile'),
+      'new variables' => array(
+        'decay_profile_loaded' => array(
+          'type' => 'decay_profile',
+          'label' => t('Decay profile'),
+        ),
+      ),
+      'module' => 'Radioactivity',
+    );
+
+      
+  $info['radioactivity_rules_action_evaluate_energy'] = array(
+      'label' => t('Set nodes energy to a specific value using a simple algorithm'),
+      'arguments' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content'),
+        ),
+        'decay_profile_loaded' => array(
+          'type' => 'decay_profile',
+          'label' => t('Decay profile'),
+        ),
+        'algorithm' => array(
+          'type' => 'string',
+      	  'label' => t('Algorithm'),
+          'description' => t('Supported operators are + - * and /. Functions sqrt(), pow(), sin() and cos().'),
+        ),
+      ),
+      'module' => 'Radioactivity',
+    );    
+    
+    
+  return $info;
+}
+
+/**
+ * Action: Load a term.
+ */
+function radioactivity_rules_action_load_decay_profile($settings) {
+  $profiles = radioactivity_get_decay_profiles();
+  $row = $profiles[$settings['decay_profile']];
+  $row['id'] = $settings['decay_profile'];
+  return array('decay_profile_loaded' => $row);
+}
+
+
+
+
+/**
+ * Update nodes energy using a simple algorithm
+ */
+function radioactivity_rules_action_evaluate_energy($node = null, $decay_profile, $algorithm, $settings) {
+  
+  // FIXME: messy regexp
+  // This will remove everything else other than 0-9 + - * / and functions sqrt, sin, cos, pow and tan
+  preg_match_all("/([0-9\+\-\/\*\(\)\.\ ]|sqrt *\(|sin *\(|cos *\(|pow *\(|tan *\()/i", $algorithm, $matches);
+  $clean = implode('', $matches[1]);
+  
+  ob_start();
+  print eval('echo ' . $clean . ';');
+  $new = ob_get_contents();
+  ob_end_clean();
+
+  if (strlen($new) == 0) {
+    drupal_set_message("There is an error in rules radioactivity algorithm: " . $clean . " (clean), " . $algorithm . " (unclean)");
+    return;
+  }
+  
+  $dpid = $decay_profile['id'];
+
+  $query = 
+  	"UPDATE {radioactivity} ".
+    "SET " .
+      "energy = '%s', " . 
+      "last_emission_timestamp = '%s' " .
+    "WHERE " .
+      "id = '%s' AND " .
+      "decay_profile = '%s' AND " .
+      "class = 'node' " .  
+    "LIMIT 1";
+  
+  db_query($query, array($new, time(), $node->nid, $dpid));
+
+  return array('node' => $node);
+
+}
+
+
+
+/**
+ * Get maximimum energy by decay_profile and class
+ * @param string $dpid
+ * @param string $class
+ */
+function radioactivity_rules_get_decay_profile_node_max_energy($dpid, $excludes) {
+  
+  if (!is_array($excludes)) {
+    $excludes = array($excludes);
+  }
+  
+  $params = array();
+  $query = "SELECT MAX(energy) AS energy " . 
+           "FROM {radioactivity} ".
+           "LEFT JOIN {node} ON ({node}.nid = {radioactivity}.id) ";
+   
+  // domain module support
+  if (module_exists("domain")) {
+    $current_domain = domain_get_domain();
+    $query .= "LEFT JOIN {domain_source} ON ({domain_source}.nid = {radioactivity}.id) WHERE {domain_source}.domain_id = '%s' AND ";
+    $params[] = $current_domain['domain_id'];
+  } else {
+    $query .= "WHERE ";
+  }
+  
+  $query .= "{radioactivity}.class = 'node' AND {node}.nid NOT IN (%s) AND {radioactivity}.decay_profile = '%s'";
+  $params[] = implode(",", $excludes);
+  $params[] = $dpid;
+
+  
+  $result = db_query($query, $params);
+  $result = db_fetch_array($result);
+
+  $energy = $result['energy'];
+  return $energy;
+}
+
+
+function radioactivity_rules_token_values($type, $object = NULL, $options = array()) {
+  if ($type == 'node') {
+    $node = $object;
+    $energies = radioactivity_get_energy($node->nid, "node");
+    foreach ($energies as $dpid => $energy) {
+      $tokens['radioactivity-energy-' . $dpid] = $energy;
+      $tokens['radioactivity-energy-max-' . $dpid] = radioactivity_rules_get_decay_profile_node_max_energy($dpid, $node->nid);
+    }
+    
+    $energies = radioactivity_get_energies_for_source($node->nid, 'node', 'node_create');
+    foreach ($energies as $dpid => $energy) {
+      $tokens['radioactivity-initial-energy-' . $dpid] = $energy;
+    } 
+
+    
+    return $tokens;
+  } 
+}
+
+
+function radioactivity_rules_token_list($type = 'all') {
+  if ($type == 'node' || $type == 'all') {
+    $options_raw = radioactivity_get_decay_profiles();
+    foreach ($options_raw as $dpid => $profile) {
+      $tokens['node']['radioactivity-energy-' . $dpid] = t("Energy for decay profile @dp (@id)", array('@dp' => $profile['label'], '@id' => $dpid));
+      $tokens['node']['radioactivity-energy-max-' . $dpid] = t("Maximum energy for decay profile @dp (@id, excluding current node)", array('@dp' => $profile['label'], '@id' => $dpid));
+      $tokens['node']['radioactivity-initial-energy-' . $dpid] = t("Initial energy at the time of the node types creation on decay profile @dp (@id)", array('@dp' => $profile['label'], '@id' => $dpid));
+    }
+    return $tokens;
+  } 
+}

@@ -1,0 +1,345 @@
+<?php
+
+include_once('vsite_comments.features.inc');
+
+/**
+ * Implementation of hook_menu_alter
+ */
+function vsite_comments_menu_alter(&$items){
+	//Change access permissions for comments menu entries
+  $items['comment/delete']['access callback'] = 'vsite_comments_admin_access';
+  //$items['comment/edit']['access callback'] = 'vsite_comments_admin_access';
+}
+
+
+/**
+ * Access function for comment/delete menu entry
+ */
+function vsite_comments_admin_access($node_type = false, $comment_type = false){
+  // if we are in a vsite, vsite admin can delete comments
+  $vsite = vsite_get_vsite();
+  if ($vsite && $vsite -> access_admin()){
+  	if($node_type){
+  		$default_setting = variable_get("comment_{$node_type}",0)?'drupal':0;
+  		if($comment_type){
+        //Are comments enabled for this node type, and set to this comment type
+        if(variable_get("vsite_comments_comment_type_{$node_type}", $default_setting) == $comment_type){
+        	return true;
+        }
+        return false;
+        
+  		}else{
+  			//Are comments enabled for this node type
+  			if(variable_get("vsite_comments_comment_type_{$node_type}", $default_setting)){
+  				return true;
+  			}
+  			return false;
+  		}
+  	}
+  	//No type passed, just make sure they are an admin
+  	return true;
+  }
+  
+  return user_access('administer comments');
+}
+
+
+/**
+ * Implementation of hook_views_handlers
+ */
+function vsite_comments_views_handlers() {
+  return array(
+    'info' => array(
+      'path' => drupal_get_path('module', 'vsite_comments') .'/includes',
+    ),
+    'handlers' => array(
+      'vsite_comments_handler_field_comment_link_delete' => array(
+        'parent' => 'views_handler_field_comment_link',
+      ),
+      'vsite_comments_handler_field_comment_link_edit' => array(
+        'parent' => 'views_handler_field_comment_edit',
+      ),
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_views_data_alter
+ * @see vsite_comments_views_handlers()
+ */
+function vsite_comments_views_data_alter(&$data) {
+  // we want our handler to be used
+  $data['comments']['delete_comment']['field']['handler'] = 'vsite_comments_handler_field_comment_link_delete';
+  $data['comments']['edit_comment']['field']['handler'] = 'vsite_comments_handler_field_comment_link_edit';
+  
+}
+
+
+/**
+ * Implementation of hook_form_alter
+ */
+function vsite_comments_form_alter(&$form, &$form_state, $form_id){
+  
+	//Check if this is a feature form and add comment settings if the feature provides a node
+	vsite_comments_add_comment_settings($form, $form_state, $form_id);
+	
+	if (isset($form['#node']) && $form_id == $form['#node']->type .'_node_form') {
+		//Alter the permissions on the comment form fieldset
+		if(isset($form['comment_settings'])){
+			$form['comment_settings']['#access'] = vsite_comments_admin_access($form['#node']->type);
+			foreach (element_children($form['comment_settings']) as $comment_type) {
+				if($comment_type == 'comment') $comment_type = 'drupal';
+				//Set the access for each comment type
+				$form['comment_settings'][$comment_type]['#access'] = vsite_comments_admin_access($form['#node']->type,$comment_type);
+			}
+		}
+	}
+}
+
+/**
+ * Alter the comment settings on a node so no more than one commenting type shows at a time
+ */
+function vsite_comments_nodeapi(&$node, $op, $teaser = NULL, $page = NULL){
+  switch ($op) {
+  	case 'view':
+  		if(module_exists('fb_social')){
+	      $preset = fb_social_preset_load('vsite_comments');
+	      if($preset){
+	      	//Enable this preset
+	      	$preset->disabled = false;
+	      	//Set the node types
+	      	$preset->settings['node_types']['types'] = variable_get('facebook_comments_nodetypes',array());
+	      	
+	      	$plugin = fb_social_fb_plugin_load($preset->plugin_type);
+		      $function = ctools_plugin_get_function($plugin, 'hook_nodeapi_view');
+		      if ($function) {
+		        $function($preset, $node, $op, $a3, $a4);
+		      }
+	      }
+  		}
+  	break;
+	  case 'load':
+	  	//Commenting is enabled for this node but disabled in variables
+      if (!empty($node->comment) && !variable_get("comment_{$node->type}",0)){
+      	$node->comment_original = $node->comment;
+        $node->comment = COMMENT_NODE_DISABLED;
+      }
+    break;
+	  case 'presave':
+	  	//Reset the comment value before we save
+      if (isset($node->comment_original)){
+        $node->comment = $node->comment_original;
+      }
+	  break;
+  }
+}
+
+/**
+ * Check if this is a feature form and add comment settings if the feature provides a node
+ */
+function vsite_comments_add_comment_settings(&$form, &$form_state, $form_id){
+	//Add node settings to the feature forms
+	
+	$feature_name = vsite_is_feature_settings_form($form, $form_state);
+	
+	if(!$feature_name){
+		return false;
+	}
+  
+  //Get the nodes for this feature
+  $a_info = features_get_features($feature_name);
+  $node_types = $a_info->info['features']['node'];
+      
+  if(!empty($node_types)){
+  	$node_names = node_get_types('names');
+    
+    foreach ($node_types as $node){
+    	
+    	if(!isset($form["{$node}_settings"])){
+    		$form["{$node}_settings"] = array(
+		      '#type' => 'fieldset',
+		      '#id' => "{$node}_settings",
+		      //'#title' => t(ucfirst($node_names[$node]).' Settings'),
+		      '#weight' => 0,
+		    );
+    	}
+    	//Set the node type
+    	$form["{$node}_settings"]['#node_type'] = $node;
+    	
+    	//Default setting from features/node-form
+    	$default_setting = variable_get("comment_{$node_type}",0)?'drupal':0;
+    	$form["{$node}_settings"]["vsite_comments_comment_type_{$node}"] = array(
+	      '#type' => 'radios',
+    	  '#node_type' => $node,
+	      '#title' => t(ucfirst($node_names[$node]).' Comment Settings'),
+	      '#default_value' => variable_get("vsite_comments_comment_type_{$node}", $default_setting),
+    	  '#options' => array(
+    	    0 => "No Comments",
+    	    'drupal' => "Standard System Comments",
+    	  ),
+    	  '#description' => "Choose the comment settings for {$node}.",
+	    );
+	    
+	    if(module_exists('disqus')){
+	    	$form["{$node}_settings"]["vsite_comments_comment_type_{$node}"]['#options']['disqus'] = "Disqus Comments";
+	    	$form["{$node}_settings"]["vsite_comments_comment_type_{$node}"]['#description'] .= " Disqus must be configured with an 'domain' shortname to work, you may setup the shortname ".l('here','cp/settings').".";
+	    }
+	    
+      if(module_exists('fb_social')){
+        $form["{$node}_settings"]["vsite_comments_comment_type_{$node}"]['#options']['facebook'] = "Facebook Comments";
+      }
+    }
+    
+    $form['#submit'][] = 'vsite_comments_comment_settings_submit';
+  }
+
+}
+
+/**
+ * Submit handler for the feature settings form
+ */
+function vsite_comments_comment_settings_submit($form, &$form_state){
+	
+	$a_comment_settings = array();
+	foreach (element_children($form) as $element) {
+		if(!isset($form[$element]['#node_type'])){
+			continue;
+		}//Not a node settings fieldset
+		
+		$s_node_type = $form[$element]['#node_type'];
+		
+		if(isset($form[$element]["vsite_comments_comment_type_{$s_node_type}"])){
+			$a_comment_settings[$s_node_type] = $form_state['values']["vsite_comments_comment_type_{$s_node_type}"];
+		}
+	}//Gather comment settings
+	
+	foreach ($a_comment_settings as $node_type => $setting) {
+	  //Set Drupal Comment Settings
+		vsite_comments_update_drupal_comment_setings($node_type,($setting == 'drupal'));
+		//Update Disqus Settings
+		vsite_comments_update_disqus_comment_setings($node_type,($setting == 'disqus'));
+		//Update Disqus Settings
+    vsite_comments_update_facebook_comment_setings($node_type,($setting == 'facebook'));
+	}
+}
+
+/**
+ * Update the comment settings for a given content type
+ *
+ * @param $node_type (The node type to update)
+ * @param $enable_comments (Should the comments for this node be enabled or disabled
+ */
+function vsite_comments_update_drupal_comment_setings($node_type, $enable_comments, $a_settings = array()){
+	
+	//Get the defaults from the feature export or for this content type, or apply defaults if none exist
+	$a_defaults = array(
+		"comment_default_order_{$node_type}" => variable_get("comment_default_order_{$node_type}","2"), //Default: OLDEST_FIRST
+		"comment_default_mode_{$node_type}" => variable_get("comment_default_mode_{$node_type}","4"), //Default: THREADED_EXPANDED
+		"comment_controls_{$node_type}" => variable_get("comment_controls_{$node_type}","3"), //Default: controls hidden
+		"comment_anonymous_{$node_type}" => variable_get("comment_anonymous_{$node_type}","1"), //Default: anon may leave contact info
+		"comment_default_per_page_{$node_type}" => variable_get("comment_default_per_page_{$node_type}","10"), //Default: 10 per page
+		"comment_form_location_{$node_type}" => variable_get("comment_form_location_{$node_type}","1"), //Default: below post
+		"comment_preview_{$node_type}" => variable_get("comment_preview_{$node_type}",COMMENT_PREVIEW_OPTIONAL), //Default: optional preview
+		"comment_subject_field_{$node_type}" => variable_get("comment_subject_field_{$node_type}","1"), //Default: Enabled
+	);
+	
+	if ($enable_comments){
+		//Comments enabled
+	  if(!isset($a_settings["comment_{$node_type}"]) || !intval($a_settings["comment_{$node_type}"])){
+		  //t('Disabled'), t('Read only'), t('Read/Write')
+			$a_settings["comment_{$node_type}"] = "2";
+		}//Set commenting to read/write unless "read only" was passed as a parameter
+		
+		//Add default settings
+		$a_settings = array_merge($a_defaults,$a_settings);
+		
+	}else{
+	  //Set commenting to disabled
+		$a_settings["comment_{$node_type}"] = "0";
+	}
+	
+	foreach ($a_settings as $variable => $value) {
+		if($vsite = vsite_get_vsite()){
+	    $vsite->controllers->variable->set($variable,$value);
+	    continue;
+	  }//If we are in a vsite set an override
+	  
+	  variable_set($variable,$value);
+	}
+}
+
+/**
+ * Update the disqus comment settings for a given content type
+ *
+ * @param $node_type (The node type to update)
+ * @param $enable_comments (Should the comments for this node be enabled or disabled
+ */
+function vsite_comments_update_disqus_comment_setings($node_type, $enable_comments){
+  if(!module_exists('disqus')){
+  	return false;
+  }
+  
+  $enabled_types = variable_get('disqus_nodetypes',array());
+  $enabled_types[$node_type] = $enable_comments? 1:0;
+  
+  if($vsite = vsite_get_vsite()){
+  	$vsite->controllers->variable->set('disqus_nodetypes',$enabled_types);
+  	return true;
+  }//If we are in a vsite set an override
+  
+  variable_set('disqus_nodetypes',$enabled_types);
+  return true;
+}
+
+
+/**
+ * Update the fb social comment settings for a given content type
+ *
+ * @param $node_type (The node type to update)
+ * @param $enable_comments (Should the comments for this node be enabled or disabled
+ */
+function vsite_comments_update_facebook_comment_setings($node_type, $enable_comments){
+  if(!module_exists('fb_social')){
+    return false;
+  }
+  
+  $enabled_types = variable_get('facebook_comments_nodetypes',array());
+  $enabled_types[$node_type] = $enable_comments? 1:0;
+  
+  if($vsite = vsite_get_vsite()){
+    $vsite->controllers->variable->set('facebook_comments_nodetypes',$enabled_types);
+    return true;
+  }//If we are in a vsite set an override
+  
+  variable_set('facebook_comments_nodetypes',$enabled_types);
+  return true;
+  
+
+  return true;
+}
+/**
+ * Implement Hook vsite_generic_settings
+ * @return array
+ */
+function vsite_comments_vsite_generic_settings(){
+  $a_settings = array();
+
+  if(module_exists('disqus')){
+	  $a_settings['disqus_domain'] = array(
+	    'group' => array(
+	      '#id' => 'social',
+	      '#title' => t('Social'),
+	      '#weight' => 0,
+	    ),
+	    'form' => array(
+	      '#type' => 'textfield',
+        '#title' => t('Disqus Shortname'),
+        '#description' => t('The domain that you registered Disqus with. If you registered http://example.disqus.com, you would enter "example" here. It is called "shortname" on the disqus site. You can '.l("signup here","http://disqus.com/")." for a disqus account if you do not have one. "),
+        '#default_value' => variable_get('disqus_domain', ''),
+	    ),
+	  );
+  }
+
+  return $a_settings;
+}

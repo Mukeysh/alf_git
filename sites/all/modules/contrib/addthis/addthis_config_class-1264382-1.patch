@@ -1,0 +1,19 @@
+diff --git a/sites/all/modules/contrib/addthis/addthis.module b/sites/all/modules/contrib/addthis/addthis.module
+index 313a904..24e8d8d 100644
+--- a/sites/all/modules/contrib/addthis/addthis.module
++++ b/sites/all/modules/contrib/addthis/addthis.module
+@@ -193,7 +193,13 @@ function theme_addthis_toolbox($services = NULL, $config = array()) {
+     }
+   }
+   
+-  $toolbox_classes = check_plain(variable_get('addthis_toolbox_classes', ''));
++  if (isset($config['addthis_toolbox_classes'])) {
++  	$toolbox_classes = $config['addthis_toolbox_classes'];
++  	unset($config['addthis_toolbox_classes']);
++  } else {
++  	$toolbox_classes = check_plain(variable_get('addthis_toolbox_classes', ''));
++  }
++  
+   return "<div class='addthis_toolbox addthis_default_style $toolbox_classes' $attributes>" . $output . "</div>";
+ }
+ 

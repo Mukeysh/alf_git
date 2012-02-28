@@ -1,0 +1,20 @@
+1634,1637c1633,1640
+<     if (drupal_strtoupper($year) == drupal_strtoupper(t("In Press")))  return 9998;
+<     if (drupal_strtoupper($year) == drupal_strtoupper(t("Submitted"))) return 9999;
+<   }
+<   else {
+---
+>     $text_year = 9998;
+>     while (is_string(_biblio_text_year($text_year))) {
+>       if (drupal_strtoupper($year) == drupal_strtoupper(_biblio_text_year($text_year))){
+>         return $text_year;
+>       }
+>     $text_year++;
+>     }
+>   } else {
+1644a1648,1652
+>   
+>   if (($text_year = check_plain(variable_get('biblio_year_text_'.$year, false))) && strlen($text_year)) {
+>     return $text_year;
+>   }
+> 

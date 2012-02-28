@@ -1,0 +1,19 @@
+#sidebar-first {
+	left: -215px;
+	}
+
+#navbar li a  {
+  line-height: 36px;
+}
+
+
+#sidebar-first #block-vsite_menus-features li a {
+  line-height: 25px;
+  text-transform:uppercase;
+ font-weight:normal;
+  font-size: 12px;
+vertical-align: top; 
+position: relative; 
+top: 1px;
+}
+

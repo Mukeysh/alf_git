@@ -1,0 +1,96 @@
+<?php
+
+// $Id: cite_distribute.install,v 1.2 2009/06/09 21:04:34 jweiner Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function cite_distribute_schema() {
+
+  $schema['cite_distribute'] = array(
+  'description' => t('Manages status for various submoule template types'),
+  'fields' => array(
+    'uid' => array(
+    'description' => t('Drupal user ID'),
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    ),
+    
+    'nid' => array(
+    'description' => t("Drupal node ID"),
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    ),
+    
+    'type' => array(
+    'description' => t("Contains the name of the submodule to identify the type of template"),
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+    ),
+    
+    'tid' => array(
+    'description' => t("Template ID"),
+    'type' => 'int',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    ),
+    
+    'upd' => array(
+    'description' => t("Marks whether template file or entry needs to be recreated next time API function is run."),
+    'type' => 'int',
+    'size' => 'tiny',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    ), 
+    
+    'remove' => array(
+    'description' => t("Marks whether template file or entry needs to be DELETED next time API function is run."),
+    'type' => 'int',
+    'size' => 'tiny',
+    'not null' => TRUE,
+    'unsigned' => TRUE,
+    'default' => 0,
+    ), 
+    
+    'created' => array(
+    'description' => t("The time when template was first marked for update"),
+    'type' => 'datetime',
+    ),
+    
+    'modified' => array(
+    'description' => t("The time when template was LAST marked for update"),
+    'type' => 'datetime',
+    ),
+  ),
+ );
+  return $schema;
+}
+  
+function cite_distribute_install(){
+  //install cite_distribute table
+  drupal_install_schema('cite_distribute');
+  //set default module mode
+  variable_set('cite_distribute_module_mode','per_submission');
+  
+  //check if table exists
+  $msg = db_table_exists('cite_distribute') ? '' :  'Error creating Cite Disitribute table';
+  //if cannot create table then display message
+  if (!empty($msg)) {
+    drupal_set_message(t($msg));
+  }
+}
+
+function cite_distribute_uninstall(){
+  //remove cite_distribute table
+  drupal_uninstall_schema('cite_distribute');
+  //remove module mode system variable
+  variable_del('cite_distribute_module_mode');
+}

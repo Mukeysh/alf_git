@@ -1,0 +1,38 @@
+/*Grey/black bg version*/
+
+body {
+    color:#FFF;
+    background: #000;
+    }
+    
+  #content-area, #content-area a, #content-area h3, #content-area div {
+  	  background: none;
+  	  color:#FFF;
+   }  
+
+  #content-area h3,  #content-area h2 {
+  	  color:#ccc;
+   } 
+
+
+#header,
+#navbar {
+  background: #888;
+  }
+
+a, a:visited, a:hover {
+  color: #FFF;
+  }
+  
+ #content-main a, a:visited, a:hover {
+text-decoration:underline;
+ color:#FFF;
+  }
+  
+#navbar a, #header a {
+	text-decoration:none;
+}
+
+.node-teaser.os-links-trail {
+  border: 1px dashed #fff;
+}

@@ -1,0 +1,17 @@
+<?php
+
+include_once('scholar_profiles.features.inc');
+
+function scholar_profiles_init() {
+  drupal_add_css(drupal_get_path('module', 'scholar_profiles') .'/scholar-profiles.css');
+}
+
+
+/**
+ * Implementation of hook_context_links_alter().
+ */
+function scholar_profiles_context_links_alter(&$links) {
+  if (!empty($links['person'])) {
+    $links['person']['query'] = drupal_get_destination();
+  }
+}

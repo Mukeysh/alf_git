@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ * May be deleted later
+ */
+function vsite_controllers_menu() {
+  $menu = array();
+  $menu['vsite_controllers'] = array(
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vsite_controllers_form'),
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+  );
+
+  return $menu;
+}
+
+/**
+ * Implementation of hook_ctools_plugin_api().
+ */
+function vsite_controllers_ctools_plugin_api($module, $api) {
+  if ($module == 'spaces' && $api == 'plugins') {
+    return array('version' => 3);
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_plugins().
+ */
+function vsite_controllers_ctools_plugin_plugins() {
+  return array(
+    'cache' => TRUE,
+    'use hooks' => TRUE,
+  );
+}
+
+/**
+ * Implementation of hook_spaces_plugins
+ */
+function vsite_controllers_spaces_plugins() {
+  $plugins = array();
+  $plugins['spaces_controller_vsite_views'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'vsite_controllers') .'/plugins',
+      'file' => 'spaces_controller_vsite_views.inc',
+      'class' => 'spaces_controller_vsite_views',
+      'parent' => 'spaces_controller',
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Implementation of hook_spaces_registry().
+ */
+function vsite_controllers_spaces_registry() {
+  return array(
+    'controllers' => array(
+      'vsite_views' => array(
+        'title' => t('vsite_controllers_vsite_views'),
+        'plugin' => 'spaces_controller_vsite_views',
+      ),
+    ),
+  );
+}
+
+function vsite_controllers_views_pre_build(&$view) {
+  $space = spaces_get_space();
+  if ($space) {
+    // space->get($view->name.':'.$view->display_handler->display->id)
+    // apply settings to view->display_handler
+    if (isset($view->display_handler->default_display)) {
+      $default_override = $space->controllers->vsite_views->get($view->name.':default');
+      if (is_array($default_override)) {
+        $view->display_handler->default_display->options = array_merge($view->display_handler->default_display->options, $default_override);
+      }
+    }
+
+    $override = $space->controllers->vsite_views->get($view->name.':'.$view->display_handler->display->id);
+    if (is_array($override)) {
+      $view->display_handler->options = array_merge($view->display_handler->options, $override);
+      if (isset($view->display_handler->default_display)) {
+        foreach ($override as $key => $value) {
+          $view->display_handler->options['defaults'][$key] = FALSE;
+        }
+      }
+    }
+  }
+}
+
+function vsite_controllers_form($form_state) {
+  $space = spaces_get_space();
+  if ($space) $overrides = $space->controllers->vsite_views->get('og_ghp_ron:default');
+  else {
+    dpm('You\'re not in a space. This isn\'t going to go well for you.');
+  }
+  $form = array();
+  $form['header'] = array(
+    '#type' => 'textarea',
+    '#title' => 'header text',
+    '#default_value' => $overrides['header'],
+  );
+  $form['header_format'] = filter_form($overrides['header_format'], NULL, array('header_format'));
+
+  $form['footer'] = array(
+    '#type' => 'textarea',
+    '#title' => 'footer text',
+    '#default_value' => $overrides['footer'],
+  );
+  $form['footer_format'] = filter_form($overrides['footer_format'], NULL, array('footer_format'));
+
+  $form['#submit'] = array('vsite_controllers_form_submit');
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+  return $form;
+}
+
+function vsite_controllers_form_submit(&$form, &$form_state) {
+  $space = spaces_get_space();
+  if (!$space) return;
+
+  $override = array(
+    'header' => $form_state['values']['header'],
+    'header_format' => $form_state['values']['header_format'],
+  );
+
+  $space->controllers->vsite_views->set('og_ghp_ron:default', $override);
+}

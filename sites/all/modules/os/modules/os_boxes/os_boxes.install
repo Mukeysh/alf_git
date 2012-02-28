@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * hook_update
+ * Twitterfeed box not includes a customizable 'followme' text/link.
+ * This will update existing twitterfeed boxes.
+ */
+function os_boxes_update_6001(&$sandbox){
+  $result = db_query("SELECT * FROM {spaces_overrides} WHERE object_type = 'boxes'");
+  while ( $row = db_fetch_object($result) ) {
+    $box = unserialize($row->value);
+    if ('os_boxes_twitterfeed' == $box->plugin_key) {
+      $box->options['followme_text'] = "Follow me on twitter";
+      $twitter_key = $box->options['twitter_username'];
+      
+      // include a followme link
+      if (strpos($twitter_key, '#') !== 0) {
+        
+        if (strpos($twitter_key, 'from:') === 0) {
+          $link = 'http://twitter.com/' . str_replace("from:", '', $twitter_key);
+        }
+        else {
+          $link = 'http://twitter.com/' . $twitter_key;
+        }
+        
+        $box->options['followme_link'] = 1;
+      }
+      $box->options['followme_url'] = $link;
+      
+      //update db
+      db_query("UPDATE {spaces_overrides} SET value = '%s' WHERE type = 'og' AND object_type = 'boxes'
+               AND id = %d AND object_id = '%s'", serialize($box), $row->id, $row->object_id);
+    
+    }
+  }
+  
+  return array(
+    array(
+      'success' => true,
+      'query' => 'Twitterfeed boxes updated'
+    )
+  );
+}

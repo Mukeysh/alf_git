@@ -1,0 +1,175 @@
+<?php
+
+/**
+ * @file
+ * Places meta tags in the <head> section of page with citation data for Google Scholar web service
+ */
+
+/**
+ * Implementation of hook_cite_distribute_register()
+ */
+function googlescholar_meta_cite_distribute_register(){
+  $module_info[] = array(
+    'name'       => 'googlescholar_meta',
+    'repository' => 'Google Scholar',
+    'file' => 'none',
+    'hide_flag' => 1,
+     );
+  return $module_info;
+}
+
+function googlescholar_meta_menu(){
+  
+  $items = array();
+  
+  $items['admin/settings/cite_distribute/googlescholar_meta'] = array(
+  'type' => MENU_LOCAL_TASK,
+  'title' => 'Google Scholar',
+  'description' => 'Google Scholar.',
+  'page callback' => 'drupal_get_form',
+  'page arguments' => array('googlescholar_meta_settings_form'),
+  'file' => 'googlescholar_meta.admin.inc',
+  'file path' => drupal_get_path('module', 'googlescholar_meta'),
+  'access callback' => 'user_access',
+  'access arguments' => array('administer site configuration'),
+  'weight' => 10,
+  );
+   return $items;
+}
+ 
+/**
+* Implementation of module_preprocess_hook().
+*/
+function googlescholar_meta_preprocess_page(&$variables) {
+  //check to see if this node is marked in the database for google scholar
+   $res = db_result(db_query("SELECT nid FROM {cite_distribute} WHERE type = '%s' AND nid = %d", 'googlescholar_meta', (int)$variables['node']->nid)); 
+  if($res){
+  $variables['head'] .= googlescholar_meta_create_metadata($variables['node']);
+  }
+}
+
+/**
+ * Function to create google scholar meta data from $node object
+ *
+ * @param $node
+ * @return string -meta data for google scholar
+ */
+function googlescholar_meta_create_metadata($node){
+  
+  $output = '';
+
+ //biblio_type 102 is a journal article 
+if($node -> biblio_type == '102'){
+  $output .= $node->biblio_secondary_title ? '<meta name="citation_journal_title" content="' . $node->biblio_secondary_title . '">' : '';  //REPLACE special chars ???
+}
+  $output .= $node->biblio_publisher ? '<meta name="citation_publisher" content="' . $node->biblio_publisher . '">' : '';
+  $output .= $node->biblio_contributors[1][0] ? '<meta name="citation_authors" content="' . googlescholar_meta_authors($node->biblio_contributors[1]) . '">' : ''; 
+  $output .= $node->title ? '<meta name="citation_title" content="' . $node->title . '">' : '';
+  $output .= $node->biblio_date ? '<meta name="citation_date" content="' . googlescholar_meta_date($node->biblio_date) . '">' : '';
+  $output .= $node->biblio_year ? '<meta name="citation_year" content="' . $node->biblio_year . '">' : '';
+  $output .= $node->biblio_volume ? '<meta name="citation_volume" content="' . $node->biblio_volume. '">' : '';
+  $output .= $node->biblio_issue ? '<meta name="citation_issue" content="' . $node->biblio_issue. '">' : '';
+  //$output .= $node->biblio_section ? '<meta name="citation_firstpage" content="' . $node->biblio_section. '">' : '';
+  //$output .= $node->biblio_section ? '<meta name="citation_lastpage" content="' . $node->biblio_section. '">' : ''; //  WHAT IS BIBLIO EQUIV ???
+  $output .= $node->biblio_issn ? '<meta name="citation_issn" content="' . $node->biblio_issn. '">' : '';
+  $output .= $node->biblio_isbn ? '<meta name="citation_isbn" content="' . $node->biblio_isbn. '">' : '';
+  $output .= $node->biblio_language ? '<meta name="citation_language" content="' . $node->biblio_language. '">' : '';
+  $output .= $node->biblio_keywords ? '<meta name="citation_keywords" content="' . googlescholar_meta_keywords($node->biblio_keywords) . '">' : '';  
+  $output .= $node->biblio_abstract ? '<meta name="citation_abstract" content="' . $node->biblio_abstract. '">' : '';
+  $output .= $node->biblio_url ? '<meta name="citation_pdf_url" content="' . check_plain($node->biblio_url) . '">' : '';
+  //$output .= $node->biblio_url ? '<meta name="citation_abstract_html_url" content="' . $node->biblio_url. '">' : '';
+ // $output .= $node->biblio_url ? '<meta name="citation_pmid" content="' . $node->biblio_url. '">' : '';
+  
+  return $output;
+ }
+
+/**
+ * Returns primary authors of node as string
+ */
+function googlescholar_meta_authors($authors =array()){
+  $author_str = '';
+  
+  if(count($authors)){
+    foreach ($authors as $author){
+
+      //Fomatting firstname initials output in case there are multiple first names
+      $firstname_arr = explode(' ', $author['firstname']);
+      if (count($firstname_arr)){
+        $firstname = '';
+        foreach ($firstname_arr as $name){
+          $firstname .= strtoupper(substr($name, 0,1));
+        }
+      }
+      $initials = (!empty($author['initials'])) ? $author['initials'] : '';
+      $author_str .= $author['lastname'] . ' ' . $firstname.  $initials  . ';';
+    }
+    //removing the semi-colon at the end
+    $author_str = substr( $author_str, 0, -1);
+  }
+  return $author_str;
+}
+
+
+/**
+ * Returns formatted date per Google scholar meta spec
+ * @param $date string- example: 2/2009
+ */
+function googlescholar_meta_date($date){
+  $date_arr = explode('/', $date);
+  //add a zero to month if less than 10
+  $month = (intval($date_arr[0]) < 10) ? str_pad($date_arr[0], 2, '0', 'STR_PAD_LEFT') : $date_arr[0];
+  
+   return $date_arr[1] . '/' . $month;  // without the day value
+   //return $date_arr[1] . '/' . $month  . '/' .  '01';  //TODO: day is not defined in biblio form but Google Scholar specifies it. I have placed a static value here
+}
+
+/**
+ * Returns formatted keywords string per Google scholar meta spec
+ * @param $keywords -an array of keywords from the biblio node object
+ */
+function googlescholar_meta_keywords($keywords = array()){
+  $keyword_str = '';
+  if (count($keywords)){
+    foreach($keywords as $keyword){
+      $keyword_str .=  $keyword . ';' ;
+    }
+  }
+  return $keyword_str;
+}
+
+  
+  function googlescholar_meta_strongarm(){
+    $conf = array();
+    $conf['googlescholar_autoflag'] = 1;
+    return $conf;
+  }
+
+/**
+ * Implementation of hook_nodeapi()
+ *
+ */
+function googlescholar_meta_nodeapi(&$node, $op){
+  if (($node->type == 'biblio') && (variable_get('googlescholar_autoflag', 0) == 1)){
+    $flag = flag_get_flag('googlescholar_meta');
+    switch($op){
+      case 'insert';
+      if($node -> status == '1'){
+        //add googlescholar flag when node is created
+        $flag->flag('flag', (int)$node -> nid);
+      }
+      break;
+
+      case 'update';
+      //if the node is set to published and not already flagged
+      if(($node -> status == '1') && !$flag->is_flagged($node->nid)){
+        $flag->flag('flag', (int)$node -> nid);
+      }
+      break;
+
+      case 'delete':
+        //cleanup - remove the flag
+        $flag -> flag('unflag', (int)$node -> nid);
+        break;
+    }
+  }
+}

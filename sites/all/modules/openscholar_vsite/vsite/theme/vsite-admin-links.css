@@ -1,0 +1,9 @@
+.active-marker {
+  position: absolute;
+  top: -11px;
+  left: -11px;
+  right:-11px;
+  bottom: -11px;
+  border: 1px dashed #228822;
+  z-index:0;
+  }

@@ -1,0 +1,7 @@
+; $Id: dyntextfield.info,v 1.1 2009/07/24 20:20:35 rbrandon Exp $
+name = CCK Dynamic Text Field
+description = A text field that can have any number of names
+dependencies[] = content
+package = CCK
+core = 6.x
+
