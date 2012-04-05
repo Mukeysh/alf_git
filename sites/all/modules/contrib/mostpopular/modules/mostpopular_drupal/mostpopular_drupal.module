@@ -1,0 +1,91 @@
+<?php
+// $Id: mostpopular_drupal.module,v 1.1 2010/12/09 19:31:15 czingerline Exp $
+/*
+ * Drupal Most Popular - Showcase the most popular content across your Drupal website and engage your audience.
+ * Copyright © 2010 New Signature
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You can contact New Signature by electronic mail at labs@newsignature.com –or- by U.S. Postal Service at 1100 H St. NW, Suite 940, Washington, DC 20005.
+ */
+/**
+ * @file
+ * This module uses the Drupal statistics module to provide Most Popular data.
+ *
+ * @author Andrew Marcus
+ * @since Dec 22, 2009
+ */
+
+/**
+ * Implements hook_mostpopular_service().
+ *
+ * @see hook_mostpopular_service()
+ */
+function mostpopular_drupal_mostpopular_service($op, $delta = 0, $options = array()) {
+  switch ($op) {
+    case 'list':
+      return array(
+        'viewed' => array(
+          'name' => t('Drupal Most Viewed'),
+          'title' => t('Viewed'),
+        ),
+        'commented' => array(
+          'name' => t('Drupal Most Commented Pages'),
+          'title' => t('Commented'),
+        )
+      );
+      break;
+
+    case 'refresh':
+      switch ($delta) {
+        case 'viewed':
+          // This query is borrowed from the Hall of Fame module.
+
+          // However, it does not fetch any nodes which were published a while ago
+          // and are only now becoming popular.   Use the Google Analytics plugin
+          // instead for better results.
+          $sql = "
+            SELECT DISTINCT n.nid, n.title, c.totalcount
+            FROM {node} n left join {node_counter} c on n.nid = c.nid
+            WHERE n.status = 1 and n.moderate = 0 and n.created >= %d
+              AND c.totalcount >= 1 and title not like '%page not found%'
+            ORDER BY c.totalcount desc, n.created desc";
+
+          $out = array();
+          $result = db_query($sql, $options['ts'], 0);
+          while ($row = db_fetch_object($result)) {
+            $node = mostpopular_match_result_nodes(url("node/$row->nid"), $row->totalcount);
+            if (isset($node)) {
+              $out[] = $node;
+              if (count($out) >= $options['max']) {
+                break;
+              }
+            }
+          }
+          return $out;
+
+        case 'commented':
+          $sql = "
+            SELECT DISTINCT n.nid, n.title, count(c.cid) as totalcount
+            FROM {node} n INNER JOIN {comments} c on n.nid = c.nid
+            WHERE n.status = 1 and n.moderate = 0 AND c.timestamp >= %d
+            GROUP BY n.nid
+            ORDER BY totalcount desc, n.created desc";
+
+          $out = array();
+          $result = db_query($sql, $options['ts']);
+          while ($row = db_fetch_object($result)) {
+            $node = mostpopular_match_result_nodes(url("node/$row->nid"), $row->totalcount);
+            if (isset($node)) {
+              $out[] = $node;
+              if (count($out) >= $options['max']) {
+                break;
+              }
+            }
+          }
+          return $out;
+      }
+      return FALSE;
+  }
+}

@@ -1,0 +1,131 @@
+<?php
+// $Id: mostpopular_addthis.module,v 1.1 2010/12/09 19:31:15 czingerline Exp $
+/*
+ * Drupal Most Popular - Showcase the most popular content across your Drupal website and engage your audience.
+ * Copyright © 2010 New Signature
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You can contact New Signature by electronic mail at labs@newsignature.com –or- by U.S. Postal Service at 1100 H St. NW, Suite 940, Washington, DC 20005.
+ */
+/**
+ * @file
+ * Uses the AddThis.com Analytics API to provide Most Popular data.
+ *
+ * @author Andrew Marcus
+ * @since Dec 30, 2009
+ */
+
+/**
+ * Implements hook_mostpopular_service().
+ *
+ * @see hook_mostpopular_service()
+ */
+function mostpopular_addthis_mostpopular_service($op, $delta = 0, $options = array()) {
+  switch ($op) {
+    case 'list':
+      return array(
+        'emailed' => array(
+          'name' => t('AddThis.com Most Emailed'),
+          'title' => t('Emailed'),
+        ),
+      );
+      break;
+
+    case 'refresh':
+      switch ($delta) {
+        case 'emailed':
+          include_once(drupal_get_path('module', 'mostpopular_addthis') . '/mostpopular_addthis.classes.inc');
+
+          $addthis = new AddThis();
+          $data = $addthis->getNodeEmailCount($options['ts']);
+          $out = array();
+
+          if (empty($data)) {
+            return $out;
+          }
+          foreach ($data as $v) {
+            $count = $v['shares'];
+            $url = $v['url'];
+
+            // Match the URL to a node
+            $obj = mostpopular_match_result_nodes($url, $count);
+            if (isset($obj)) {
+              $out[] = $obj;
+            }
+
+            // Return only the first results
+            if (count($out) >= $options['max']) {
+              break;
+            }
+          }
+          return $out;
+      }
+      return FALSE;
+
+    case 'config':
+      $form = array();
+      $password = variable_get('addthis_password', '');
+
+      $form['auth'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('AddThis.com login credentials'),
+        'addthis_username' => array(
+          '#type' => 'item',
+          '#title' => t('User Name'),
+          '#value' => variable_get('addthis_username', '') . ' &nbsp; ' .
+            l('(change)', 'admin/settings/addthis', array(
+              'query' => drupal_get_destination()
+            )),
+        ),
+        'addthis_password' => array(
+          '#type' => 'password',
+          '#title' => t('Password'),
+          '#required' => empty($password),
+          '#description' => empty($password) ?
+            t('You must set the password to connect to the AddThis.com service.') :
+            t('To update your AddThis.com password, enter a new password here.'),
+          '#attributes' => array( 'autocomplete' => 'off' ),
+        ),
+      );
+      $form['#submit'][] = 'mostpopular_addthis_config_submit';
+      return $form;
+
+    case 'throttles':
+      switch ($delta) {
+        case 'emailed':
+          $out = array();
+          foreach ($options as $iid => $ts) {
+            // Determine the interval
+            if ($ts >= strtotime('-1 day -10 minutes')) {
+              $out[$iid] = '1 hour';
+            }
+            elseif ($ts <= strtotime('-1 year')) {
+              $out[$iid] = '1 week';
+            }
+            else {
+              $out[$iid] = '1 day';
+            }
+          }
+          return $out;
+      }
+      return NULL;
+  }
+}
+
+/**
+ * When the AddThis config form is submitted, only save the password if it
+ * is not empty.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function mostpopular_addthis_config_submit($form, &$form_state) {
+  if (empty($form_state['values']['addthis_password'])) {
+    unset ($form_state['values']['addthis_password']);
+  }
+  else {
+    drupal_set_message(t('Updated AddThis.com password.'));
+  }
+}

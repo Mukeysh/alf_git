@@ -1,0 +1,263 @@
+<?php
+// $Id: mostpopular.module,v 1.1 2010/12/09 19:31:15 czingerline Exp $
+/*
+ * Drupal Most Popular - Showcase the most popular content across your Drupal website and engage your audience.
+ * Copyright © 2010 New Signature
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You can contact New Signature by electronic mail at labs@newsignature.com –or- by U.S. Postal Service at 1100 H St. NW, Suite 940, Washington, DC 20005.
+ */
+module_load_include('php', 'mostpopular', 'mostpopular.api');
+
+// Define some constants to determine how much to style the mostpopular block.
+define('MOSTPOPULAR_STYLE_NONE', 0);
+define('MOSTPOPULAR_STYLE_BASIC', 1);
+define('MOSTPOPULAR_STYLE_FULL', 2);
+
+/**
+ * Implements hook_perm().
+ */
+function mostpopular_perm() {
+  return array(
+    'administer mostpopular',
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function mostpopular_theme() {
+  return array(
+    'mostpopular_config_intervals_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'mostpopular.admin.inc',
+    ),
+    'mostpopular_config_services_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'mostpopular.admin.inc',
+    ),
+    'mostpopular_config_service_form_throttles' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'mostpopular.admin.inc',
+    ),
+    'mostpopular_service_status' => array(
+      'arguments' => array('status' => 0),
+      'file' => 'mostpopular.admin.inc',
+    ),
+    'mostpopular_page' => array(
+      'arguments' => array('sid' => 1, 'iid' => 1),
+      'file' => 'mostpopular.block.inc',
+    ),
+    'mostpopular_block' => array(
+      'arguments' => array('sid' => 1, 'iid' => 1),
+      'file' => 'mostpopular.block.inc',
+    ),
+    'mostpopular_services' => array(
+      'arguments' => array('sid' => 1, 'iid' => 1),
+      'file' => 'mostpopular.block.inc',
+    ),
+    'mostpopular_intervals' => array(
+      'arguments' => array('sid' => 1, 'iid' => 1),
+      'file' => 'mostpopular.block.inc',
+    ),
+    'mostpopular_items' => array(
+      'arguments' => array('items' => array(), 'sid' => 1, 'iid' => 1),
+      'file' => 'mostpopular.block.inc',
+    ),
+    'mostpopular_item' => array(
+      'arguments' => array('item' => NULL, 'sid' => 1, 'iid' => 1),
+      'file' => 'mostpopular.block.inc',
+    ),
+    'mostpopular_items_none' => array(
+      'file' => 'mostpopular.block.inc',
+    )
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function mostpopular_menu() {
+  $items = array();
+
+  $items['admin/settings/mostpopular'] = array(
+    'title' => 'Most Popular settings',
+    'description' => 'Configure the Most Popular functionality',
+    'page callback' => 'drupal_get_form',
+    'file' => 'mostpopular.admin.inc',
+    'page arguments' => array('mostpopular_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer mostpopular'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/settings/mostpopular/main'] = array(
+    'title' => 'Settings',
+    'description' => 'Configure the Most Popular functionality',
+    'file' => 'mostpopular.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mostpopular_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer mostpopular'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/settings/mostpopular/intervals'] = array(
+    'title' => 'Intervals',
+    'description' => 'Configure the intervals of time used by the Most Popular feature',
+    'file' => 'mostpopular.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mostpopular_intervals_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer mostpopular'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+  $items['admin/settings/mostpopular/services'] = array(
+    'title' => 'Services',
+    'description' => 'Configure the services available to the Most Popular feature',
+    'file' => 'mostpopular.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mostpopular_services_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer mostpopular'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+  $i = 0;
+  $services = MostPopularService::fetchSorted();
+  foreach ($services as $service) {
+    $items["admin/settings/mostpopular/services/$service->sid"] = array(
+      'title' => $service->name,
+      'description' => "Configure the $service->title service",
+      'file' => 'mostpopular.admin.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('mostpopular_service_config_form', 4),
+      'access callback' => 'user_access',
+      'access arguments' => array('administer mostpopular'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => $i++,
+    );
+  }
+  /*
+  $items['admin/settings/mostpopular/services/%'] = array(
+    'title' => 'Configure %service',
+    'title arguments' => array( '%service' => mostpopular_get_service_title( arg(4) )),
+    'description' => 'Configure the service with the given ID',
+    'file' => 'mostpopular.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mostpopular_service_config_form', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer mostpopular'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 2,
+  );
+  */
+
+  $items['admin/settings/mostpopular/refresh'] = array(
+    'title' => 'Refresh Stats',
+    'description' => 'Refresh the Most Popular stats',
+    'file' => 'mostpopular.admin.inc',
+    'page callback' => 'mostpopular_refresh',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer mostpopular'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
+  );
+
+  $items['mostpopular/items/%/%'] = array(
+    'title' => 'Most Popular Pages',
+    'file' => 'mostpopular.block.inc',
+    'page callback' => 'mostpopular_items_page',
+    'page arguments' => array(2, 3),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['mostpopular/ajax/%/%'] = array(
+    'title' => 'Get the most popular stats via AJAX',
+    'file' => 'mostpopular.block.inc',
+    'page callback' => 'mostpopular_items_ajax',
+    'page arguments' => array(2, 3),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_block() to create the most popular block.
+ *
+ * The service and interval to show by default are loaded from the user's cookie.
+ * If they don't have a cookie set, the first service and first interval will be
+ * selected by default.
+ *
+ * This block checks the URL and cookies to set its state, and adds CSS and
+ * Javascript to the page.  Therefore, it should never be cached.
+ */
+function mostpopular_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array(
+        0 => array(
+          'info' => t('Most Popular'),
+          'cache' => BLOCK_NO_CACHE,
+        ),
+      );
+
+    case 'view':
+      switch ($delta) {
+        case 0:
+
+          // If the page is fully cached, don't use any service or interval.
+          // Note that this will only happe in Javascript is enabled so we
+          // don't need to worry about fallbacks.
+          global $is_page_authcache;
+          if ($is_page_authcache) {
+            $sid = 0;
+            $iid = 0;
+          }
+          else {
+            // If we're looking at the mostpopular/items page, bypass the cookies
+            // because the block gets loaded first before the cookies are set.
+            if (arg(0) == 'mostpopular' && arg(1) == 'items') {
+              $service = MostPopularService::fetch(arg(2));
+              $interval = MostPopularInterval::fetch(arg(3));
+            }
+
+            // Otherwise, get the service and interval from the user's cookie
+            elseif (isset($_COOKIE['mostpopular'])) {
+              $cookie = $_COOKIE['mostpopular'];
+              $parts = split('/', $cookie);
+              if (count($parts) != 2) {
+                drupal_set_message(t('You have an invalid cookie for the most popular service'), 'error');
+              }
+              else {
+                $service = MostPopularService::fetch($parts[0]);
+                $interval = MostPopularInterval::fetch($parts[1]);
+              }
+            }
+
+            // Otherwise, use the defaults
+            if (!isset($service)) {
+              $service = MostPopularService::getDefault();
+            }
+            if (!isset($interval)) {
+              $interval = MostPopularInterval::getDefault();
+            }
+            $sid = $service->sid;
+            $iid = $interval->iid;
+          }
+
+          return array(
+            'subject' => t('Most Popular'),
+            'content' => theme('mostpopular_block', $sid, $iid),
+          );
+      }
+      break;
+
+  }
+}

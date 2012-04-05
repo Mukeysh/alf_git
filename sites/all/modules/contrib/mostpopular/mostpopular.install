@@ -1,0 +1,196 @@
+<?php
+// $Id: mostpopular.install,v 1.1 2010/12/09 19:31:15 czingerline Exp $
+/*
+ * Drupal Most Popular - Showcase the most popular content across your Drupal website and engage your audience.
+ * Copyright © 2010 New Signature
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You can contact New Signature by electronic mail at labs@newsignature.com –or- by U.S. Postal Service at 1100 H St. NW, Suite 940, Washington, DC 20005.
+ */
+/**
+ * @file
+ * Install and uninstall functions for the Most Popular module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function mostpopular_install() {
+  drupal_set_message(t('Installing most popular tables'));
+  drupal_install_schema('mostpopular');
+
+  module_load_include('php', 'mostpopular', 'classes/intervals');
+  MostPopularInterval::reset();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function mostpopular_uninstall() {
+  drupal_set_message(t('Uninstalling most popular tables'));
+  drupal_uninstall_schema('mostpopular');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function mostpopular_schema() {
+  $schema['mostpopular_services'] = array(
+    'description' => 'Stores configuration information about the most popular services',
+    'fields' => array(
+      'sid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'module' => array(
+        'description' => 'The module that provides this service',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'delta' => array(
+        'description' => 'The delta of this service within the module (for modules that provide more than one service)',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'enabled' => array(
+        'description' => 'TRUE if this service is enabled, false otherwise',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+      ),
+      'status' => array(
+        'type' => 'int',
+        'size' => 'small',
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => "The name of the provided service (so we don't have to look it up every time)",
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'description' => 'The title to show users in for this service',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'extra' => array(
+        'description' => 'Any additional parameters for the service, serialized',
+        'type' => 'text',
+        'size' => 'medium',
+        'serialize' => TRUE,
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array( 'sid' ),
+    'unique keys' => array(
+      'service' => array( 'module', 'delta' ),
+    ),
+  );
+
+  $schema['mostpopular_intervals'] = array(
+    'description' => 'Stores the predefined intervals to fetch for each service',
+    'fields' => array(
+      'iid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'string' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array( 'iid' ),
+    'unique keys' => array(
+      'interval_str' => array( 'string' ),
+      'weight' => array( 'iid', 'weight' ),
+    ),
+  );
+
+  $schema['mostpopular_last_run'] = array(
+    'description' => 'Stores the time at which a service was last run over an interval.',
+    'fields' => array(
+      'sid' => array(
+        'description' => 'The service that generated this data',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'iid' => array(
+        'description' => 'The interval to which this data corresponds',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'last_run' => array(
+        'description' => 'The time at which this service was last run',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'throttle' => array(
+        'description' => 'The amount of time to wait before refreshing this service again',
+        'type' => 'varchar',
+        'length' => 64,
+      ),
+    ),
+    'primary key' => array( 'sid', 'iid' ),
+  );
+
+  $schema['mostpopular_items'] = array(
+    'description' => 'Stores cached values from the most popular services',
+    'fields' => array(
+      'sid' => array(
+        'description' => 'The service that generated this data',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'iid' => array(
+        'description' => 'The interval to which this data corresponds',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'If node ID, if this item is a node',
+        'type' => 'int',
+      ),
+      'url' => array(
+        'description' => 'The URL alias of the node or page',
+        'type' => 'varchar',
+        'length' => 1024,
+      ),
+      'title' => array(
+        'description' => 'The title of the node or page',
+        'type' => 'varchar',
+        'length' => 1024,
+      ),
+      'count' => array(
+        'description' => 'The number of occurrences of this URL within the requested time interval',
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array( 'sid', 'iid', array('url', 50) ),
+    'unique keys' => array(
+      'count' => array( 'sid', 'iid', 'count', array('url', 50), 'nid' ),
+      'page' => array( array('url', 50), 'sid', 'iid', 'count', 'nid' ),
+    ),
+  );
+  return $schema;
+}

@@ -1,0 +1,307 @@
+/* $Id: mostpopular-full.css,v 1.1 2010/12/09 19:31:15 czingerline Exp $ */
+/*
+ * Drupal Most Popular - Showcase the most popular content across your Drupal website and engage your audience.
+ * Copyright © 2010 New Signature
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You can contact New Signature by electronic mail at labs@newsignature.com –or- by U.S. Postal Service at 1100 H St. NW, Suite 940, Washington, DC 20005.
+ */
+
+/**
+ * Most Popular Basic Styles
+ *
+ * This is an example of basics styles for the Most Popular block. It is meant to give you 
+ * a good start with styling it.
+ *
+ * It depends upon the [module root]/mostpopular/css/mostpopular-basic.css.
+ */
+
+
+/*
+ * Typography
+ */
+
+/**
+ * The type treatment for the top two rows of filters.
+ */
+.mostpopular .mostpopular--intervals a,
+.mostpopular .mostpopular--services  a,
+.mostpopular .mostpopular--label {
+  /* font-family: Arial, sans-serif; */
+  /* font-size: 14px; */
+  /* text-decoration: none; */
+}
+
+/**
+ * The type treatment for the filter labels.
+ */
+.mostpopular .mostpopular--label {
+  font-weight: bold;
+}
+
+/**
+ * The type treatment for the current filter link.
+ */
+.mostpopular .mostpopular--intervals .selected a,
+.mostpopular .mostpopular--services  .selected a {
+  text-decoration: none;
+}
+
+/**
+ * The type treatment for the result items.
+ */
+.mostpopular .mostpopular--items {
+  /* font-family: Arial, sans-serif; */
+  /* font-size: 15px; */
+}
+
+/**
+ * The type treatment for the article title and link
+ */
+.mostpopular .mostpopular--items a {
+  text-decoration: none; 
+}
+
+/**
+ * The type treatment for the article title
+ */
+.mostpopular .mostpopular--items .title {
+  /* font-weight: bold; */
+}
+
+/**
+ * The type treatment for the popularity count for each article
+ */
+.mostpopular .mostpopular--items .count {
+  font-size: 85%;
+}
+
+
+
+/*
+ * Color
+ */
+ 
+ /**
+  * The border color around the Most Popular block box.
+  */
+.mostpopular {
+  border-color: #333;
+}
+
+/**
+ * The background color for the service filter bar.
+ */
+.mostpopular .mostpopular--services {
+  background-color: #bbb; 
+}
+
+/**
+ * The border color for the bottom of the service filter bar.
+ */
+.mostpopular .mostpopular--services,
+.mostpopular .mostpopular--services .selected a {
+  border-color: #aaa;
+}
+
+/**
+ * The background color for the interval filter bar.
+ */
+.mostpopular .mostpopular--intervals,
+.mostpopular .mostpopular--services .selected a {
+  background-color: #ddd;
+}
+
+/**
+ * The border color for the bottom of the interval filter bar.
+ */
+.mostpopular .mostpopular--intervals,
+.mostpopular .mostpopular--intervals .selected a {
+  border-color: #ccc;
+}
+
+/**
+ * The background color for the content area.
+ */
+.mostpopular .mostpopular--content,
+.mostpopular .mostpopular--intervals .selected a {
+  background-color: white;
+}
+
+
+/**
+ * The color for the services filter bar label.
+ */
+.mostpopular .mostpopular--services .mostpopular--label {
+  /* color: #000; */
+}
+
+/**
+ * The color for the interval filter bar label.
+ */
+.mostpopular .mostpopular--interval .mostpopular--label {
+  /* color: #000; */
+}
+
+/**
+ * The color and background for the services links.
+ */
+.mostpopular .mostpopular--services a {
+  /* color: blue; */
+  /* background-color: white; */
+}
+
+/**
+ * The color and background for the interval links.
+ */
+.mostpopular .mostpopular--interval a {
+  /* color: blue; */
+  /* background-color: white; */
+}
+
+
+/**
+ * The color for the selected service link.
+ */
+.mostpopular .mostpopular--services .selected a {
+  /* color: blue; */
+}
+
+/**
+ * The color for the selected interval link.
+ */
+.mostpopular .mostpopular--interval .selected a {
+  /* color: blue; */
+}
+
+
+/**
+ * The color for the items links.
+ */
+.mostpopular .mostpopular--items a {
+  /* color: blue; */
+  /* background-color: transparent; */
+}
+
+/**
+ * The color for the items count.
+ */
+.mostpopular .mostpopular--items a .count {
+  color: #666;
+}
+
+/**
+ * The hover color for the items links.
+ */
+.mostpopular .mostpopular--items a:hover {
+  /* color: blue; */
+  background-color: #f0f0f0;
+}
+
+
+
+/*
+ * Layout
+ */
+
+/**
+ * Layout for the most popular box container.
+ */
+.mostpopular {
+  border-style: solid;
+  border-width: 1px;
+  display: block;
+}
+
+
+/**
+ * Layout for the label for filters.
+ */
+.mostpopular .mostpopular--label {
+  padding-right: 0.25em;
+}
+
+/**
+ * Layout for the filter bars.
+ */
+.mostpopular .mostpopular--services,
+.mostpopular .mostpopular--intervals {
+  padding: 3px 2px 0 2px;
+  
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+}
+
+/**
+ * Layout for the filter links.
+ */
+.mostpopular .mostpopular--intervals a,
+.mostpopular .mostpopular--services  a {
+  display: block;
+}
+
+/**
+ * Layout for the selected filter links.
+ */
+.mostpopular .mostpopular--intervals .selected a,
+.mostpopular .mostpopular--services .selected a {
+  padding: 0 3px 1px;
+  margin-bottom: -1px; /* knock out the border below the active link */
+  
+  border-style: solid;
+  border-width: 1px 1px 0 1px;
+  
+  /* Give it rounded corners on the top. */
+  -moz-border-radius: 3px 3px 0 0;
+  -webkit-border-top-right-radius: 3px;
+  -webkit-border-top-left-radius: 3px;
+  border-radius: 3px 3px 0 0;
+  
+}
+
+
+/**
+ * Layout for the results items list.
+ */
+.mostpopular .mostpopular--items {
+  padding: 0;
+  margin: 0;
+  display: block;
+  list-style-type: none;
+}
+
+/**
+ * Layout for the results item list items.
+ */
+.mostpopular ul.mostpopular--items li {
+  padding: 0;
+  margin: 0;
+  display: block;
+  list-style-type: none;
+}
+
+/**
+ * Layout for the results item links.
+ */
+.mostpopular .mostpopular--items a {
+  padding: .25em .5em;
+  display: block;
+}
+
+/**
+ * Layout for the results item first link.
+ */
+.mostpopular .mostpopular--items .first a {
+  /* Double the padding to the bottom to match the spacing between links */
+  padding-top: .5em;
+}
+
+/**
+ * Layout for the results item last link.
+ */
+.mostpopular .mostpopular--items .last a {
+  /* Double the padding to the top to match the spacing between links */
+  padding-bottom: .5em;
+}
