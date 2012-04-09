@@ -240,27 +240,25 @@ div.litecal .litecal-header .litecal-label {
   margin: 0 17px;
 }
 
+#footer-region .block {
+  background: url("../images/footer.jpg") repeat scroll 0 0 transparent;
+  border: 1px solid #15085A;
+  border-radius: 6px 6px 6px 6px;
+  display: inline-table;
+  margin-top: 5px;
+}
 #block-views-scholar_announcements-block_1 {
-  display: inline-block;
   width:194px;
 }
 
 #block-biblio-0 {
-  display: inline-block;
   margin-left: 1px;
   width: 275px;
 }
 
 #block-views-top_faculty-block_1 {
-  float: right;
   margin-right: 4px;
   width: 276px;
-}
-#block-views-scholar_announcements-block_1, #block-biblio-0, #block-views-top_faculty-block_1 { 
-  background: url("../images/footer-back.png") repeat scroll 0 0 transparent;
-  border: 1px solid #15085A;
-  border-radius: 6px;
-  margin-top: 5px;
 }
 
 #block-views-scholar_announcements-block_1 h2, #block-biblio-0 h2, #block-views-top_faculty-block_1 h2 {
