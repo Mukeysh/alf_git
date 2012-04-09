@@ -185,10 +185,6 @@ form#user-login-form {
   height: 4px;
 }
 
-.litecal-timespan .crayon-5 {
-  background:none;
-}
-
 div.litecal .litecal-header .litecal-label {
   padding-left: 12px;
 }
@@ -260,14 +256,14 @@ div.litecal .litecal-header .litecal-label {
   margin-right: 4px;
   width: 276px;
 }
-#block-views-scholar_announcements-block_1, #block-biblio-0, #block-mostpopular-0 { 
+#block-views-scholar_announcements-block_1, #block-biblio-0, #block-views-top_faculty-block_1 { 
   background: url("../images/footer-back.png") repeat scroll 0 0 transparent;
   border: 1px solid #15085A;
   border-radius: 6px;
   margin-top: 5px;
 }
 
-#block-views-scholar_announcements-block_1 h2, #block-biblio-0 h2, #block-mostpopular-0 h2 {
+#block-views-scholar_announcements-block_1 h2, #block-biblio-0 h2, #block-views-top_faculty-block_1 h2 {
   font-size:12px;
 }
 
@@ -279,7 +275,7 @@ div.litecal .litecal-header .litecal-label {
   background: url("../images/footer-border1.png") no-repeat scroll 0 0 transparent;
 }
 
-#block-mostpopular-0 .content {
+#block-views-top_faculty-block_1 .content {
   background: url("../images/footer-border.png") no-repeat scroll 0 0 transparent;
 }
 
