@@ -1,0 +1,5 @@
+name = Form Mod
+description = Contains modifications to the site forms
+core = 6.x
+package = Alfaisal
+files[] = form_mod.module

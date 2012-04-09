@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * Adds modifications to various forms of the site
+ */
+
+
+/**
+ * Implements hook_form_alter()
+ */
+
+function form_mod_form_alter(&$form, &$form_state, $form_id) {  
+        //print"<pre>"; print_r($form);
+   
+     if ($form_id == 'search_theme_form') {
+            $form['search_theme_form']['#title'] = t('Search');
+        } 
+}
+
