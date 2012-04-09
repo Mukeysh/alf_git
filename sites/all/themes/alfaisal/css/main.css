@@ -95,6 +95,7 @@ input:-webkit-autofill {
   border-radius: 10px 10px 10px 10px;
   -moz-border-radius: 10px; 
   -webkit-border-radius: 10px;
+  margin-bottom: 7px;
   padding:0px;
   width:173px;
 }
@@ -105,6 +106,11 @@ input:-webkit-autofill {
   margin-top:0px;
   margin-left:10px;
   width: 152px;
+}
+
+/** css for removing "*" in login form **/
+#block-user-0 label span.form-required {
+  display:none;
 }
 
 input.form-text {
@@ -170,6 +176,7 @@ form#user-login-form {
 #block-scholar_events-mini h2 {
   background: url("../images/cal-image.jpg") no-repeat scroll 0 0 transparent;
   font-size: 12px;
+  margin-bottom:4px;
   padding-left: 16px;
 }
 
@@ -179,8 +186,9 @@ form#user-login-form {
 }
 
 #block-scholar_events-mini .litecal-compact .litecal-title h3.litecal-title {
-  text-align:center;
+  font-size: 12px;
   float:none;
+  text-align:center;
 }
 
 #sidebar-first div.litecal .litecal-slot, #sidebar-first div.litecal .litecal-timespan {

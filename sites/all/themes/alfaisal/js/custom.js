@@ -1,5 +1,7 @@
+
+$(document).ready(function() {
 //js for remove login new account
-$('#sidebar-first .block-inner .item-list li:first').css('display','none');
+$('#block-user-0 .item-list li:first-child').css('display','none');
 
 //jquey for chrome
 if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
@@ -12,4 +14,11 @@ if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {
                     });
 });}
 
-
+//js for chnage requested password text
+$('#block-user-0 .item-list li:last-child a').text('Forgot your password?');
+//js for remove search ":"
+$('#search #edit-search-theme-form-1-wrapper label').text('Search');
+//js for removing ':' for login form
+$('#block-user-0 #edit-name-wrapper label').text('Username');
+$('#block-user-0 #edit-pass-wrapper label').text('Password');
+});
