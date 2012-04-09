@@ -251,7 +251,7 @@ div.litecal .litecal-header .litecal-label {
   width:194px;
 }
 
-#block-biblio-0 {
+#block-views-scholar_publications-block_1 {
   margin-left: 1px;
   width: 275px;
 }
@@ -261,7 +261,7 @@ div.litecal .litecal-header .litecal-label {
   width: 276px;
 }
 
-#block-views-scholar_announcements-block_1 h2, #block-biblio-0 h2, #block-views-top_faculty-block_1 h2 {
+#block-views-scholar_announcements-block_1 h2, #block-views-scholar_publications-block_1 h2, #block-views-top_faculty-block_1 h2 {
   font-size:12px;
 }
 
@@ -269,7 +269,7 @@ div.litecal .litecal-header .litecal-label {
   background: url("../images/footer-border.png") no-repeat scroll 0 0 transparent;
 }
 
-#block-biblio-0 .content {
+#block-views-scholar_publications-block_1 .content {
   background: url("../images/footer-border1.png") no-repeat scroll 0 0 transparent;
 }
 
