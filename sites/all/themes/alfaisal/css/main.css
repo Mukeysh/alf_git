@@ -165,6 +165,14 @@ form#user-login-form {
   padding:0px;
   width:173px;
 }
+
+/** add image to calender title **/
+#block-scholar_events-mini h2 {
+  background: url("../images/cal-image.jpg") no-repeat scroll 0 0 transparent;
+  font-size: 12px;
+  padding-left: 16px;
+}
+
 .litecal-compact .litecal-title {
   background: url("../images/calender-head.jpg") repeat scroll 0 0 transparent;
   color: #FFFFFF;
