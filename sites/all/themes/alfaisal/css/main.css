@@ -1,0 +1,289 @@
+body {
+  background:#EDECEB;
+  color:#584e8a;
+}
+
+/** css for front page **/
+#header {
+  border-bottom: 5px solid #3B3173;
+  border-top: 4px solid #3B3173;
+}
+/** css for logo **/
+#branding {
+  margin-left: 22px;
+  padding-bottom: 10px;
+  padding-top: 15px;
+}
+
+#container {
+  width: 859px !important;
+  background: url(../images/background.jpg);
+}
+/** css for right side logo and search box **/
+#logo1 {
+  float: right;
+  margin-top: 15px;
+}
+
+#logo1 img {
+  float: right;
+  margin-right: 44px;
+}
+
+#container #search-box {
+  float: none;
+}
+
+#search-box #search-theme-form {
+  margin-right: 23px;
+  margin-top:0px;
+  margin-bottom:0px;
+}
+
+#search-box .button-wrapper input#edit-submit-1 {
+  background:url(../images/search-box.gif) no-repeat;
+  border: medium none;
+  height:24px;
+  text-indent: -9999em;
+  width:29px;
+}  
+
+#edit-search-theme-form-1-wrapper input#edit-search-theme-form-1 {
+  background:url(../images/search.jpg) no-repeat;
+  border: medium none;
+  padding: 3px 2px;
+  width: 150px;
+}
+
+input{
+margin:0px;
+}
+#sidebar-first img{
+  margin-left:9px;
+  margin-top:4px;
+}
+
+
+/** css for sidebar login **/
+#block-user-0 span.button input {
+  background: url(../images/login.jpg);
+  border: none;
+  cursor: pointer;
+  width: 86px;
+  height: 22px;
+  text-align: center;
+  text-indent: -9999em;
+}
+
+/** css for chrome text box border **/
+textarea:focus, input:focus{
+  outline: none;
+}
+input:-webkit-autofill {
+    background: #fff !important;
+}
+
+#sidebar-first {
+  padding-left:15px;
+}
+
+
+/** css for login block **/
+#sidebar-first #block-user-0 {
+  background: none repeat scroll 0 0 #F7F7F7;
+  border: 1px solid #140852;
+  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px; 
+  -webkit-border-radius: 10px;
+  padding:0px;
+  width:173px;
+}
+/** add image to input box login**/
+.block-inner #edit-pass-wrapper input, .block-inner #edit-name-wrapper input {
+  background: url(../images/login-input.jpg) no-repeat;
+  height: 17px;
+  margin-top:0px;
+  margin-left:10px;
+  width: 152px;
+}
+
+input.form-text {
+  border:none;   
+}
+
+/** on focus it shows yellow color remove**/
+.form-text:focus, .form-checkbox:focus, .form-radio:focus, .form-select:focus {
+  border: none !important;
+}
+
+#sidebar-first #block-user-0 h2 {
+  background: url("../images/login-border.jpg") no-repeat scroll -7px 18px transparent;
+  color:#584e8a;
+  font-size: 14px;
+  margin-left: 13px;
+}
+ 
+#sidebar-first #edit-name-wrapper {
+  margin-bottom:0px;
+  margin-top: 1px;
+}
+ 
+#sidebar-first #edit-pass-wrapper {
+  margin:0px;
+}
+
+/** aligned left label **/
+#edit-name-wrapper label, #edit-pass-wrapper label {
+  font-size:10px;
+  margin-left: 14px;
+  text-align: left;
+  font-weight:normal;  
+}
+
+#sidebar-first .block-inner {
+  padding-bottom:0px;
+}
+
+form#user-login-form {
+  margin-bottom:0px;
+}
+
+#block-user-0 .item-list ul li a{
+  color: #22175C;
+  font-size: 10px;
+  text-decoration:none;
+}
+
+#sidebar-first span.button-wrapper {
+  display: block;
+  margin-top: 3px;
+}
+
+/** css for calender **/
+
+#block-scholar_events-mini {
+  padding:0px;
+  width:173px;
+}
+.litecal-compact .litecal-title {
+  background: url("../images/calender-head.jpg") repeat scroll 0 0 transparent;
+  color: #FFFFFF;
+}
+
+#block-scholar_events-mini .litecal-compact .litecal-title h3.litecal-title {
+  text-align:center;
+  float:none;
+}
+
+#sidebar-first div.litecal .litecal-slot, #sidebar-first div.litecal .litecal-timespan {
+  background:url(../images/calender-back.jpg);
+  border:0px;
+}
+
+#sidebar-first div.litecal .litecal-timespan {
+  border:0px;
+  height: 4px;
+}
+
+.litecal-timespan .crayon-5 {
+  background:none;
+}
+
+div.litecal .litecal-header .litecal-label {
+  padding-left: 12px;
+}
+
+.litecal-header {
+  background: url(../images/calender-back.jpg);
+  color:#000;
+}
+
+#sidebar-first {
+  padding-left:17px;
+}
+
+#content-column .content-inner {
+  margin-left:201px;
+}
+
+#main-content #content, #main-content .block {
+  padding:0px;
+}
+
+/** css for main content block **/
+#block-block-1, #block-block-2, #block-block-3, #block-block-4 {
+  display:inline-block;
+  margin:0px;
+}
+
+#block-block-1, #block-block-3 {
+  float:left;
+  margin-right:3px;
+}
+
+#block-block-1 h2, #block-block-2 h2, #block-block-3 h2, #block-block-4 h2 {
+  font-size:12px;
+  margin-bottom:2px;
+}
+
+#main-content #content {
+  margin-top:9px;
+}
+
+#block-block-1 .block-inner, #block-block-2 .block-inner, #block-block-3 .block-inner, #block-block-4 .block-inner {
+  padding:0px;
+}
+
+#block-block-1 .block-inner, #block-block-2 .block-inner{
+  padding-bottom:0px;
+}
+/** css for footer block **/
+
+#footer {
+  border-top: 1px solid #15085A;
+  margin: 0 17px;
+}
+
+#block-views-scholar_announcements-block_1 {
+  display: inline-block;
+  width:194px;
+}
+
+#block-biblio-0 {
+  display: inline-block;
+  margin-left: 1px;
+  width: 275px;
+}
+
+#block-mostpopular-0 {
+  float: right;
+  margin-right: 4px;
+  width: 276px;
+}
+#block-views-scholar_announcements-block_1, #block-biblio-0, #block-mostpopular-0 { 
+  background: url("../images/footer-back.png") repeat scroll 0 0 transparent;
+  border: 1px solid #15085A;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
+#block-views-scholar_announcements-block_1 h2, #block-biblio-0 h2, #block-mostpopular-0 h2 {
+  font-size:12px;
+}
+
+#block-views-scholar_announcements-block_1 .content {
+  background: url("../images/footer-border.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-biblio-0 .content {
+  background: url("../images/footer-border1.png") no-repeat scroll 0 0 transparent;
+}
+
+#block-mostpopular-0 .content {
+  background: url("../images/footer-border.png") no-repeat scroll 0 0 transparent;
+}
+
+.footer-msg {
+  background: url("../images/footer-msg.png") repeat scroll 0 0 transparent;
+  height: 47px;
+}
