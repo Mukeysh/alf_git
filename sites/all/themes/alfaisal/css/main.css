@@ -40,7 +40,7 @@ body {
   margin-bottom:0px;
 }
 
-#search-box .button-wrapper input#edit-submit-1 {
+#search-box .button-wrapper .button input {
   background:url(../images/search-box.gif) no-repeat;
   border: medium none;
   height:24px;
@@ -190,7 +190,7 @@ form#user-login-form {
 
 #sidebar-first div.litecal .litecal-timespan {
   border:0px;
-  height: 4px;
+  height: 7px;
 }
 
 div.litecal .litecal-header .litecal-label {
@@ -212,6 +212,11 @@ div.litecal .litecal-header .litecal-label {
 
 #main-content #content, #main-content .block {
   padding:0px;
+}
+
+#block-scholar_events-mini .litecal-compact .timespan-last .litecal-slot {
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 /** css for main content block **/
@@ -308,3 +313,4 @@ div.litecal .litecal-header .litecal-label {
   text-indent: -9999em;
   width: 54px;
 }
+
