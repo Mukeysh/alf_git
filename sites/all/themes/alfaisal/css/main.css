@@ -66,7 +66,7 @@ margin:0px;
 
 /** css for sidebar login **/
 #block-user-0 span.button input {
-  background: url(../images/login.jpg);
+  background: url(../images/login.jpg) no-repeat;
   border: none;
   cursor: pointer;
   width: 86px;
@@ -245,6 +245,7 @@ div.litecal .litecal-header .litecal-label {
   border: 1px solid #15085A;
   border-radius: 6px 6px 6px 6px;
   display: inline-table;
+  margin-bottom: 10px;
   margin-top: 5px;
 }
 #block-views-scholar_announcements-block_1 {
@@ -263,6 +264,7 @@ div.litecal .litecal-header .litecal-label {
 
 #block-views-scholar_announcements-block_1 h2, #block-views-scholar_publications-block_1 h2, #block-views-top_faculty-block_1 h2 {
   font-size:12px;
+  color: #1B105E;
 }
 
 #block-views-scholar_announcements-block_1 .content {
@@ -274,10 +276,26 @@ div.litecal .litecal-header .litecal-label {
 }
 
 #block-views-top_faculty-block_1 .content {
-  background: url("../images/footer-border.png") no-repeat scroll 0 0 transparent;
+  background: url("../images/footer-border1.png") no-repeat scroll 0 0 transparent;
 }
 
 .footer-msg {
   background: url("../images/footer-msg.png") repeat scroll 0 0 transparent;
   height: 47px;
+}
+
+/** footer block font **/
+#footer-region .block a {
+  color: #000000;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+#footer .more-link a {
+  background: url("../images/more.jpg") no-repeat scroll right top transparent;
+  display: inline-block;
+  font-size: 0;
+  height: 14px;
+  text-indent: -9999em;
+  width: 54px;
 }
