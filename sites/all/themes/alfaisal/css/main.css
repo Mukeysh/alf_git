@@ -265,17 +265,18 @@ div.litecal .litecal-header .litecal-label {
 #block-views-scholar_announcements-block_1 h2, #block-views-scholar_publications-block_1 h2, #block-views-top_faculty-block_1 h2 {
   font-size:12px;
   color: #1B105E;
+  height:22px
 }
 
-#block-views-scholar_announcements-block_1 .content {
+#block-views-scholar_announcements-block_1 h2 {
   background: url("../images/footer-border.png") no-repeat scroll 0 0 transparent;
 }
 
-#block-views-scholar_publications-block_1 .content {
+#block-views-scholar_publications-block_1 h2 {
   background: url("../images/footer-border1.png") no-repeat scroll 0 0 transparent;
 }
 
-#block-views-top_faculty-block_1 .content {
+#block-views-top_faculty-block_1 h2 {
   background: url("../images/footer-border1.png") no-repeat scroll 0 0 transparent;
 }
 
