@@ -165,7 +165,7 @@
     <?php if (!empty($primary_menu)): ?>
       <div id="primary" class="nav">
         <h2 class="element-invisible"><?php print t('Main Menu'); ?></h2>
-        <?php print $primary_menu; ?>
+        <?php //print $primary_menu; ?>
       </div> <!-- /primary link menu -->
     <?php endif; ?>
 
@@ -238,7 +238,7 @@
       <?php endif; ?>
 
       <?php if ($right): ?>
-        <div id="sidebar-last" class="sidebar"><?php //print $right; ?></div> <!-- /sidebar-last -->
+        <div id="sidebar-last" class="sidebar"><?php print $right; ?></div> <!-- /sidebar-last -->
       <?php endif; ?>
 
     </div></div> <!-- /columns -->
