@@ -143,16 +143,16 @@
         </div> <!-- /branding -->
       <?php endif; ?>
       
-<div id="logo1"><img src="sites/all/themes/alfaisal/images/logo1.jpg">
+<div id="logo1"><img src="sites/all/themes/alfaisal/images/logo1.jpg"> 
+
       <?php if ($search_box): ?>
         <div id="search-box"<?php print $toggle_label ?>><?php print $search_box; ?></div> <!-- /search box -->
-        
-      <?php endif; ?>
-</div>
+         <?php endif; ?>
+            <div id="advanced-search"><a href ="search/node">Advanced Search</a></div>
+</div>     
       <?php if ($header): ?>
         <div id="header-region"><?php print $header; ?></div> <!-- /header region -->
-      <?php endif; ?>
-
+      <?php endif; ?>            
     </div> <!-- /header -->
 
     <?php if (!empty($menu_bar)): ?>
