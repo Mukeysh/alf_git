@@ -66,6 +66,7 @@ body {
 #advanced-search a{
   color:#221761;
   text-decoration:none;
+  font-weight:bold;
 }
 
 input{
