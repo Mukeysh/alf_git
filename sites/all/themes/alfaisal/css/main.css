@@ -187,8 +187,9 @@ form#user-login-form {
 
 /** add image to calender title **/
 #block-scholar_events-mini h2 {
-  background: url("../images/cal-image.jpg") no-repeat scroll 0 0 transparent;
-  font-size: 12px;
+  background: url("../images/cal-image.jpg") no-repeat scroll 0 1px transparent;
+  color:#333;
+  font-size: 13.39px;
   margin-bottom:4px;
   padding-left: 16px;
 }
