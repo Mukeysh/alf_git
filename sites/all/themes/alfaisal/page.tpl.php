@@ -142,15 +142,17 @@
 
         </div> <!-- /branding -->
       <?php endif; ?>
+      
+<div id="logo1"><img src="sites/all/themes/alfaisal/images/logo1.jpg"> 
 
       <?php if ($search_box): ?>
         <div id="search-box"<?php print $toggle_label ?>><?php print $search_box; ?></div> <!-- /search box -->
-      <?php endif; ?>
-
+         <?php endif; ?>
+            <div id="advanced-search"><a href ="search/node">Advanced Search</a></div>
+</div>     
       <?php if ($header): ?>
         <div id="header-region"><?php print $header; ?></div> <!-- /header region -->
-      <?php endif; ?>
-
+      <?php endif; ?>            
     </div> <!-- /header -->
 
     <?php if (!empty($menu_bar)): ?>
@@ -230,11 +232,12 @@
       </div></div> <!-- /content-column -->
 
       <?php if ($left): ?>
-        <div id="sidebar-first" class="sidebar"><?php print $left; ?></div> <!-- /sidebar-first -->
+      
+        <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
       <?php endif; ?>
 
       <?php if ($right): ?>
-        <div id="sidebar-last" class="sidebar"><?php print $right; ?></div> <!-- /sidebar-last -->
+        <div id="sidebar-last" class="sidebar"><?php //print $right; ?></div> <!-- /sidebar-last -->
       <?php endif; ?>
 
     </div></div> <!-- /columns -->
@@ -259,10 +262,13 @@
         <?php endif; ?>
 
       </div> <!-- /footer -->
+    
     <?php endif; ?>
-
-  </div> <!-- /container -->
-
+    <div class="footer-msg">
+ 
+    </div> 
+  </div><!-- /container -->
+ 
   <?php print $closure ?>
 
 </body>
