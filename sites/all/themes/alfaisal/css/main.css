@@ -434,3 +434,27 @@ div.litecal .litecal-header .litecal-label {
 .article-type-sitewide-page #block-scholar_events-mini h2 {
   display:none;
 }
+
+/** css for widget area **/
+#block-block-5 .block-inner {
+  padding-bottom: 0px;
+}
+
+.block-block-5 {
+  border: medium none;
+  padding-top: 0px;
+}
+
+.widget-area img {
+  float: left;
+  padding-top: 9px;
+}
+
+.widget-area .widget-content {
+  display: inline-block;
+  font-family: candara;
+  font-size: 12px;
+  font-weight: bold;
+  padding-left: 5px;
+  padding-top: 18px;
+}
