@@ -440,9 +440,9 @@ div.litecal .litecal-header .litecal-label {
   padding-bottom: 0px;
 }
 
-.block-block-5 {
+.article-type-sitewide-page #sidebar-last #block-block-5 {
   border: medium none;
-  padding-top: 0px;
+  padding-top: 0;
 }
 
 .widget-area img {
