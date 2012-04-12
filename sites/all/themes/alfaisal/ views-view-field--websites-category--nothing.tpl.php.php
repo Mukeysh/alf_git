@@ -22,7 +22,7 @@
 ?>
 <?php print $output; 
 print "<pre>";
-print_r $field ;
+print_r ($field) ;
 die();
 
 ?>
