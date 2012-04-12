@@ -348,15 +348,16 @@ div.litecal .litecal-header .litecal-label {
 #footer-right {
   float:right;
 }
-#block-block-8, #block-block-9{
-  margin-bottom: 0px;
+
+.footer-msg .block {
+  margin-bottom: 0;
 }
 
-#block-block-8 .block-inner, #block-block-9 .block-inner  {
-  padding-bottom: 0px;
+.footer-msg .block .block-inner {
+  padding-bottom: 0;
 }
 
-#block-block-8 p, #block-block-9 p {
+.footer-msg .block p{
   color: #A1A1A1;
   margin-bottom: 0px;
   margin-top: 0px;
