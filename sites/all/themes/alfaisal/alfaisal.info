@@ -56,6 +56,8 @@
   regions[tertiary_content]  = Tertiary Content
   regions[footer]            = Footer
   regions[article_aside]     = Article Aside
+  regions[footer_left]       = Footer Left
+  regions[footer_right]      = Footer Right
 
 
 ;----------// Gpanel Regions

@@ -264,9 +264,15 @@
       </div> <!-- /footer -->
     
     <?php endif; ?>
-    <div class="footer-msg">
+      <div class="footer-msg">
+    <?php if ($footer_left): ?>
+      <div id="footer-left"><?php print $footer_left; ?></div> <!-- /leaderboard -->
+    <?php endif; ?>
+    <?php if ($footer_right): ?>
+      <div id="footer-right"><?php print $footer_right; ?></div> <!-- /leaderboard -->
+    <?php endif; ?>
  
-    </div> 
+    </div> <!--footer-msg -->
   </div><!-- /container -->
  
   <?php print $closure ?>

@@ -103,7 +103,7 @@ input:-webkit-autofill {
 
 
 /** css for login block **/
-#sidebar-first #block-user-0 {
+#block-user-0 {
   background: none repeat scroll 0 0 #F7F7F7;
   border: 1px solid #140852;
   border-radius: 10px 10px 10px 10px;
@@ -114,7 +114,7 @@ input:-webkit-autofill {
   width:173px;
 }
 /** add image to input box login**/
-.block-inner #edit-pass-wrapper input, .block-inner #edit-name-wrapper input {
+#block-user-0 input, #block-user-0 input {
   background: url(../images/login-input.jpg) no-repeat;
   border:none;
   height: 17px;
@@ -138,19 +138,19 @@ input:-webkit-autofill {
   background:white;
 }**/
 
-#sidebar-first #block-user-0 h2 {
+#block-user-0 h2 {
   background: url("../images/login-border.jpg") no-repeat scroll -7px 18px transparent;
   color: #150958;
   font-size: 14px;
   margin-left: 13px;
 }
  
-#sidebar-first #edit-name-wrapper {
+#block-user-0 #edit-name-wrapper {
   margin-bottom:0px;
   margin-top: 1px;
 }
  
-#sidebar-first #edit-pass-wrapper {
+#block-user-0 #edit-pass-wrapper {
   margin:0px;
 }
 
@@ -176,7 +176,7 @@ form#user-login-form {
   text-decoration:none;
 }
 
-#sidebar-first span.button-wrapper {
+#block-user-0 span.button-wrapper {
   display: block;
   margin-top: 3px;
 }
@@ -208,14 +208,14 @@ form#user-login-form {
   text-align:center;
 }
 
-#block-scholar_events-mini div.litecal .litecal-slot, #block-scholar_events-mini div.litecal .litecal-timespan {
+div.litecal .litecal-slot, div.litecal .litecal-timespan {
   background:url(../images/calender-back.jpg);
   border:0px;
 }
 
-#block-scholar_events-mini div.litecal .litecal-timespan {
+div.litecal .litecal-timespan {
   border:0px;
-  height: 7px;
+  height: 6.2px;
 }
 
 div.litecal .litecal-header .litecal-label {
@@ -240,7 +240,7 @@ div.litecal .litecal-header .litecal-label {
   padding:0px;
 }
 
-#block-scholar_events-mini .litecal-compact .timespan-last .litecal-slot {
+.litecal-compact .timespan-last .litecal-slot {
   margin-bottom: 0;
   padding-bottom: 0;
 }
@@ -319,11 +319,6 @@ div.litecal .litecal-header .litecal-label {
   background: url("../images/footer-border1.png") no-repeat scroll 0 18px transparent;
 }
 
-.footer-msg {
-  background: url("../images/footer-msg.png") repeat scroll 0 0 transparent;
-  height: 47px;
-}
-
 /** footer block font **/
 #footer-region .block a, #sidebar-last .block a {
   color: #000000;
@@ -340,6 +335,35 @@ div.litecal .litecal-header .litecal-label {
   width: 54px;
 }
 
+/** css for footer msg **/
+.footer-msg {
+  background: url("../images/footer-msg2.png") repeat scroll 0 0 transparent;
+  height: 47px;
+}
+
+#footer-left {
+  float:left;
+}
+
+#footer-right {
+  float:right;
+}
+#block-block-8, #block-block-9{
+  margin-bottom: 0px;
+}
+
+#block-block-8 .block-inner, #block-block-9 .block-inner  {
+  padding-bottom: 0px;
+}
+
+#block-block-8 p, #block-block-9 p {
+  color: #A1A1A1;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  padding-left: 6px;
+  padding-right: 10px;
+  padding-top: 19px;
+}
 
 /** css for internal pages **/
 /** css for links **/
@@ -367,31 +391,6 @@ div.litecal .litecal-header .litecal-label {
   text-decoration: none;
 }
 
-/** css for internal pages **/
-/** css for links **/
-#block-vsite_menus-features {
-  padding-left: 0;
-}
-
-#block-vsite_menus-features ul {
-  padding-left: 0px;
-}
-
-#block-vsite_menus-features ul li {
-  background: url("../images/links.jpg") no-repeat scroll 0 0 transparent;
-  color: white;
-  display: block;
-  height: 22px;
-  margin-left: 4px;
-  margin-top: 7px;
-  padding-left: 25px;
-  width: 147px;
-}
-
-#block-vsite_menus-features ul li a {
-  color: #FFFFFF;
-  text-decoration: none;
-}
 
 /**css for main content internal page **/
 /** css for heading of page **/
@@ -411,7 +410,11 @@ div.litecal .litecal-header .litecal-label {
   width: 216px;
 }
 
-.article-type-sitewide-page #sidebar-last .block {
+#sidebar-last #block-block-6 {
+  padding-top: 3px;
+}
+
+#sidebar-last .block {
   border-top: 1px solid;
   margin: 0 3px;
   padding: 4px 15px 0;
@@ -426,7 +429,7 @@ div.litecal .litecal-header .litecal-label {
 
 .article-type-sitewide-page #block-views-scholar_publications-block_1 h2 {
   background: url("../images/recent-publi.jpg") no-repeat scroll 0 0px transparent;
-  height:28px;
+  height:26px;
   padding-top:6px;
   padding-left: 36px;
 }
@@ -440,7 +443,7 @@ div.litecal .litecal-header .litecal-label {
   padding-bottom: 0px;
 }
 
-.article-type-sitewide-page #sidebar-last #block-block-5 {
+#sidebar-last #block-block-5, #sidebar-last #block-scholar_events-mini {
   border: medium none;
   padding-top: 0;
 }
@@ -461,4 +464,41 @@ div.litecal .litecal-header .litecal-label {
 
 #sidebar-last .more-link a {
   overflow: hidden;
+}       
+
+/** css for follow us **/
+ul.follow-us {
+  list-style: none outside none;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+ul.follow-us li {
+  display:inline;
+  margin-left:0px;
+  padding-right: 5px;
+}
+
+#sidebar-last #block-block-5 {
+  padding-left: 8px;
+}
+
+#block-block-6 .block-inner, 
+.article-type-sitewide-page #block-views-scholar_publications-block_1 .block-inner,
+.article-type-sitewide-page #block-views-scholar_announcements-block_1 .block-inner {
+  padding-bottom: 0px;
+}
+
+/** css for college pages **/
+#block-views-websites_category-block_1 {
+  margin-left: 6px;
+}
+
+#block-views-websites_category-block_1 td {
+  width:210px;
+  vertical-align: top;
+}
+
+#block-views-websites_category-block_1 td .field-photos-fid {
+  float: left;
 }
