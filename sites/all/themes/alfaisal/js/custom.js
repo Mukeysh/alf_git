@@ -1,7 +1,7 @@
 
 $(document).ready(function() {
 //js for remove login new account
-//$('#block-user-0 li:first-child').hide();
+$('#block-user-0 li:first-child').hide();
 
 //jquey for chrome
 if (navigator.userAgent.toLowerCase().indexOf("chrome") >= 0) {

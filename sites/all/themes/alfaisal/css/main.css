@@ -264,6 +264,14 @@ div.litecal .litecal-header .litecal-label {
   padding-bottom: 0;
 }
 
+.litecal-header .litecal-label {
+    color: #000000;
+}
+
+.litecal-timespan a span {
+    color: #FFFFFF;
+}
+
 /** css for main content block **/
 .front #main-content .block{
   display:inline-block;
