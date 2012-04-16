@@ -1,0 +1,523 @@
+/**default css **/
+
+* {
+  margin:0px;
+  padding:0px;
+}
+
+p{
+  font-size:12px;
+}
+
+ul,li {
+  list-style-type:none;
+}
+
+body {
+  background:#EDECEB;
+  color: #150958;
+  margin:0px;
+  padding:0px;
+  font-size:12px;
+}
+
+/** css for front page **/
+#header {
+  border-bottom: 5px solid #150958;
+  border-top: 2px solid #150958;
+}
+/** css for logo **/
+#branding {
+  margin-left: 12px;
+  padding-bottom: 10px;
+  padding-top: 15px;
+}
+
+.container #container {
+  width: 859px;
+  background: url(../images/background.jpg);
+}
+/** css for right side logo and search box **/
+#logo1 {
+  float: right;
+  margin-top: 17px;
+}
+
+#logo1 img {
+  float: right;
+  margin-right: 20px;
+  margin-bottom: 3px;
+}
+
+#container #search-box {
+  float: none;
+}
+
+#search-box #search-theme-form {
+  margin-right: 12px;
+  margin-top:0px;
+  margin-bottom:0px;
+}
+
+#search-box .button-wrapper .button input {
+  background:url(../images/search-box.gif) no-repeat;
+  border: medium none;
+  cursor: pointer;
+  height: 24px;
+  text-indent: -9999em;
+  width: 29px;
+}  
+
+#edit-search-theme-form-1-wrapper input#edit-search-theme-form-1 {
+  background:url(../images/search.jpg) no-repeat;
+  border: medium none;
+  padding: 3px 2px;
+  width: 150px;
+}
+
+/** css for advanced search **/
+#advanced-search {
+  font-size: 10px;
+  margin-left: 101px;
+}
+
+#advanced-search a{
+  color:#221761;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+input{
+margin:0px;
+}
+#sidebar-first img{
+  margin-left:9px;
+  margin-top:4px;
+}
+
+
+/** css for sidebar login **/
+#block-user-0 span.button input {
+  background: url(../images/login.jpg) no-repeat;
+  border: none;
+  cursor: pointer;
+  width: 86px;
+  height: 22px;
+  text-align: center;
+  text-indent: -9999em;
+}
+
+/** css for chrome text box border **/
+textarea:focus, input:focus{
+  outline: none;
+}
+input:-webkit-autofill {
+    background: #fff !important;
+}
+
+#sidebar-first {
+  padding-left:15px;
+}
+
+
+/** css for login block **/
+#block-user-0 {
+  background: none repeat scroll 0 0 #F7F7F7;
+  border: 1px solid #140852;
+  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px; 
+  -webkit-border-radius: 10px;
+  margin-bottom: 7px;
+  padding:0px;
+  width:173px;
+}
+/** add image to input box login**/
+#block-user-0 input, #block-user-0 input {
+  background: url(../images/login-input.jpg) no-repeat;
+  border:none;
+  height: 17px;
+  margin-top:0px;
+  margin-left:10px;
+  width: 152px;
+}
+
+/** css for removing "*" in login form **/
+#block-user-0 label span.form-required {
+  display:none;
+}
+
+/**input.form-text {
+  border:none;   
+}**/
+
+/** on focus it shows yellow color remove**/
+/**.form-text:focus, .form-checkbox:focus, .form-radio:focus, .form-select:focus {
+  border:1px solid #CCCCCC;
+  background:white;
+}**/
+
+#block-user-0 h2 {
+  background: url("../images/login-border.jpg") no-repeat scroll -7px 18px transparent;
+  color: #150958;
+  font-size: 14px;
+  margin-left: 13px;
+}
+ 
+#block-user-0 #edit-name-wrapper {
+  margin-bottom:0px;
+  margin-top: 1px;
+}
+ 
+#block-user-0 #edit-pass-wrapper {
+  margin:0px;
+}
+
+/** aligned left label **/
+#edit-name-wrapper label, #edit-pass-wrapper label {
+  font-size:10px;
+  margin-left: 14px;
+  text-align: left;
+  font-weight:normal;  
+}
+
+#sidebar-first .block-inner {
+  padding-bottom:0px;
+}
+
+form#user-login-form {
+  margin-bottom:0px;
+}
+
+#block-user-0 .item-list ul li a{
+  color: #1B105E;
+  font-size: 9px;
+  text-decoration:none;
+}
+
+#block-user-0 span.button-wrapper {
+  display: block;
+  margin-top: 3px;
+}
+
+/** css for calender **/
+
+#block-scholar_events-mini {
+  padding:0px;
+  width:173px;
+}
+
+/** add image to calender title **/
+#block-scholar_events-mini h2 {
+  background: url("../images/cal-image.jpg") no-repeat scroll 0 1px transparent;
+  color:#333;
+  font-size: 13.39px;
+  margin-bottom:4px;
+  padding-left: 16px;
+}
+
+.litecal-compact .litecal-title {
+  background: url("../images/calender-head.jpg") repeat scroll 0 0 transparent;
+  color: #FFFFFF;
+}
+
+#block-scholar_events-mini .litecal-compact .litecal-title h3.litecal-title {
+  font-size: 12px;
+  float:none;
+  text-align:center;
+}
+
+div.litecal .litecal-slot, div.litecal .litecal-timespan {
+  background:url(../images/calender-back.jpg);
+  border:0px;
+}
+
+div.litecal .litecal-timespan {
+  border:0px;
+  height: 6.2px;
+}
+
+div.litecal .litecal-header .litecal-label {
+  padding-left: 12px;
+}
+
+.litecal-header {
+  background: url(../images/calender-back.jpg);
+  color:#000;
+}
+
+#sidebar-first {
+  padding-left:17px;
+}
+
+.front #content-column .content-inner {
+  margin-left:201px;
+  margin-right:0px;
+}
+
+#main-content #content, #main-content .block {
+  padding:0px;
+}
+
+.litecal-compact .timespan-last .litecal-slot {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+/** css for main content block **/
+#block-block-1, #block-block-2, #block-block-3, #block-block-4 {
+  display:inline-block;
+  margin:0px;
+}
+
+#block-block-1, #block-block-3 {
+  float:left;
+  margin-right:3px;
+}
+
+#block-block-1 h2, #block-block-2 h2, #block-block-3 h2, #block-block-4 h2 {
+  font-size:12px;
+  margin-bottom:2px;
+}
+
+#main-content #content {
+  margin-top:9px;
+}
+
+#block-block-1 .block-inner, #block-block-2 .block-inner, #block-block-3 .block-inner, #block-block-4 .block-inner {
+  padding:0px;
+}
+
+#block-block-1 .block-inner, #block-block-2 .block-inner{
+  padding-bottom:0px;
+}
+/** css for footer block **/
+
+#footer {
+  border-top: 1px solid #15085A;
+  margin: 0 17px;
+}
+
+#footer-region .block {
+  background: url("../images/footer.jpg") repeat scroll 0 0 transparent;
+  border: 1px solid #15085A;
+  border-radius: 6px 6px 6px 6px;
+  display: inline-table;
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+#block-views-scholar_announcements-block_1 {
+  width:194px;
+}
+
+#block-views-scholar_publications-block_1 {
+  margin-left: 1px;
+  width: 275px;
+}
+
+#block-views-top_faculty-block_1 {
+  margin-right: 4px;
+  width: 276px;
+}
+
+#block-views-scholar_announcements-block_1 h2, #block-views-scholar_publications-block_1 h2, #block-views-top_faculty-block_1 h2 {
+  font-size:12px;
+  color: #1B105E;
+  height:22px
+}
+
+#block-views-scholar_announcements-block_1 h2 {
+  background: url("../images/footer-border.png") no-repeat scroll 0 18px transparent;
+}
+
+#block-views-scholar_publications-block_1 h2 {
+  background: url("../images/footer-border1.png") no-repeat scroll 0 18px transparent;
+}
+
+#block-views-top_faculty-block_1 h2 {
+  background: url("../images/footer-border1.png") no-repeat scroll 0 18px transparent;
+}
+
+/** footer block font **/
+#footer-region .block a, #sidebar-last .block a {
+  color: #000000;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+#footer .more-link a, #sidebar-last .more-link a {
+  background: url("../images/more.jpg") no-repeat scroll right top transparent;
+  display: inline-block;
+  font-size: 0;
+  height: 14px;
+  text-indent: -9999em;
+  width: 54px;
+}
+
+/** css for footer msg **/
+.footer-msg {
+  background: url("../images/footer-msg2.png") repeat scroll 0 0 transparent;
+  height: 47px;
+}
+
+#footer-left {
+  float:left;
+}
+
+#footer-right {
+  float:right;
+}
+
+.footer-msg .block {
+  margin-bottom: 0;
+}
+
+.footer-msg .block .block-inner {
+  padding-bottom: 0;
+}
+
+.footer-msg .block p{
+  color: #A1A1A1;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  padding-left: 6px;
+  padding-right: 10px;
+  padding-top: 19px;
+}
+
+/** css for internal pages **/
+/** css for links **/
+#block-vsite_menus-features {
+  padding-left: 0;
+}
+
+#block-vsite_menus-features ul {
+  padding-left: 0px;
+}
+
+#block-vsite_menus-features ul li {
+  background: url("../images/links.jpg") no-repeat scroll 0 0 transparent;
+  color: white;
+  display: block;
+  height: 22px;
+  margin-left: 4px;
+  margin-top: 7px;
+  padding-left: 25px;
+  width: 147px;
+}
+
+#block-vsite_menus-features ul li a {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+
+/**css for main content internal page **/
+/** css for heading of page **/
+.article-type-sitewide-page #content-column .content-inner {
+  margin-left: 171px;
+}
+
+.article-type-sitewide-page #main-content-header h1#page-title {
+  font-size: 12px;
+  margin-top: 12px;
+}
+
+/** css for sidebar last **/
+.article-type-sitewide-page #sidebar-last {
+  background: url("../images/home-college.jpg") no-repeat scroll 0 0 transparent;
+  margin-left: -220px;
+  width: 216px;
+}
+
+#sidebar-last #block-block-6 {
+  padding-top: 3px;
+}
+
+#sidebar-last .block {
+  border-top: 1px solid;
+  margin: 0 3px;
+  padding: 4px 15px 0;
+  width: auto;
+}
+
+.article-type-sitewide-page #block-views-scholar_announcements-block_1 h2 {
+  background: url("../images/announcement.jpg") no-repeat scroll 0 -4px transparent;
+  padding-left: 26px;
+  padding-top:3px;
+}
+
+.article-type-sitewide-page #block-views-scholar_publications-block_1 h2 {
+  background: url("../images/recent-publi.jpg") no-repeat scroll 0 0px transparent;
+  height:26px;
+  padding-top:6px;
+  padding-left: 36px;
+}
+
+.article-type-sitewide-page #block-scholar_events-mini h2 {
+  display:none;
+}
+
+/** css for widget area **/
+#block-block-5 .block-inner {
+  padding-bottom: 0px;
+}
+
+#sidebar-last #block-block-5, #sidebar-last #block-scholar_events-mini {
+  border: medium none;
+  padding-top: 0;
+}
+
+.widget-area img {
+  float: left;
+  padding-top: 9px;
+}
+
+.widget-area .widget-content {
+  display: inline-block;
+  font-family: candara;
+  font-size: 12px;
+  font-weight: bold;
+  padding-left: 5px;
+  padding-top: 18px;
+}
+
+#sidebar-last .more-link a {
+  overflow: hidden;
+}       
+
+/** css for follow us **/
+ul.follow-us {
+  list-style: none outside none;
+  padding-bottom: 0;
+  padding-left: 0;
+}
+
+ul.follow-us li {
+  display:inline;
+  margin-left:0px;
+  padding-right: 5px;
+}
+
+#sidebar-last #block-block-5 {
+  padding-left: 8px;
+}
+
+#block-block-6 .block-inner, 
+.article-type-sitewide-page #block-views-scholar_publications-block_1 .block-inner,
+.article-type-sitewide-page #block-views-scholar_announcements-block_1 .block-inner {
+  padding-bottom: 0px;
+}
+
+/** css for college pages **/
+#block-views-websites_category-block_1 {
+  margin-left: 6px;
+}
+
+#block-views-websites_category-block_1 td {
+  width:210px;
+  vertical-align: top;
+}
+
+#block-views-websites_category-block_1 td .field-photos-fid {
+  float: left;
+}
