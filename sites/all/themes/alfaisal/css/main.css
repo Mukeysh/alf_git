@@ -496,12 +496,18 @@ ul.follow-us li {
 #block-views-websites_category-block_1 {
   margin-left: 6px;
 }
-
-#block-views-websites_category-block_1 td {
-  width:210px;
+#main-content .block td {
+  padding-left: 15px;
   vertical-align: top;
+  width: 260px;
 }
 
 #block-views-websites_category-block_1 td .field-photos-fid {
   float: left;
+}
+
+.vsite-users-last-name-value, .vsite-users-title-value {
+  display: inline-block;
+  margin-left: 13px;
+  width: 170px;
 }
