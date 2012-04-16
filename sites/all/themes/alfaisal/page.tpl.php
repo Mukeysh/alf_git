@@ -95,7 +95,7 @@
   <?php print $layout_settings; ?>
   <?php print $scripts; ?>
 </head>
-<body class="<?php print $classes; ?> front">
+<body class="<?php print $classes; ?>">
   <div class="container"><div id="container">
 
     <div id="skip-nav" class="<?php print $skip_nav_class; ?>">
