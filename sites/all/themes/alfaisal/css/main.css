@@ -98,7 +98,7 @@ margin:0px;
 
 /** css for sidebar login **/
 #block-user-0 span.button input {
-  background: url(../images/login.jpg) no-repeat;
+  background: url(../images/login-button.jpg) no-repeat;
   border: none;
   cursor: pointer;
   width: 86px;
