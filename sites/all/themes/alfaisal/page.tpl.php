@@ -143,7 +143,7 @@
         </div> <!-- /branding -->
       <?php endif; ?>
       
-<div id="logo1"><img src="sites/all/themes/alfaisal/css/images/logo1.jpg"> 
+<div id="logo1"><img src="sites/all/themes/alfaisal/images/logo1.jpg"> 
 
       <?php if ($search_box): ?>
         <div id="search-box"<?php print $toggle_label ?>><?php print $search_box; ?></div> <!-- /search box -->
