@@ -284,7 +284,7 @@ div.litecal .litecal-header .litecal-label {
 
 #footer {
   border-top: 1px solid #15085A;
-  margin: 0 22px;
+  margin: 0 21px;
 }
 
 #footer-region .block {
@@ -306,6 +306,9 @@ div.litecal .litecal-header .litecal-label {
   margin-top: 8px;
 }
 
+#block-views-top_faculty-block_1 {
+  padding-right:0px;
+}
 
 /** footer block font **/
 #footer-region .block a, #sidebar-last .block a {
