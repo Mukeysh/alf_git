@@ -276,10 +276,12 @@ div.litecal .litecal-header .litecal-label {
 
 #main-content .block h2 {
   font-size:12px;
-  margin-bottom:2px;
+  margin-bottom:9px;
 }
 
-
+#content .block-inner {
+  padding-bottom:4px;
+}
 /** css for footer block **/
 
 #footer {
