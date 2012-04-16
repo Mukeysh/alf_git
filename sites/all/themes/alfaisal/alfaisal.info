@@ -31,7 +31,7 @@
   ; Theme CSS - use this stylesheet to build your custom theme.
   stylesheets[all][] = css/theme/theme.css
   ;Main CSS - use this stylesheet to build your custom theme.
-  stylesheets[all][] = css/theme/main.css
+  stylesheets[all][] = css/main.css
 ;----------// IE Conditional Stylesheets
 
   ; You MUST install http://drupal.org/project/conditional_styles (and see its readme!)
