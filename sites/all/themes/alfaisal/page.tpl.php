@@ -3,7 +3,6 @@
 
 /**
  * @file page.tpl.php
-
  * Theme implementation to display a single Drupal page.
  *
  * Available variables:
@@ -96,8 +95,8 @@
   <?php print $layout_settings; ?>
   <?php print $scripts; ?>
 </head>
-<body class="<?php print $classes; ?>">
-  <div id="container">
+<body class="<?php print $classes; ?> front">
+  <div class="container"><div id="container">
 
     <div id="skip-nav" class="<?php print $skip_nav_class; ?>">
       <!-- To adjust the display of the skip link see the Advanced theme settings (General settings), and never use display:none! -->
@@ -144,7 +143,7 @@
         </div> <!-- /branding -->
       <?php endif; ?>
       
-<div id="logo1"><img src="sites/all/themes/alfaisal/images/logo1.jpg"> 
+<div id="logo1"><img src="sites/all/themes/alfaisal/css/images/logo1.jpg"> 
 
       <?php if ($search_box): ?>
         <div id="search-box"<?php print $toggle_label ?>><?php print $search_box; ?></div> <!-- /search box -->
@@ -265,10 +264,16 @@
       </div> <!-- /footer -->
     
     <?php endif; ?>
-    <div class="footer-msg">
+      <div class="footer-msg">
+    <?php if ($footer_left): ?>
+      <div id="footer-left"><?php print $footer_left; ?></div> <!-- /leaderboard -->
+    <?php endif; ?>
+    <?php if ($footer_right): ?>
+      <div id="footer-right"><?php print $footer_right; ?></div> <!-- /leaderboard -->
+    <?php endif; ?>
  
-    </div> 
-  </div><!-- /container -->
+    </div> <!--footer-msg -->
+ </div> </div><!-- /container -->
  
   <?php print $closure ?>
 
