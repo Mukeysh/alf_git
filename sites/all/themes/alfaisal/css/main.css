@@ -5,7 +5,7 @@
   padding:0px;
 }
 
-h1, h2, h3, h4, h5, h6 a {
+h1, h2, h3, h4, h5, h6, a {
   text-decoration:none;
 }
 
@@ -284,48 +284,23 @@ div.litecal .litecal-header .litecal-label {
 
 #footer {
   border-top: 1px solid #15085A;
-  margin: 0 17px;
+  margin: 0 23px;
 }
 
 #footer-region .block {
-  background: url("../images/footer.jpg") repeat scroll 0 0 transparent;
-  border: 1px solid #15085A;
-  border-radius: 6px 6px 6px 6px;
+  background: url("../images/footer-block.jpg") no-repeat scroll 0 0 transparent;
   display: inline-table;
   margin-bottom: 10px;
   margin-top: 5px;
 }
-#block-views-scholar_announcements-block_1 {
-  width:194px;
-}
 
-#block-views-scholar_publications-block_1 {
-  margin-left: 1px;
-  width: 275px;
-}
-
-#block-views-top_faculty-block_1 {
-  margin-right: 4px;
-  width: 276px;
-}
-
-#block-views-scholar_announcements-block_1 h2, #block-views-scholar_publications-block_1 h2, #block-views-top_faculty-block_1 h2 {
+#footer  h2 {
+  background: url("../images/footer-border.jpg") no-repeat scroll 0 18px transparent;
   font-size:12px;
   color: #1B105E;
   height:22px
 }
 
-#block-views-scholar_announcements-block_1 h2 {
-  background: url("../images/footer-border.png") no-repeat scroll 0 18px transparent;
-}
-
-#block-views-scholar_publications-block_1 h2 {
-  background: url("../images/footer-border1.png") no-repeat scroll 0 18px transparent;
-}
-
-#block-views-top_faculty-block_1 h2 {
-  background: url("../images/footer-border1.png") no-repeat scroll 0 18px transparent;
-}
 
 /** footer block font **/
 #footer-region .block a, #sidebar-last .block a {
