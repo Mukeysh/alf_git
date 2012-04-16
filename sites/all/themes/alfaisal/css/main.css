@@ -5,6 +5,10 @@
   padding:0px;
 }
 
+h1, h2, h3, h4, h5, h6 a {
+  text-decoration:none;
+}
+
 p{
   font-size:12px;
 }
@@ -126,7 +130,7 @@ input:-webkit-autofill {
   height:141px;
   margin-bottom: 7px;
   padding:0px;
-  width:174px;
+  width:175px;
 }
 /** add image to input box login**/
 #block-user-0 input, #block-user-0 input {
@@ -243,11 +247,11 @@ div.litecal .litecal-header .litecal-label {
 }
 
 #sidebar-first {
-  padding-left:17px;
+  padding-left:23px;
 }
 
 .front #content-column .content-inner {
-  margin-left:201px;
+  margin-left:218px;
   margin-right:0px;
 }
 
@@ -263,18 +267,17 @@ div.litecal .litecal-header .litecal-label {
 /** css for main content block **/
 .front #main-content .block{
   display:inline-block;
-  margin:0px;
-}
-
-#block-block-1 h2, #block-block-2 h2, #block-block-3 h2, #block-block-4 h2 {
-  font-size:12px;
-  margin-bottom:2px;
+  margin:0px 12px 0px 0px;
 }
 
 .front #main-content #content {
   margin-top:9px;
 }
 
+#main-content .block h2 {
+  font-size:12px;
+  margin-bottom:2px;
+}
 
 
 /** css for footer block **/
