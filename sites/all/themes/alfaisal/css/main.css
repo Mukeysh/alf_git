@@ -45,7 +45,7 @@ body {
 
 #logo1 img {
   float: right;
-  margin-right: 12px;
+  margin-right: 20px;
   margin-bottom: 3px;
 }
 
@@ -54,7 +54,7 @@ body {
 }
 
 #search-box #search-theme-form {
-  margin-right: 12px;
+  margin-right: 13px;
   margin-top:0px;
   margin-bottom:0px;
 }
@@ -78,7 +78,7 @@ body {
 /** css for advanced search **/
 #advanced-search {
   font-size: 10px;
-  margin-left: 101px;
+  margin-left: 112px;
 }
 
 #advanced-search a{
@@ -122,11 +122,7 @@ input:-webkit-autofill {
 
 /** css for login block **/
 #block-user-0 {
-  background: none repeat scroll 0 0 #F7F7F7;
-  border: 1px solid #140852;
-  border-radius: 10px 10px 10px 10px;
-  -moz-border-radius: 10px; 
-  -webkit-border-radius: 10px;
+  background: url(../images/login.jpg) no-repeat;
   margin-bottom: 7px;
   padding:0px;
   width:173px;
