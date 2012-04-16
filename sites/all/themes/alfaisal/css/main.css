@@ -123,9 +123,10 @@ input:-webkit-autofill {
 /** css for login block **/
 #block-user-0 {
   background: url(../images/login.jpg) no-repeat;
+  height:141px;
   margin-bottom: 7px;
   padding:0px;
-  width:173px;
+  width:174px;
 }
 /** add image to input box login**/
 #block-user-0 input, #block-user-0 input {
@@ -260,14 +261,9 @@ div.litecal .litecal-header .litecal-label {
 }
 
 /** css for main content block **/
-#block-block-1, #block-block-2, #block-block-3, #block-block-4 {
+.front #main-content .block{
   display:inline-block;
   margin:0px;
-}
-
-#block-block-1, #block-block-3 {
-  float:left;
-  margin-right:3px;
 }
 
 #block-block-1 h2, #block-block-2 h2, #block-block-3 h2, #block-block-4 h2 {
@@ -275,17 +271,12 @@ div.litecal .litecal-header .litecal-label {
   margin-bottom:2px;
 }
 
-#main-content #content {
+.front #main-content #content {
   margin-top:9px;
 }
 
-#block-block-1 .block-inner, #block-block-2 .block-inner, #block-block-3 .block-inner, #block-block-4 .block-inner {
-  padding:0px;
-}
 
-#block-block-1 .block-inner, #block-block-2 .block-inner{
-  padding-bottom:0px;
-}
+
 /** css for footer block **/
 
 #footer {
