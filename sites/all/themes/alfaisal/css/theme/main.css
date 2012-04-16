@@ -34,7 +34,7 @@ body {
 }
 
 .container #container {
-  width: 859px;
+  width: 980px;
   background: url(../images/background.jpg);
 }
 /** css for right side logo and search box **/
@@ -45,7 +45,7 @@ body {
 
 #logo1 img {
   float: right;
-  margin-right: 20px;
+  margin-right: 12px;
   margin-bottom: 3px;
 }
 
