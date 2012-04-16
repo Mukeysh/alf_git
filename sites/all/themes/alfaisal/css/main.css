@@ -284,21 +284,26 @@ div.litecal .litecal-header .litecal-label {
 
 #footer {
   border-top: 1px solid #15085A;
-  margin: 0 23px;
+  margin: 0 22px;
 }
 
 #footer-region .block {
   background: url("../images/footer-block.jpg") no-repeat scroll 0 0 transparent;
   display: inline-table;
+  height: 170px;
   margin-bottom: 10px;
   margin-top: 5px;
+  padding-right: 14px;
+  width: 290px;
 }
 
-#footer  h2 {
-  background: url("../images/footer-border.jpg") no-repeat scroll 0 18px transparent;
+#footer h2 {
+  background: url("../images/footer-border.jpg") no-repeat scroll -9px 18px transparent;
   font-size:12px;
   color: #1B105E;
-  height:22px
+  height:22px;
+  margin-left: 5px;
+  margin-top: 8px;
 }
 
 
