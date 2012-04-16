@@ -306,7 +306,7 @@ div.litecal .litecal-header .litecal-label {
   margin-top: 8px;
 }
 
-#block-views-top_faculty-block_1 {
+#footer #block-views-top_faculty-block_1 {
   padding-right:0px;
 }
 
@@ -322,6 +322,7 @@ div.litecal .litecal-header .litecal-label {
   display: inline-block;
   font-size: 0;
   height: 14px;
+  margin-right: 8px;
   text-indent: -9999em;
   width: 54px;
 }
