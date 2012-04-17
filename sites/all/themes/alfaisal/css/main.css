@@ -528,3 +528,11 @@ ul.follow-us li {
 #main-content tr.row-first {
   padding-top: 0;
 }
+
+#main-content .view-node {
+  float:right;
+}
+
+#main-content .view-node a {
+  
+}
