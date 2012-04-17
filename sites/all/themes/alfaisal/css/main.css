@@ -404,6 +404,7 @@ div.litecal .litecal-header .litecal-label {
 .article-type-sitewide-page #main-content-header h1#page-title {
   font-size: 12px;
   margin-top: 12px;
+  margin-left: 10px;
 }
 
 /** css for sidebar last **/
@@ -495,13 +496,23 @@ ul.follow-us li {
 /** css for college pages **/
 
 #main-content .block td {
+  color:#8E8D8F;
+  height:90px;
   padding: 0px;
-  vertical-align: top;
-  width: 260px;
+  vertical-align: middle;
+  width: 265px;
 }
 
-#main-content .block td .field-vsite-logo-fid {
+#main-content .field-vsite-logo-fid {
   float: left;
+}
+
+.field-last-name-value {
+  color: #8E8D8F;
+  font-family: arial, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  margin-top: 10px;
 }
 
 .field-last-name-value, .field-titles-value {
@@ -538,5 +549,9 @@ ul.follow-us li {
 }
 
 #main-content .view-node a {
-  
+  background: url("../images/more.jpg") no-repeat scroll 0 0 transparent;
+  display: block;
+  text-indent: -9999em;
+  width: 56px;
 }
+
