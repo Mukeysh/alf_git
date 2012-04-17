@@ -410,7 +410,8 @@ div.litecal .litecal-header .litecal-label {
 /** css for sidebar last **/
 .article-type-sitewide-page #sidebar-last {
   background: url("../images/home-college.jpg") no-repeat scroll 0 0 transparent;
-  margin-left: -220px;
+  height: 528px;
+  margin-left: -233px;
   width: 216px;
 }
 
