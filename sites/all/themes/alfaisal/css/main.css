@@ -513,19 +513,19 @@ ul.follow-us li {
 #main-content tr {
   display: block;
   margin: 0 0 0 23px;
-  padding-top: 4px;
 }
 
 #main-content .block td.col-2 {
   border-left: 1px solid #CCCCCC;
   padding-left: 15px;
+  padding-top:4px;
 }
 
 #sidebar-last h2 {
   font-size:12px;
 }
 
-#main-content tr.row-first {
+#main-content td.col-1 {
   padding-top: 0;
 }
 
