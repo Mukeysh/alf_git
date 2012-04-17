@@ -510,9 +510,10 @@ ul.follow-us li {
   width: 165px;
 }
 
-.article-type-sitewide-page #main-content tr {
+#main-content tr {
   display: block;
-  margin: 0 15px;
+  margin: 0 0 0 23px;
+  padding-top: 4px;
 }
 
 #main-content .block td.col-2 {
@@ -522,3 +523,8 @@ ul.follow-us li {
 
 #sidebar-last h2 {
   font-size:12px;
+}
+
+#main-content tr.row-first {
+  padding-top: 0;
+}
