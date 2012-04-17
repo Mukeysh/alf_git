@@ -515,7 +515,10 @@ ul.follow-us li {
   margin: 0 15px;
 }
 
-#main-content .block    td.col-2 {
+#main-content .block td.col-2 {
   border-left: 1px solid #CCCCCC;
   padding-left: 15px;
 }
+
+#sidebar-last h2 {
+  font-size:12px;
