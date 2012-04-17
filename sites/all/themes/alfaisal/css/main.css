@@ -500,11 +500,11 @@ ul.follow-us li {
   width: 260px;
 }
 
-#main-content .block td .field-photos-fid {
+#main-content .block td .field-vsite-logo-fid {
   float: left;
 }
 
-.vsite-users-last-name-value, .vsite-users-title-value {
+.field-last-name-value, .field-last-name-value {
   display: inline-block;
   margin-left: 13px;
   width: 165px;
