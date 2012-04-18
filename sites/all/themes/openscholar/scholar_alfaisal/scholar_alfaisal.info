@@ -5,8 +5,8 @@ description = This is a scholar theme that is made for the alfaisal.
 screenshot = screenshot.png
 core       = 6.x
 base theme = scholar_base
-stylesheets[all][]   = scholar-alfaisal.css
-conditional-stylesheets[if lte IE 7][all][] = scholar-alfaisal-ie.css
+stylesheets[all][]   = scholar_alfaisal.css
+conditional-stylesheets[if lte IE 7][all][] = scholar_alfaisal-ie.css
 
 os[widgets][vsite-site_search] = left
 os[widgets][vsite_menus-features] = left
