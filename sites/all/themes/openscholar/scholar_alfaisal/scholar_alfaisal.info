@@ -1,0 +1,18 @@
+name        = Alfaisal_sub
+description = This is a scholar theme that is made for the alfaisal.
+
+
+screenshot = screenshot.png
+core       = 6.x
+base theme = scholar_base
+stylesheets[all][]   = scholar-alfaisal.css
+conditional-stylesheets[if lte IE 7][all][] = scholar-alfaisal-ie.css
+
+os[widgets][vsite-site_search] = left
+os[widgets][vsite_menus-features] = left
+os[widgets][scholar_events-mini] = right
+os[widgets][boxes-scholar_announcements_latest] = right
+os[widgets][boxes-scholar_publications_recent] = right
+
+os[theme_type]   = "vsite"
+os[theme_access] = "public"
