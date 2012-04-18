@@ -95,7 +95,7 @@ input{
 margin:0px;
 }
 #sidebar-first img{
-  margin-left:9px;
+ /** margin-left:9px;**/
   margin-top:4px;
 }
 
@@ -501,11 +501,23 @@ ul.follow-us li {
   height:90px;
   padding: 0px;
   vertical-align: top;
-  width: 265px;
+}
+
+/** css for td width **/
+td.col-1 {
+  width: 267px;
+}
+
+td.col-2 {
+  width: 250px;
 }
 
 #main-content .field-vsite-logo-fid {
   float: left;
+}
+#main-content .field-vsite-logo-fid img {
+  border:1px solid #ccc;
+  border-radius:6px;
 }
 
 .field-last-name-value {
@@ -518,19 +530,20 @@ ul.follow-us li {
 
 .field-last-name-value, .field-titles-value {
   display: inline-block;
-  margin-left: 13px;
-  width: 165px;
   font-size:10px;
+  margin-left: 13px;
+  width: 166px;
 }
 
 #main-content tr {
   display: block;
   margin: 0 0 0 23px;
+  position: relative;
 }
 
 #main-content .block td.col-2 {
   border-left: 1px solid #CCCCCC;
-  padding-left: 15px;
+  padding-left: 19px;
 }
 
 #sidebar-last h2 {
@@ -542,12 +555,15 @@ ul.follow-us li {
   padding-top: 4px;
 }
 
-#main-content tr.row-1 td {
+/**#main-content tr.row-1 td {
   padding-top: 0;
-}
+}**/
 
 #main-content .view-node {
+  bottom: 0;
   float:right;
+  position: absolute;
+  width:252px;
 }
 
 #main-content .view-node a {
@@ -557,3 +573,6 @@ ul.follow-us li {
   width: 56px;
 }
 
+#main-content tr.row-last td {
+  border-bottom: medium none;
+}
