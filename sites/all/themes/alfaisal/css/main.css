@@ -216,9 +216,14 @@ form#user-login-form {
   padding-left: 16px;
 }
 
-.litecal-compact .litecal-title {
-  background: url("../images/calender-head.jpg") repeat scroll 0 0 transparent;
+.litecal-compact {
+  background: url("../images/calender1.png") no-repeat scroll 0 0 transparent;
+  height: 157px;
+  width: 170px;
+ }
+#block-scholar_events-mini div.litecal .litecal-title {
   color: #FFFFFF;
+  line-height: 22px;
 }
 
 #block-scholar_events-mini .litecal-compact .litecal-title h3.litecal-title {
@@ -228,7 +233,7 @@ form#user-login-form {
 }
 
 div.litecal .litecal-slot, div.litecal .litecal-timespan {
-  background:url(../images/calender-back.jpg);
+ /* background:url(../images/calender-back.jpg);*/
   border:0px;
 }
 
@@ -241,8 +246,12 @@ div.litecal .litecal-header .litecal-label {
   padding-left: 12px;
 }
 
+#block-scholar_events-mini div.litecal .litecal-slot, #block-scholar_events-mini div.litecal .litecal-timespan {
+  background:none;
+}  
+ 
 .litecal-header {
-  background: url(../images/calender-back.jpg);
+  /*background: url(../images/calender-back.jpg);*/
   color:#000;
 }
 
