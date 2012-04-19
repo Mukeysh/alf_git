@@ -578,7 +578,7 @@ td.col-2 {
 #main-content .view-node a {
   background: url("../images/more.jpg") no-repeat scroll 0 0 transparent;
   display: block;
-  float:left;
+  float: right;
   text-indent: -9999em;
   width: 56px;
 }
