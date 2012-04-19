@@ -15,6 +15,15 @@ os[widgets][boxes-scholar_announcements_latest] = right
 os[widgets][boxes-scholar_publications_recent] = right
 os[widgets][boxes-site_logo] = false
 os[widgets][boxes-site_info] = false
+os[widgets][vsite-site_search] = false
+os[widgets][vsite_menus-scholar_secondary_menu] = false
+os[widgets][vsite_menus-features] = false
+os[widgets][boxes-shield_default] = false
+os[widgets][scholar_events-mini] = false
+os[widgets][boxes-scholar_publications_recent] = false
+os[widgets][views-scholar_events_upcoming-block_1] = false
+os[widgets][boxes-scholar_announcements_latest] = false
+
 
 os[theme_type]   = "vsite"
 os[theme_access] = "public"
