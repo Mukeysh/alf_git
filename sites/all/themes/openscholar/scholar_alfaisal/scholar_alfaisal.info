@@ -13,6 +13,8 @@ os[widgets][vsite_menus-features] = left
 os[widgets][scholar_events-mini] = right
 os[widgets][boxes-scholar_announcements_latest] = right
 os[widgets][boxes-scholar_publications_recent] = right
+os[widgets][boxes-site_logo] = false
+os[widgets][boxes-site_info] = false
 
 os[theme_type]   = "vsite"
 os[theme_access] = "public"
