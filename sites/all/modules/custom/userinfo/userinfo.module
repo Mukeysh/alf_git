@@ -37,27 +37,3 @@
   
  // return $abc;
 //}
-
-/**
-* Implementation of hook_block().
-*/
-function customblock_block($op=’list’, $delta=0) {
-// listing of blocks, such as on the admin/block page
-if ($op == “list”) {
-$block[0]["info"] = t(‘Custom Block’);
-return $block;
-}
-
-else if($op == ‘view’)
-{
-$block_content=”;
-$block_content.=’<div style=”border:1px solid #D6D6D6; background-color:#F2F2F2; padding: 5px;”>’;
-$block_content.=’<div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\’s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. Why do we use it? <br />
-<a href=”http://drupal.org/” target=”_blank”>Click Here</a> – Drupal.Org
-</div>’;
-$block_content.=’</div>’;
-$block['subject'] = ‘Custom Block’;
-$block['content'] = $block_content;
-return $block;
-}
-}
