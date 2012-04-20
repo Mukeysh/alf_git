@@ -31,17 +31,17 @@ function onthisdate_block($op='list', $delta=0) {
   } 
   else if ($op == 'view') {
     // Generate our block content
-
+ print"I am here";
     // Get today's date
-    $today = getdate();
+   // $today = getdate();
 
     // calculate midnight one week ago
-    $start_time = mktime(0, 0, 0,
-       $today['mon'], ($today['mday'] - 7), $today['year']);
+    //$start_time = mktime(0, 0, 0,
+      // $today['mon'], ($today['mday'] - 7), $today['year']);
 
     // we want items that occur only on the day in question, so   
     // calculate 1 day
-    $end_time = $start_time + 86400;  
+    //$end_time = $start_time + 86400;  
     // 60 * 60 * 24 = 86400 seconds in a day
     
 
