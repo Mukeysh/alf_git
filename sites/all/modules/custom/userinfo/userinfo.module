@@ -26,6 +26,7 @@ function userinfo_block($op='list', $delta=0) {
  global $base_path;
  echo arg(1);
 echo "this is homepage". arg(0); 
+echo "this is homepage". arg(2); 
 // print 'arg(1)';
 // print"<pre>";
 // $node_load("$node");
