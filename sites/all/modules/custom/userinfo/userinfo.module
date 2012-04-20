@@ -5,7 +5,7 @@
  * @param integer $delta code to identify the block
  * @param array $edit only for "save" operation
 */
-function onthisdate_block($op = 'list', $delta = 0, $edit = array()) {  
+function userinfo_block($op = 'list', $delta = 0, $edit = array()) {  
   if ($op == "list") {
     // Generate listing of blocks from this module, for the admin/block page
     $block = array();
@@ -21,7 +21,7 @@ function onthisdate_block($op = 'list', $delta = 0, $edit = array()) {
  * @param delta offset
  * @returns block HTML 
  */
-function onthisdate_block($op='list', $delta=0) {
+function userinfo_block($op='list', $delta=0) {
   // set up an empty array which will contain the block contents
   $block = array();
 
