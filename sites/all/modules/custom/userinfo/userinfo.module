@@ -26,8 +26,8 @@ function userinfo_block($op='list', $delta=0) {
 // global $base_path;
  $current_path = drupal_get_path_alias($_GET["q"]);
 echo $current_path;
- echo argv(1);
-echo "this is homepage". argv(0); 
+ //echo argv(1);
+//echo "this is homepage". argv(0); 
 
 //echo "this is homepage". arg(2); 
 // print 'arg(1)';
