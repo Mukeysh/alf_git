@@ -6,7 +6,6 @@
  * @param array $edit only for "save" operation
 */
 
-<?php
 /**
  * Generate HTML for the onthisdate block
  * @param op the operation from the URL
