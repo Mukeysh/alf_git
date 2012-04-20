@@ -1,3 +1,21 @@
+/**for admin **/
+.section-admin h2.title {
+  padding-top: 23px;
+}
+
+.section-admin #content .tabs ul.primary {
+  padding: 8px;
+}
+
+.section-admin #content .tabs ul.primary li {
+  padding: 5px;
+}
+
+body.section-admin #content-main {
+  float:left;
+}
+
+/** for main **/
 body {
   background: none repeat scroll 0 0 #EDECEB;
 }
@@ -78,19 +96,37 @@ body {
   text-decoration: none;
 }
 
+/** css for navbar **/
+#navbar {
+  background: url(images/user-info.jpg) no-repeat;
+  padding: 10px 10px 0;
+}
+
+#logo img {
+  border: 1px solid ##150958;
+  border-radius: 6px;
+}
+
+.hg-container {
+  padding:0px;
+}
+
 #sidebar-first {
-  width:170px;
-  left: -328px;
+  width:155px;
+  left: 0px;
+  margin-left:0px;
 }
 
 #content-main {
-  right: 65px;
-  width: 611px;
+  right: 0px;
+  padding-left: 0;
+  padding-right: 0;
+  width: 570px;
 }
 
 #sidebar-second {
-  right: 65px;
-  width: 200px;
+  right: 0px;
+  margin-right:0px;
 }
 
 #content-main #logo {
@@ -221,7 +257,8 @@ body.cp-toolbar-mini #top > .item-list ul li.first .wrench {
   border: medium none;
   display: block;
   height: 33px;
-  padding-top:7px;
+  padding: 7px 0 0 10px;
+  width: 411px;
 }
 
 #admin-area #message_welcome_message .expanded {
@@ -242,4 +279,50 @@ body.cp-toolbar-mini #top > .item-list ul li.first .wrench {
 
 #block-scholar_front-get_started {
   width: 69%;
+}
+
+#admin-area .context-links, #admin-area .section-cp div.ctools-dropdown {
+  background: url("images/add-new1.jpg") no-repeat scroll 0 0 transparent !important;
+  height: 31px;
+  margin-right: 0 !important;
+  margin-top: 1px;
+  padding-left: 31px !important;
+  padding-right: 45px !important;
+  z-index: 134;
+}
+
+
+
+#admin-area .context-links:hover, #admin-area .section-cp div.ctools-dropdown:hover {
+    background: url("images/add-new1.jpg") repeat scroll 0 0 transparent;
+    color: #FFFFFF;
+}
+
+#admin-area .ctools-dropdown.context-links.vsite-section-admin-links {
+ padding: 0 !important;
+}
+
+.context-links a.ctools-dropdown-link, .context-links a, .context-links a:visited {
+  color: #FFFFFF !important;
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.context-links a.ctools-dropdown-link:hover {
+  color: #fff !important;
+}
+
+ 
+
+#admin-area .ctools-dropdown.context-links.vsite-section-admin-links a.ctools-dropdown-link {
+  background:url(images/control-panel1.jpg) no-repeat !important;
+  margin-top: 7px;
+  position: absolute;
+  right: 10px;
+}
+
+#admin-area .ctools-dropdown.context-links.vsite-section-admin-links a.ctools-dropdown-link:hover {
+  background: url(images/control-panel1.jpg) no-repeat !important;
 }

@@ -7,6 +7,9 @@ core       = 6.x
 base theme = scholar_base
 stylesheets[all][]   = scholar_alfaisal.css
 conditional-stylesheets[if lte IE 7][all][] = scholar_alfaisal-ie.css
+;----------// jQuery Plugins and JavaScripts
+
+  scripts[] = js/custom.js
 
 os[widgets][vsite-site_search]                        = false
 os[widgets][boxes-site_logo]                          = navbar

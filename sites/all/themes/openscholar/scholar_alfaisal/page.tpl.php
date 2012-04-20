@@ -47,9 +47,16 @@
         </div><!-- /wrap -->
       </div><!-- /header -->
       <?php endif; ?>
+      
       <div id="content-area">
         <div class="wrap clearfix">
           <div class="hg-container">
+          <?php if (!empty($left)): ?>
+          <div id="sidebar-first" class="sidebar column">
+          <img src="<?php print base_path().path_to_theme(); ?>/images/poweredby.jpg">
+            <?php print $left; ?>
+          </div> <!-- /sidebar-first -->
+          <?php endif; ?>
           <div id="content-main" class="column<?php if (!empty($content_left)){ echo " content-left"; } if (!empty($content_right)){ echo " content-right"; } ?>">
             <?php if (!empty($navbar)): ?>
       <div id="navbar">
@@ -102,12 +109,7 @@
             </div><!-- /admin-area -->
             <?php endif; ?>
             </div><!-- /content main -->
-          <?php if (!empty($left)): ?>
-          <div id="sidebar-first" class="sidebar column">
-          <img src="<?php print base_path().path_to_theme(); ?>/images/poweredby.jpg">
-            <?php print $left; ?>
-          </div> <!-- /sidebar-first -->
-          <?php endif; ?>
+          
           <?php if (!empty($right)): ?>
           <div id="sidebar-second" class="sidebar column">
             <?php print $right; ?>
