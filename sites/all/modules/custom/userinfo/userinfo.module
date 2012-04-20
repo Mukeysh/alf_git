@@ -1,39 +1,54 @@
 <?php
-
 /**
-
- * @file
- * Module provides block with user information on the vsite
- *  
+ * Implementation of hook_block().
+ * @param string $op one of "list", "view", "save" and "configure"
+ * @param integer $delta code to identify the block
+ * @param array $edit only for "save" operation
+*/
+function onthisdate_block($op = 'list', $delta = 0, $edit = array()) {  
+  if ($op == "list") {
+    // Generate listing of blocks from this module, for the admin/block page
+    $block = array();
+    $block[0]["info"] = t('On This Date');
+    return $block;
+  } 
+} // function onthisdate_block
+?>
+<?php
+/**
+ * Generate HTML for the onthisdate block
+ * @param op the operation from the URL
+ * @param delta offset
+ * @returns block HTML 
  */
+function onthisdate_block($op='list', $delta=0) {
+  // set up an empty array which will contain the block contents
+  $block = array();
 
-//function userinfo_block($op = 'list', $delta = 0, $edit = array()) {
-  //switch(op) {
-   // case 'list':
-  //    $blocks[0]['info'] = t('User Information');
-    //  return $blocks;
-      
-     // case 'view':
-     // switch(delta){
-       // case 0:
-  //$block['content'] = userinfo();
-  //$block['delta'] = '';
-  //return $block;
-        
-  //    }  
- // }
-  
-  
-//}
+  if ($op == "list") {
+    // Generate listing of blocks from this module, for the admin/block page
+    $block[0]["info"] = t('On This Date');
+  } 
+  else if ($op == 'view') {
+    // Generate our block content
 
-/*
- * create block showing user information
- */
-//function userinfo() {
- // print "<pre>";
- // node_load($node);
- // $abc = print_r($node);
-  
-  
- // return $abc;
-//}
+    // Get today's date
+    $today = getdate();
+
+    // calculate midnight one week ago
+    $start_time = mktime(0, 0, 0,
+       $today['mon'], ($today['mday'] - 7), $today['year']);
+
+    // we want items that occur only on the day in question, so   
+    // calculate 1 day
+    $end_time = $start_time + 86400;  
+    // 60 * 60 * 24 = 86400 seconds in a day
+    
+
+   // more coming...
+  }
+
+  // return the built content
+  return $block;
+}
+?>
