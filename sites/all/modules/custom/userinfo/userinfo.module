@@ -32,9 +32,9 @@ $a = explode('/', $curr_uri);
 print_r ($a[1]);
 $usite = $a[1];
 $result = db_query('SELECT nid FROM node WHERE title = "' . $usite . '"');
-while ($row = db_fetch_object($result)) {
+
   print_r($result);
-}
+
 }
     
 
