@@ -9,20 +9,20 @@
 
 
 function userinfo_block($op = 'list', $delta = 0, $edit = array()) {
-  switch(op) {
-    case 'list':
+  //switch(op) {
+   // case 'list':
       $blocks[0]['info'] = t('User Information');
       return $blocks;
       
-      case 'view':
-      switch(delta){
-        case 0:
+     // case 'view':
+     // switch(delta){
+       // case 0:
   $block['content'] = userinfo();
   $block['delta'] = '';
   return $block;
         
-      }  
-  }
+  //    }  
+ // }
   
   
 }
