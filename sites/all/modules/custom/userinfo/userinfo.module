@@ -29,7 +29,7 @@ echo $current_path;
 $curr_uri = request_uri();
 echo $curr_uri;
 $a = explode('/', $curr_uri);
-print_r ($a[]);
+print_r ($a[1]);
 
  //echo argv(1);
 //echo "this is homepage". argv(0); 
