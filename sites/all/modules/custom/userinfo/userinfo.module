@@ -5,15 +5,7 @@
  * @param integer $delta code to identify the block
  * @param array $edit only for "save" operation
 */
-function userinfo_block($op = 'list', $delta = 0, $edit = array()) {  
-  if ($op == "list") {
-    // Generate listing of blocks from this module, for the admin/block page
-    $block = array();
-    $block[0]["info"] = t('On This Date');
-    return $block;
-  } 
-} // function onthisdate_block
-?>
+
 <?php
 /**
  * Generate HTML for the onthisdate block
