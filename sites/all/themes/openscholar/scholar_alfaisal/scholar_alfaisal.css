@@ -42,7 +42,7 @@ body {
   border:0px;
 }
 
-.search-form input.form-submit {
+#header-right #search-form input.form-submit {
   background:url("images/search-ok.gif") no-repeat;
 }
 
@@ -80,16 +80,16 @@ body {
 
 #sidebar-first {
   width:170px;
-  left: -270px;
+  left: -328px;
 }
 
 #content-main {
-  right: 40px;
-  width: 550px;
+  right: 65px;
+  width: 611px;
 }
 
 #sidebar-second {
-  right: 40px;
+  right: 65px;
   width: 200px;
 }
 
@@ -164,4 +164,52 @@ div.litecal .litecal-header .litecal-label {
 
 .litecal-timespan a span {
     color: #FFFFFF;
+}
+
+/** css for footer msg **/
+.footer-msg {
+  background: url("images/footer-msg2.png") repeat scroll 0 0 transparent;
+  height: 47px;
+}
+
+#footer-left {
+  float:left;
+}
+
+#footer-right {
+  float:right;
+}
+
+.footer-msg .block {
+  margin-bottom: 0;
+}
+
+.footer-msg .block .block-inner {
+  padding-bottom: 0;
+}
+
+.footer-msg .block p{
+  color: #A1A1A1;
+  margin-bottom: 0px;
+  margin-top: 0px;
+  padding-left: 6px;
+  padding-right: 10px;
+  padding-top: 19px;
+}
+
+/** css for control panel **/
+body.cp-toolbar-mini #top > .item-list ul li.first {
+  background: none repeat scroll 0 0 transparent;
+  float: left;
+  margin-right: 285px;
+  top: 9px;
+}
+
+body.cp-toolbar-mini #top > .item-list ul li.first .wrench {
+  background: url("images/control-panel.jpg") no-repeat scroll 97px 1px transparent;
+  color: #150A58;
+  display: block;
+  font-weight: bold;
+  height: 21px;
+  width: 93px;
 }

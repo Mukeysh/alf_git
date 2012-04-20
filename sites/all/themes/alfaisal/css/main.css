@@ -415,7 +415,10 @@ div.litecal .litecal-header .litecal-label {
   margin-top: 12px;
   margin-left: 10px;
 }
-
+.article-type-sitewide-page .more-link {
+  margin-top:-10px;
+  margin-bottom:2px;
+}
 /** css for sidebar last **/
 .article-type-sitewide-page #sidebar-last {
   background: url("../images/home-college.jpg") no-repeat scroll 0 0 transparent;
@@ -475,10 +478,10 @@ div.litecal .litecal-header .litecal-label {
   padding-left: 5px;
   padding-top: 18px;
 }
-
+/**
 #sidebar-last .more-link a {
   overflow: hidden;
-}       
+}  **/     
 
 /** css for follow us **/
 ul.follow-us {

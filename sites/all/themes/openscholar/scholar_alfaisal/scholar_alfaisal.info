@@ -8,22 +8,35 @@ base theme = scholar_base
 stylesheets[all][]   = scholar_alfaisal.css
 conditional-stylesheets[if lte IE 7][all][] = scholar_alfaisal-ie.css
 
-os[widgets][vsite-site_search] = left
-os[widgets][vsite_menus-features] = left
-os[widgets][scholar_events-mini] = right
-os[widgets][boxes-scholar_announcements_latest] = right
-os[widgets][boxes-scholar_publications_recent] = right
-os[widgets][boxes-site_logo] = false
-os[widgets][boxes-site_info] = false
-os[widgets][vsite-site_search] = false
-os[widgets][vsite_menus-scholar_secondary_menu] = false
-os[widgets][vsite_menus-features] = false
-os[widgets][boxes-shield_default] = false
-os[widgets][scholar_events-mini] = false
-os[widgets][boxes-scholar_publications_recent] = false
-os[widgets][views-scholar_events_upcoming-block_1] = false
-os[widgets][boxes-scholar_announcements_latest] = false
-
-
+os[widgets][vsite-site_search]                        = false
+os[widgets][boxes-site_logo]                          = navbar
+os[widgets][boxes-site_info]                          = navbar
+os[widgets][vsite_menus-features]                     = left
+os[widgets][boxes-og-119-b9d8b989]                    = right
+os[widgets][scholar_events-mini]                      = right
+os[widgets][scholar_announcements_latest]             = right
+os[widgets][boxes-box-scholar_biocv_bio]              = content-top
 os[theme_type]   = "vsite"
 os[theme_access] = "public"
+
+
+
+
+;------ regions ------
+regions[header_top]    	= header top
+regions[header_left]    = header left
+regions[header_main]    = header main
+regions[header_right]   = header right
+regions[navbar]         = navigation bar
+regions[left]           = first sidebar
+regions[right]          = second sidebar
+regions[content_top]    = content top
+regions[content_bottom] = content bottom
+regions[content_left]   = content left
+regions[content_right]  = content right
+regions[footer]         = footer
+regions[footer_left]    = footer left
+regions[footer_right]   = footer right 
+regions[closure_region] = closure
+regions[admin_area]     = Administrative
+

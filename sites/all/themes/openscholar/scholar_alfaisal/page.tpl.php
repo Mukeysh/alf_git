@@ -123,15 +123,26 @@
           <?php if ($footer) : ?>
             <?php print $footer; ?>
           <?php endif; ?>
+         
           <?php
             $home_link =  l('Powered by OpenScholar','http://openscholar.harvard.edu', array('attributes' => array('class' => 'poweredby'),'html'=>TRUE));
             $login_link = theme('vsite_login_link',"Login",array('class' => 'footer-login'));
           ?>
-          <p class="copy"><?php print $login_link;?> <?php if ($footer_message) { print $footer_message; } ?> <span id="powered-link"><?php print $home_link; ?></span></p><?php if(variable_get('openscholar_reportverinfo', 1)){ ?><img src="http://openscholar.harvard.edu/openscholar_lu/spacer.gif?<?php echo drupal_query_string_encode($openscholar_version_info) ?>" /><?php } ?>
+          <p class="copy"><?php print $login_link;?> <?php if ($footer_message) { print $footer_message; } ?><!-- <span id="powered-link"><?php print $home_link; ?></span></p><?php if(variable_get('openscholar_reportverinfo', 1)){ ?><img src="http://openscholar.harvard.edu/openscholar_lu/spacer.gif?<?php echo drupal_query_string_encode($openscholar_version_info) ?>" /><?php } ?>-->
         </div><!-- /wrap -->
       </div> <!-- /#footer -->
     </div><!-- /page-wrapper -->
+      <div class="footer-msg">
+    <?php if ($footer_left): ?>
+      <div id="footer-left"><?php print $footer_left; ?></div> <!-- /leaderboard -->
+    <?php endif; ?>
+    <?php if ($footer_right): ?>
+      <div id="footer-right"><?php print $footer_right; ?></div> <!-- /leaderboard -->
+    <?php endif; ?>
+ 
+    </div> <!--footer-msg -->
   </div> <!-- /page -->
+
   <div id="extradiv"></div>
   <?php if ($closure_region): ?>
   <div id="closure-blocks"><?php print $closure_region; ?></div>
