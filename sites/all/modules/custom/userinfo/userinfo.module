@@ -24,8 +24,8 @@ function userinfo_block($op='list', $delta=0) {
     // Generate our block content
  print"I am here";
  global $base_path;
- print arg(0);
- print arg(1);
+ print 'arg(0)';
+ print 'arg(1)';
  print"<pre>";
  $node_load("$node");
  print_r($node);
