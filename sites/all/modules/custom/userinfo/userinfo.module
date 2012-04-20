@@ -23,7 +23,7 @@ function userinfo_block($op='list', $delta=0) {
   else if ($op == 'view') {
     // Generate our block content
  print"I am here";
- print"<pre>";
+ //print"<pre>";
  node_load($node);
  print_r($node);
     // Get today's date
