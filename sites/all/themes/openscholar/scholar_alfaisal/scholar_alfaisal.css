@@ -213,3 +213,33 @@ body.cp-toolbar-mini #top > .item-list ul li.first .wrench {
   height: 21px;
   width: 93px;
 }
+
+/** css for user common setting **/
+
+#admin-area #message_welcome_message .toggle {
+  background: url("images/user-setting.jpg") no-repeat scroll 0 0 transparent;
+  border: medium none;
+  display: block;
+  height: 33px;
+  padding-top:7px;
+}
+
+#admin-area #message_welcome_message .expanded {
+  height: 21px !important;
+  padding-bottom: 9px;
+}
+
+#admin-area #message_welcome_message .vsite-admin .toggle {
+  background:none;
+  border:none;
+}
+
+#message_welcome_message .slider {
+  margin-top: 0;
+  width:402px;
+  
+}
+
+#block-scholar_front-get_started {
+  width: 69%;
+}
