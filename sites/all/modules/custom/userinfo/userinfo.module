@@ -24,8 +24,9 @@ function userinfo_block($op='list', $delta=0) {
     // Generate our block content
  print"I am here";
  //print"<pre>";
- node_load($node);
+ $node_load($node);
  print_r($node);
+ 
     // Get today's date
    // $today = getdate();
 
