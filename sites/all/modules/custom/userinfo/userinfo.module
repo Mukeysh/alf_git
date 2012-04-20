@@ -1,0 +1,40 @@
+<?php
+
+/**
+
+ * @file
+ * Module provides block with user information on the vsite
+ *  
+ */
+
+
+function userinfo_block($op = 'list', $delta = 0, $edit = array()) {
+  switch(op) {
+    case 'list':
+      $blocks[0]['info'] = t('User Information');
+      return $blocks;
+      
+      case 'view':
+      switch(delta){
+        case 0:
+  $block['content'] = userinfo();
+  $block['delta'] = '';
+  return $block;
+        
+      }  
+  }
+  
+  
+}
+
+/*
+ * create block showing user information
+ */
+function userinfo() {
+  print "<pre>";
+  node_load($node);
+  print_r($node);
+  
+  
+  
+}

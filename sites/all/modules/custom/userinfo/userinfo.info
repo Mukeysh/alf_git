@@ -1,0 +1,4 @@
+name = "Userinfo"
+description = "Displays the information of user on the vsite"
+core = 6.x
+php = 5.1
