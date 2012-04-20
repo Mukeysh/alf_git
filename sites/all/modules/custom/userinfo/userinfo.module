@@ -36,5 +36,5 @@ function userinfo() {
   print_r($node);
   
   
-  return userinfo();
+  return $node;
 }
