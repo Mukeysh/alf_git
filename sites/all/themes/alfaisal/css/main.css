@@ -259,8 +259,7 @@ div.litecal .litecal-header .litecal-label {
 }
 
 .two-sidebars #sidebar-first {
-  padding-left:15px;
-  margin-left:0px;
+  margin-left:23px;
   margin-right:0px;
   width:145px;
 }
@@ -302,9 +301,9 @@ div.litecal .litecal-header .litecal-label {
   margin-top:9px;
 }
 #main-content {
-  float:left;
-  width:560px;
-  margin-left:10px;
+  float: left;
+  width: 568px;
+  margin-left: 2px;
 }
 #main-content .block h2 {
   color: #150958;
@@ -436,7 +435,7 @@ div.litecal .litecal-header .litecal-label {
 .two-sidebars #sidebar-last {
   background: url("../images/home-college.jpg") no-repeat scroll 0 0 transparent;
   height: 528px;
-  margin-left: 15px;
+  margin-left: 9px;
   width: 216px;
 }
 
