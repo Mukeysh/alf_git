@@ -31,7 +31,7 @@ echo $curr_uri;
 $a = explode('/', $curr_uri);
 print_r ($a[1]);
 $usite = $a[1];
-$result = db_query('SELECT nid FROM node WHERE title = "' . $usite . '"');
+$result = 'SELECT nid FROM node WHERE title = "' . $usite . '"';
 
   print_r($result);
 
