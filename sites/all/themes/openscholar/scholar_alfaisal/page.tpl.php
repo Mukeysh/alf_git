@@ -8,7 +8,7 @@
   <?php print $styles; ?>
   <?php print $scripts; ?>
 </head>
-<body class="<?php print $body_classes; ?>">
+<body class="<?php print $body_classes; ?>" >
  <div id="container">
   <?php if ($cp_toolbar) : ?>
   <div id="top">

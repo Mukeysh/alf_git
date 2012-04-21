@@ -95,7 +95,7 @@
   <?php print $layout_settings; ?>
   <?php print $scripts; ?>
 </head>
-<body class="<?php print $classes; ?>">
+<body class="<?php print $classes; ?> inner">
   <div class="container"><div id="container">
 
     <div id="skip-nav" class="<?php print $skip_nav_class; ?>">
@@ -205,7 +205,11 @@
         <?php if ($content_top): ?>
           <div id="content-top"><?php print $content_top; ?></div> <!-- /content-top -->
         <?php endif; ?>
-
+        
+     <?php if ($left): ?>
+      
+        <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
+      <?php endif; ?>
         <div id="main-content">
 
           <?php if ($title or $tabs): ?>
@@ -224,6 +228,11 @@
           <div id="content"><?php print $content; ?></div>
 
         </div> <!-- /main-content -->
+        <?php if ($right): ?>
+        <div id="sidebar-last" class="sidebar"><?php print $right; ?></div> <!-- /sidebar-last -->
+      <?php endif; ?>
+
+    </div></div> <!-- /columns -->
 
         <?php if ($content_bottom): ?>
           <div id="content-bottom"><?php print $content_bottom; ?></div> <!-- /content-bottom -->
@@ -231,16 +240,9 @@
 
       </div></div> <!-- /content-column -->
 
-      <?php if ($left): ?>
       
-        <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
-      <?php endif; ?>
 
-      <?php if ($right): ?>
-        <div id="sidebar-last" class="sidebar"><?php print $right; ?></div> <!-- /sidebar-last -->
-      <?php endif; ?>
-
-    </div></div> <!-- /columns -->
+      
 
     <?php if ($tertiary_content): ?>
       <div id="tertiary-content"><?php print $tertiary_content; ?></div> <!-- /tertiary-content -->

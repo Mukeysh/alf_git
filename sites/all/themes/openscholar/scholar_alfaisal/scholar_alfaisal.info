@@ -17,6 +17,7 @@ os[widgets][boxes-site_info]                          = navbar
 os[widgets][vsite_menus-features]                     = left
 os[widgets][scholar_events-mini]                      = right
 os[widgets][scholar_announcements_latest]             = right
+os[widgets][boxes-scholar_publications_recent]        = right
 os[widgets][boxes-box-scholar_biocv_bio]              = content-top
 os[widgets][box-os_addthis]                           = false
 os[theme_type]   = "vsite"

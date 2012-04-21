@@ -205,6 +205,10 @@
         <?php if ($content_top): ?>
           <div id="content-top"><?php print $content_top; ?></div> <!-- /content-top -->
         <?php endif; ?>
+        
+        <?php if ($left): ?>
+          <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
+       <?php endif; ?>
 
         <div id="main-content">
 
@@ -231,15 +235,11 @@
 
       </div></div> <!-- /content-column -->
 
-      <?php if ($left): ?>
       
-        <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
-      <?php endif; ?>
-
-      <?php if ($right): ?>
+<!--
+      <?php //if ($right): ?>
         <div id="sidebar-last" class="sidebar"><?php //print $right; ?></div> <!-- /sidebar-last -->
-      <?php endif; ?>
-
+      <?php //endif; ?>
     </div></div> <!-- /columns -->
 
     <?php if ($tertiary_content): ?>

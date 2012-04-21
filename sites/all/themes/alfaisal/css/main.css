@@ -64,7 +64,7 @@ body {
 }
 
 #search-box .button-wrapper .button input {
-  background:url(../images/search-box.gif) no-repeat;
+  background:url(../images/search-ok.gif) no-repeat scroll 0px 2px;
   border: medium none;
   cursor: pointer;
   height: 24px;
@@ -118,9 +118,11 @@ textarea:focus, input:focus{
 input:-webkit-autofill {
     background: #fff !important;
 }
-
-#sidebar-first {
-  padding-left:15px;
+/** css for side bar first **/
+.front #sidebar-first#sidebar-first {
+  padding-left:23px;
+  margin-left: 0;
+  width:180px;
 }
 
 
@@ -256,12 +258,15 @@ div.litecal .litecal-header .litecal-label {
   color:#000;
 }
 
-#sidebar-first {
-  padding-left:23px;
+.two-sidebars #sidebar-first {
+  padding-left:15px;
+  margin-left:0px;
+  margin-right:0px;
+  width:145px;
 }
 
-.front #content-column .content-inner {
-  margin-left:218px;
+#content-column .content-inner {
+  margin-left:0px;
   margin-right:0px;
 }
 
@@ -288,10 +293,19 @@ div.litecal .litecal-header .litecal-label {
   margin:0px 12px 0px 0px;
 }
 
+.front #main-content {
+  width:auto;
+  float:none;
+}
+
 .front #main-content #content {
   margin-top:9px;
 }
-
+#main-content {
+  float:left;
+  width:560px;
+  margin-left:10px;
+}
 #main-content .block h2 {
   color: #150958;
   font-size:12px;
@@ -408,9 +422,6 @@ div.litecal .litecal-header .litecal-label {
 
 /**css for main content internal page **/
 /** css for heading of page **/
-.article-type-sitewide-page #content-column .content-inner {
-  margin-left: 171px;
-}
 
 .article-type-sitewide-page #main-content-header h1#page-title {
   font-size: 12px;
@@ -422,10 +433,10 @@ div.litecal .litecal-header .litecal-label {
   margin-bottom:2px;
 }
 /** css for sidebar last **/
-.article-type-sitewide-page #sidebar-last {
+.two-sidebars #sidebar-last {
   background: url("../images/home-college.jpg") no-repeat scroll 0 0 transparent;
   height: 528px;
-  margin-left: -233px;
+  margin-left: 15px;
   width: 216px;
 }
 
