@@ -19,6 +19,7 @@ os[widgets][boxes-og-119-b9d8b989]                    = right
 os[widgets][scholar_events-mini]                      = right
 os[widgets][scholar_announcements_latest]             = right
 os[widgets][boxes-box-scholar_biocv_bio]              = content-top
+os[widgets][box-os_addthis]                           = false
 os[theme_type]   = "vsite"
 os[theme_access] = "public"
 

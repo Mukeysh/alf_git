@@ -107,14 +107,23 @@ body {
   border-radius: 6px;
 }
 
+#block-boxes-site_info {
+  float:left;
+}
+
+#block-boxes-site_logo {
+  float:right;
+}
+
 .hg-container {
   padding:0px;
 }
 
 #sidebar-first {
-  width:155px;
   left: 0px;
-  margin-left:0px;
+  margin-left: 8px;
+  padding: 5px 2px 10px 5px;
+  width: 155px;
 }
 
 #content-main {
@@ -125,8 +134,20 @@ body {
 }
 
 #sidebar-second {
+  background: url("images/home-college.jpg") no-repeat scroll 0 0 transparent;
+  height: 528px;
+  margin-left: 10px;
+  margin-right: 0px;
+  margin-top: 10px;
   right: 0px;
-  margin-right:0px;
+}
+
+#sidebar-first .block {
+    padding-top: 2px;
+}
+
+#sidebar-second .block {
+  padding-left:12px;
 }
 
 #content-main #logo {
@@ -305,12 +326,12 @@ body.cp-toolbar-mini #top > .item-list ul li.first .wrench {
 .context-links a.ctools-dropdown-link, .context-links a, .context-links a:visited {
   color: #FFFFFF !important;
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   margin-top: 5px;
 }
 
-.context-links a.ctools-dropdown-link:hover {
+.context-links a.ctools-dropdown-link:hover, .context-links ul.links li a:hover {
   color: #fff !important;
 }
 
@@ -325,4 +346,8 @@ body.cp-toolbar-mini #top > .item-list ul li.first .wrench {
 
 #admin-area .ctools-dropdown.context-links.vsite-section-admin-links a.ctools-dropdown-link:hover {
   background: url(images/control-panel1.jpg) no-repeat !important;
+}
+
+.context-links ul.links li.announcement a:hover {
+  color: #fff !important;
 }
