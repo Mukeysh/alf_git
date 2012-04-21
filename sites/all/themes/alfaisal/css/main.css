@@ -261,7 +261,7 @@ div.litecal .litecal-header .litecal-label {
 .two-sidebars #sidebar-first {
   margin-left:23px;
   margin-right:0px;
-  width:145px;
+  width:170px;
 }
 
 #content-column .content-inner {
@@ -302,8 +302,8 @@ div.litecal .litecal-header .litecal-label {
 }
 #main-content {
   float: left;
-  width: 568px;
-  margin-left: 2px;
+  width: 545px;
+  margin-left: 0px;
 }
 #main-content .block h2 {
   color: #150958;
@@ -561,7 +561,7 @@ td.col-2 {
 
 #main-content tr {
   display: block;
-  margin: 0 0 0 23px;
+  margin: 0px;
   position: relative;
 }
 
