@@ -158,9 +158,10 @@ input:-webkit-autofill {
 }**/
 
 #block-user-0 h2 {
-  background: url("../images/login-border.jpg") no-repeat scroll -7px 18px transparent;
+  background: url("../images/login-border.jpg") no-repeat scroll -7px 21px transparent;
   color: #150958;
   font-size: 14px;
+  height: 24px;
   margin-left: 13px;
 }
  
@@ -292,6 +293,7 @@ div.litecal .litecal-header .litecal-label {
 }
 
 #main-content .block h2 {
+  color: #150958;
   font-size:12px;
   margin-bottom:9px;
 }
