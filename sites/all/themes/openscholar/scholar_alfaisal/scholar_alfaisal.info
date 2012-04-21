@@ -15,7 +15,6 @@ os[widgets][vsite-site_search]                        = false
 os[widgets][boxes-site_logo]                          = navbar
 os[widgets][boxes-site_info]                          = navbar
 os[widgets][vsite_menus-features]                     = left
-os[widgets][boxes-og-119-b9d8b989]                    = right
 os[widgets][scholar_events-mini]                      = right
 os[widgets][scholar_announcements_latest]             = right
 os[widgets][boxes-box-scholar_biocv_bio]              = content-top
