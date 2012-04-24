@@ -82,7 +82,7 @@ body {
 /** css for advanced search **/
 #advanced-search {
   font-size: 10px;
-  margin-left: 112px;
+  margin-left: 118px;
 }
 
 #advanced-search a{
@@ -119,9 +119,8 @@ input:-webkit-autofill {
     background: #fff !important;
 }
 /** css for side bar first **/
-.front #sidebar-first#sidebar-first {
-  padding-left:23px;
-  margin-left: 0;
+.front #columns #sidebar-first {
+  margin-left: 23px;
   width:194px;
 }
 
@@ -130,7 +129,7 @@ input:-webkit-autofill {
 #block-user-0 {
   background: url(../images/login.jpg) no-repeat;
   height:141px;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
   padding:0px;
   width:175px;
 }
@@ -269,7 +268,7 @@ div.litecal .litecal-header .litecal-label {
   width:170px;
 }
 
-#content-column .content-inner {
+#content-column .content-inner, .front #columns .content-inner {
   margin-left:0px;
   margin-right:0px;
 }
@@ -306,7 +305,7 @@ div.litecal .litecal-header .litecal-label {
 }
 
 .front #main-content .block {
-  margin-top:9px;
+  margin-top: 12px;
 }
 #main-content {
   float: left;
@@ -322,6 +321,11 @@ div.litecal .litecal-header .litecal-label {
 #content .block-inner {
   padding-bottom:4px;
 }
+
+#content #block-views-Homepage_images-block_2, #content #block-views-Homepage_images-block_4 {
+  margin-top:0px;
+}
+
 /** css for footer block **/
 
 .front #footer {
