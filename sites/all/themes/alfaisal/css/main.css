@@ -69,7 +69,7 @@ body {
   cursor: pointer;
   height: 24px;
   text-indent: -9999em;
-  width: 29px;
+  width: 22px;
 }  
 
 #edit-search-theme-form-1-wrapper input#edit-search-theme-form-1 {
@@ -160,11 +160,12 @@ input:-webkit-autofill {
 }**/
 
 #block-user-0 h2 {
-  background: url("../images/login-border.jpg") no-repeat scroll -7px 21px transparent;
+  background: url("../images/login-border.jpg") no-repeat scroll -7px 22px transparent;
   color: #150958;
-  font-size: 14px;
-  height: 24px;
+  font-size: 12px;
+  height: 21px;
   margin-left: 13px;
+  padding-top: 4px;
 }
  
 #block-user-0 #edit-name-wrapper {
@@ -178,7 +179,7 @@ input:-webkit-autofill {
 
 /** aligned left label **/
 #edit-name-wrapper label, #edit-pass-wrapper label {
-  font-size:10px;
+  font-size:11px;
   margin-left: 14px;
   text-align: left;
   font-weight:normal;  
@@ -194,7 +195,11 @@ form#user-login-form {
 
 #block-user-0 .item-list ul li a{
   color: #1B105E;
-  font-size: 9px;
+  display: block;
+  font-family: Arial,sans-serif;
+  font-size: 10px;
+  margin-left: 10px;
+  margin-top: -1px;
   text-decoration:none;
 }
 
@@ -286,6 +291,9 @@ div.litecal .litecal-header .litecal-label {
     color: #FFFFFF;
 }
 
+.crayon-anchor .crayon-popup span {
+  color: #000000;
+}
 /** css for main content block **/
 .front #main-content .block{
   display:inline-block;
@@ -297,7 +305,7 @@ div.litecal .litecal-header .litecal-label {
   float:none;
 }
 
-.front #main-content #content {
+.front #main-content .block {
   margin-top:9px;
 }
 #main-content {
@@ -316,23 +324,24 @@ div.litecal .litecal-header .litecal-label {
 }
 /** css for footer block **/
 
-#footer {
+.front #footer {
   border-top: 1px solid #15085A;
-  margin: 0 21px;
+  margin: 0 auto;
+  width: 932px;
 }
 
-#footer-region .block {
+.front #footer-region .block {
   background: url("../images/footer-block.jpg") no-repeat scroll 0 0 transparent;
   display: inline-table;
   height: 170px;
   margin-bottom: 10px;
   margin-top: 5px;
-  padding-right: 14px;
-  width: 290px;
+  padding-right: 15px;
+  width: 288px;
 }
 
-#footer h2 {
-  background: url("../images/footer-border.jpg") no-repeat scroll -9px 18px transparent;
+.front #footer h2 {
+  background: url("../images/footer-border.jpg") no-repeat scroll -7px 18px transparent;
   font-size:12px;
   color: #1B105E;
   height:22px;
@@ -340,18 +349,28 @@ div.litecal .litecal-header .litecal-label {
   margin-top: 8px;
 }
 
-#footer #block-views-top_faculty-block_1 {
+.front #footer #block-views-top_faculty-block_1 {
   padding-right:0px;
 }
 
+#block-views-top_faculty-block_1 .views-row-unformatted .title {
+  background: url("../images/plus.jpg") no-repeat scroll 0 6px transparent;
+  padding-left: 10px;
+}
+
 /** footer block font **/
-#footer-region .block a, #sidebar-last .block a {
+.front #footer-region .block a, #sidebar-last .block a {
   color: #000000;
   font-size: 11px;
   text-decoration: none;
 }
 
-#footer .more-link a, #sidebar-last .more-link a {
+.front #footer .content {
+  font-size: 10px;
+  padding-left: 6px;
+}
+
+.front #footer .more-link a, #sidebar-last .more-link a {
   background: url("../images/more.jpg") no-repeat scroll right top transparent;
   display: inline-block;
   font-size: 0;
@@ -359,6 +378,16 @@ div.litecal .litecal-header .litecal-label {
   margin-right: 8px;
   text-indent: -9999em;
   width: 54px;
+}
+#sidebar-last .more-link a {
+  margin-right:0px;
+}
+
+.front .more-link {
+  bottom: 9px;
+  position: absolute;
+  text-align: right;
+  width: 280px;
 }
 
 /** css for footer msg **/
@@ -422,48 +451,72 @@ div.litecal .litecal-header .litecal-label {
 /**css for main content internal page **/
 /** css for heading of page **/
 
-.article-type-sitewide-page #main-content-header h1#page-title {
+.inner #main-content-header h1#page-title {
   font-size: 12px;
   margin-top: 12px;
-  margin-left: 10px;
+  margin-left: 0px;
 }
-.article-type-sitewide-page .more-link {
-  margin-top:-10px;
-  margin-bottom:2px;
+
+
+.two-sidebars .sidebar .more-link{
+  padding-bottom:2px;
 }
+
+#sidebar-last .content {
+  font-size: 10px;
+}
+
+#main-content .article h2 a {
+  font-size:12px;
+  text-decoration: underline;
+  color:#636262;
+}
+
+.article {
+  color:#636262;
+}
+
 /** css for sidebar last **/
 .two-sidebars #sidebar-last {
-  background: url("../images/home-college.jpg") no-repeat scroll 0 0 transparent;
-  height: 528px;
+  background: url("../images/side-top.jpg") no-repeat scroll 2px -1px transparent;
   margin-left: 9px;
-  width: 216px;
+  width: 217px;
+  margin-top:10px;
+}
+
+#main-content-header {
+  padding:0px 2px;
 }
 
 #sidebar-last #block-block-6 {
+  background: #F4F4F4;
   padding-top: 3px;
 }
 
 #sidebar-last .block {
+  background: #E0E0E0;
   border-top: 1px solid;
+  border-left: 1px solid;
+  border-right: 1px solid;
   margin: 0 3px;
   padding: 4px 15px 0;
   width: auto;
 }
 
-.article-type-sitewide-page #block-views-scholar_announcements-block_1 h2 {
+#sidebar-last #block-views-scholar_announcements-block_1 h2 {
   background: url("../images/announcement.jpg") no-repeat scroll 0 -4px transparent;
   padding-left: 26px;
   padding-top:3px;
 }
 
-.article-type-sitewide-page #block-views-scholar_publications-block_1 h2 {
+#sidebar-last #block-views-scholar_publications-block_1 h2 {
   background: url("../images/recent-publi.jpg") no-repeat scroll 0 0px transparent;
   height:26px;
   padding-top:6px;
   padding-left: 36px;
 }
 
-.article-type-sitewide-page #block-scholar_events-mini h2 {
+.inner #block-scholar_events-mini h2 {
   display:none;
 }
 
@@ -473,13 +526,15 @@ div.litecal .litecal-header .litecal-label {
 }
 
 #sidebar-last #block-block-5, #sidebar-last #block-scholar_events-mini {
-  border: medium none;
+  background: #F2F2F2;
+  border-top: medium none;
+  border-bottom: none;
   padding-top: 0;
 }
 
 .widget-area img {
   float: left;
-  padding-top: 9px;
+  padding-top: 0px;
 }
 
 .widget-area .widget-content {
@@ -487,13 +542,20 @@ div.litecal .litecal-header .litecal-label {
   font-family: candara;
   font-size: 12px;
   font-weight: bold;
-  padding-left: 5px;
-  padding-top: 18px;
+  height: 27px;
+  margin-left: 1px;
+  margin-top: 10px;
+  margin-bottom: 2px;
 }
 /**
 #sidebar-last .more-link a {
   overflow: hidden;
 }  **/     
+
+.side-bottom {
+  background: url("../images/side-bottom.jpg") no-repeat scroll 2px 0 transparent;
+  height: 11px;
+}
 
 /** css for follow us **/
 ul.follow-us {
@@ -509,12 +571,14 @@ ul.follow-us li {
 }
 
 #sidebar-last #block-block-5 {
+  background: #F9FBFA;
   padding-left: 8px;
+  margin-top:4px;
 }
 
 #block-block-6 .block-inner, 
-.article-type-sitewide-page #block-views-scholar_publications-block_1 .block-inner,
-.article-type-sitewide-page #block-views-scholar_announcements-block_1 .block-inner {
+.inner #block-views-scholar_publications-block_1 .block-inner,
+.inner #block-views-scholar_announcements-block_1 .block-inner {
   padding-bottom: 0px;
 }
 

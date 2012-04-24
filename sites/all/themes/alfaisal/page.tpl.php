@@ -229,7 +229,8 @@
 
         </div> <!-- /main-content -->
         <?php if ($right): ?>
-        <div id="sidebar-last" class="sidebar"><?php print $right; ?></div> <!-- /sidebar-last -->
+        <div id="sidebar-last" class="sidebar"><?php print $right; ?><div class="side-bottom"></div></div> <!-- /sidebar-last -->
+        
       <?php endif; ?>
 
     </div></div> <!-- /columns -->
@@ -239,10 +240,6 @@
         <?php endif; ?>
 
       </div></div> <!-- /content-column -->
-
-      
-
-      
 
     <?php if ($tertiary_content): ?>
       <div id="tertiary-content"><?php print $tertiary_content; ?></div> <!-- /tertiary-content -->

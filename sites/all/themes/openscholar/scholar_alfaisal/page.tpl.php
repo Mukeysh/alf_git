@@ -112,7 +112,7 @@
           
           <?php if (!empty($right)): ?>
           <div id="sidebar-second" class="sidebar column">
-            <?php print $right; ?>
+            <?php print $right; ?><div class="side-bottom"></div>
           </div> <!-- /sidebar-second -->
           <?php endif; ?>
         </div> <!-- / hg-container -->

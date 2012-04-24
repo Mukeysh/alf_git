@@ -133,27 +133,37 @@ body {
   width: 570px;
 }
 
+#sidebar-first .block {
+  padding-top: 2px;
+}
+
 #sidebar-second {
-  background: url("images/home-college.jpg") no-repeat scroll 0 0 transparent;
+  background: url("images/side-top.jpg") no-repeat scroll 0 1px transparent;
   height: 528px;
   margin-left: 10px;
   margin-right: 0px;
   margin-top: 10px;
+  padding-left: 1px;
   right: 0px;
-}
-
-#sidebar-first .block {
-    padding-top: 2px;
+  width:auto;
 }
 
 #sidebar-second .block {
+  border-left: 1px solid;
+  border-right: 1px solid;
+  margin-bottom:0px;
   padding-left:12px;
+  width:197px;
 }
 
 #content-main #logo {
   float:right;
 }
 
+.side-bottom {
+  background: url("images/side-bottom.jpg") no-repeat scroll -1px 0 transparent;
+  height: 11px;
+}
 
 /** css for calender **/
 
@@ -221,6 +231,10 @@ div.litecal .litecal-header .litecal-label {
 
 .litecal-timespan a span {
     color: #FFFFFF;
+}
+
+.crayon-anchor .crayon-popup span {
+  color: #000000;
 }
 
 /** css for footer msg **/
