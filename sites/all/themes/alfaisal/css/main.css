@@ -268,7 +268,7 @@ div.litecal .litecal-header .litecal-label {
   width:170px;
 }
 
-#content-column .content-inner, .front #columns .content-inner {
+#content-column .content-inner {
   margin-left:0px;
   margin-right:0px;
 }
@@ -300,8 +300,9 @@ div.litecal .litecal-header .litecal-label {
 }
 
 .front #main-content {
-  width:auto;
+  display:block;
   float:none;
+  width:auto;
 }
 
 .front #main-content .block {
