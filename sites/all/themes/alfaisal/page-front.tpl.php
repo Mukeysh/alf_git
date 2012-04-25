@@ -194,9 +194,9 @@
       <div id="secondary-content"><?php print $secondary_content; ?></div> <!-- /secondary-content -->
     <?php endif; ?>
 
-    <div id="columns"><!--<div class="columns-inner clearfix">
+    <div id="columns"><div class="columns-inner clearfix">
 
-      <div id="content-column"><div class="content-inner">-->
+      <div id="content-column"><div class="content-inner">
 
         <?php if ($mission): ?>
           <div id="mission"><?php print $mission; ?></div> <!-- /mission -->
@@ -207,11 +207,10 @@
         <?php endif; ?>
         
         <?php if ($left): ?>
-          <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg">
-          <?php print $left; ?></div> <!-- /sidebar-first -->
+          <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
        <?php endif; ?>
 
-        <div id="main-content">
+        <div id="main-contents">
 
           <?php if ($title or $tabs): ?>
             <div id="main-content-header">
@@ -234,14 +233,14 @@
           <div id="content-bottom"><?php print $content_bottom; ?></div> <!-- /content-bottom -->
         <?php endif; ?>
 
-     <!-- </div></div> <!-- /content-column -->
+      </div></div> <!-- /content-column -->
 
       
 <!--
       <?php //if ($right): ?>
         <div id="sidebar-last" class="sidebar"><?php //print $right; ?></div> <!-- /sidebar-last -->
       <?php //endif; ?>
-    <!--</div>--></div> <!-- /columns -->
+    </div></div> <!-- /columns -->
 
     <?php if ($tertiary_content): ?>
       <div id="tertiary-content"><?php print $tertiary_content; ?></div> <!-- /tertiary-content -->

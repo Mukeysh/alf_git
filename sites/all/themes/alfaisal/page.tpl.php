@@ -210,7 +210,7 @@
       
         <div id="sidebar-first" class="sidebar"><img src="sites/all/themes/alfaisal/images/poweredby.jpg"><?php print $left; ?></div> <!-- /sidebar-first -->
       <?php endif; ?>
-        <div id="main-content">
+        <div id="main-contents">
 
           <?php if ($title or $tabs): ?>
             <div id="main-content-header">
